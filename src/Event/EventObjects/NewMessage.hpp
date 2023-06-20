@@ -12,8 +12,10 @@
  */
 class NewMessage : public EventObject
 {
+public:
   Message &getMessage() { return message; }
   const Message &getMessage() const { return message; }
+
 private:
   Message message;
   void foo() override {}

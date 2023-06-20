@@ -5,6 +5,7 @@
 
 class Message
 {
+public:
   int id;
   int date;
   int peer_id;
