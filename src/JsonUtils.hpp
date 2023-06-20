@@ -2,5 +2,8 @@
 #include <string>
 #include "Event/EventObjects/NewMessage.hpp"
 
-Json::Value stringToJsonValue(const std::string &str);
-NewMessage JsonValueToNewMessage(const Json::Value &root);
+namespace json_utils
+{
+  Json::Value stringToJsonValue(std::string_view s);
+  NewMessage JsonValueToNewMessage(const Json::Value &root);
+}
