@@ -9,6 +9,8 @@ class EventObject
 {
 private:
   virtual void foo() = 0;
+public:
+  virtual ~EventObject() = default;
 };
 
 #endif

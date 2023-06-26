@@ -1,15 +1,18 @@
 #include "ConfigReader.hpp"
 
-Config ConfigHolder::config = Config();
-std::shared_mutex ConfigHolder::mut = std::shared_mutex();
-
-
-ConfigHolder::ReadOnlyConfig ConfigHolder::getReadOnlyConfig()
+namespace config
 {
-  return ReadOnlyConfig();
-}
+  Config ConfigHolder::config = Config();
+  std::shared_mutex ConfigHolder::mut = std::shared_mutex();
 
-ConfigHolder::ReadWriteConfig ConfigHolder::getReadWriteConfig()
-{
-  return ReadWriteConfig();
+
+  ConfigHolder::ReadOnlyConfig ConfigHolder::getReadOnlyConfig()
+  {
+    return ReadOnlyConfig();
+  }
+
+  ConfigHolder::ReadWriteConfig ConfigHolder::getReadWriteConfig()
+  {
+    return ReadWriteConfig();
+  }
 }

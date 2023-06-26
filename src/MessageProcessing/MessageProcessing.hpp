@@ -11,14 +11,14 @@ namespace commands
 {
   enum Tag
   {
-    ALL_BLOCKS,
-    ALL_BLOCKS_IMPORTANT,
+    ALL,
+    ALL_IMPORTANT,
     NONE
   };
 
-  std::map<Tag, std::vector<std::string>> tagStrings = {
-    {ALL_BLOCKS,           {"_всем_блокам"}},
-    {ALL_BLOCKS_IMPORTANT, {"_всем_блокам_важно"}}
+  const std::map<Tag, std::vector<std::string>> tagStrings = {
+    {ALL,           {"_всем_"}},
+    {ALL_IMPORTANT, {"_всем_важно"}}
   };
 
   enum Command
@@ -26,23 +26,21 @@ namespace commands
     REG_TARGET,
     REG_SOURCE,
     REG_CHECKER,
-    DEL_TARGET_BY_ID,
-    DEL_TARGET_BY_BLOCK,
+    DEL_TARGET,
+    DEL_TARGET_BY_NUM,
     DEL_SOURCE,
-    DEL_THIS_SOURCE,
     DEL_CHECKER,
     PRINT_MAP,
     NONE
   };
 
-  std::map<Command, std::vector<std::string>> commandStrings = {
+  const std::map<Command, std::vector<std::string>> commandStrings = {
     {REG_TARGET,          {"/reg_target"}},
     {REG_SOURCE,          {"/reg_source"}},
     {REG_CHECKER,         {"/reg_checker"}},
-    {DEL_TARGET_BY_ID,    {"/del_target_by_id"}},
-    {DEL_TARGET_BY_BLOCK, {"/del_target_by_block"}},
+    {DEL_TARGET,          {"/del_target"}},
+    {DEL_TARGET_BY_NUM,   {"/del_target_by_num"}},
     {DEL_SOURCE,          {"/del_source"}},
-    {DEL_THIS_SOURCE,     {"/del_this_source"}},
     {DEL_CHECKER,         {"/del_checker"}},
     {PRINT_MAP,           {"/print_map"}},
   };

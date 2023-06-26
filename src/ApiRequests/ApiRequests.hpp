@@ -7,7 +7,9 @@
 namespace vk
 {
   const std::string baseUrl = "https://api.vk.com/method/";
-  void sendRequest(const std::string &method, cpr::Parameters params);
+  //TODO pause between requests
+  //TODO add token and "v" to parameters
+  cpr::Response sendRequest(const std::string &method, cpr::Parameters params);
 }
 
 #endif

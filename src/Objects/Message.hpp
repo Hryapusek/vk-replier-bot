@@ -5,13 +5,19 @@
 
 class Message
 {
+  static const int CHAT_START_ID = 2e9;
 public:
   int id;
-  int date;
+  /// @brief Can be user, chat or group. Destination peer_id.
+  /// @note peer_id value is from bot perspective.
+  /// Same conversation has different peer_id respectively to users.
   int peer_id;
+  /// @brief Can be user or group. But surely not chat.
   int from_id;
   std::string text;
-  int random_id;
+  bool fromDirect() const;
+  bool fromChat() const;
+  bool fromGroup() const;
 };
 
 #endif
