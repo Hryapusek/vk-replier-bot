@@ -5,9 +5,26 @@
 #include "Event/Event.hpp"
 #include "JsonUtils.hpp"
 #include "MessageProcessing/MessageProcessing.hpp"
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/trivial.hpp>
 
 void init()
 {
+  {
+    using namespace boost::log;
+    add_file_log
+    (
+      keywords::file_name = "logfile.log",
+      keywords::rotation_size = 10 * 1024 * 1024 //bytes
+    );
+
+    core::get()->set_filter
+    (
+      trivial::severity >= trivial::trace
+    );
+  }
+
   config::ConfigHolder::readConfigFromFile("config.json");
 }
 

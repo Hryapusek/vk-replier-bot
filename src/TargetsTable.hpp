@@ -11,7 +11,7 @@ struct Target
   std::optional<std::string> title;
 };
 
-class TargetsTable : protected std::map<int, Target>
+class TargetsTable
 {
 public:
   /// @brief Inserts pair in table.
@@ -27,6 +27,9 @@ public:
   bool containsTarget(Target t);
   bool containsNum(int num);
   int &at(int key);
+
+private:
+  std::map<int, Target> map;
 };
 
 #endif

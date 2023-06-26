@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <array>
 #include <shared_mutex>
 #include "TargetsTable.hpp"
 
@@ -21,8 +22,10 @@ namespace config
     std::string token;
     std::optional< TargetsTable > targetsTable;
     std::optional< int > sourceChatId;
-    std::optional< std::vector< int > > statusCheckersId;
+    std::optional< std::vector< int > > statusCheckersIds;
+    std::optional< std::vector< int > > godlikeIds;
     std::string secret_string;
+    int port;
   };
 
   class ConfigHolder
@@ -31,10 +34,11 @@ namespace config
     struct ReadWriteConfig;
 
   public:
+    static const std::vector< std::string > generalNecessaryFields;
     static void readConfigFromFile(const std::string &fileName);
     static ReadOnlyConfig getReadOnlyConfig();
     static ReadWriteConfig getReadWriteConfig();
-    /// @return Target ids from config in format id1, id2, ... 
+    /// @return Target ids from config in format id1, id2, ...
     /// @note Use this if you can instead of direct config use.
     /// String calculated only once on startup.
     static const std::string &getTargetIds();

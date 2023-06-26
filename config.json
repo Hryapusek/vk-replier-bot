@@ -1,0 +1,17 @@
+{
+  "mode" : "",
+  "token" : "",
+  "secret_string" : "",
+  "port" : 0,
+  "target_chats" : [
+    {
+      "num" : 21,
+      "peer_id" : 2,
+      "title" : ""
+    }
+  ],
+  "source_chat" : 0,
+  "status_checkers" : [],
+  "log_file_max_size" : 1024,
+  "godlike_ids" : []
+}
