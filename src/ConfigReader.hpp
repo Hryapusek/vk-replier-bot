@@ -37,6 +37,7 @@ namespace config
   public:
     static const std::vector< std::string > generalNecessaryFields;
     static void readConfigFromFile(const std::string &fileName);
+    //TODO get Token v secret_string port
     static ReadOnlyConfig getReadOnlyConfig();
     static ReadWriteConfig getReadWriteConfig();
     /// @return Target ids from config in format id1, id2, ...
