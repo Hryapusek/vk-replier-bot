@@ -1,13 +1,20 @@
+#define BOOST_LOG_DYN_LINK 1
 #include <iostream>
-#include <httpserver.hpp>
 #include <thread>
-#include "ConfigReader.hpp"
-#include "Event/Event.hpp"
-#include "JsonUtils.hpp"
-#include "MessageProcessing/MessageProcessing.hpp"
+
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/trivial.hpp>
+#include <httpserver.hpp>
+
+#include "ConfigReader.hpp"
+#include "Event/Event.hpp"
+#include "JsonUtils.hpp"
+#include "ApiRequests/ApiRequests.hpp"
+#include "MessageProcessing/MessageProcessing.hpp"
+
+//TODO all threads should be joined before programm stopped.
+std::vector< std::thread > threads;
 
 void init()
 {
@@ -24,21 +31,41 @@ void init()
       trivial::severity >= trivial::trace
     );
   }
-
   config::ConfigHolder::readConfigFromFile("config.json");
+  const auto &config =  config::ConfigHolder::getReadOnlyConfig().config;
+  vk::Requests::init(config.token, config.v);
+}
+
+template < class T, class ... Args >
+void logArgs(T &&message, Args &&... args)
+{
+  BOOST_LOG_TRIVIAL(warning) << message;
+  logArgs(std::forward< Args >(args)...);
+}
+
+template < class T >
+void logArgs(T &&message)
+{
+  BOOST_LOG_TRIVIAL(warning) << message;
+}
+
+template < class ... Args >
+void logSkipEvent(Args &&... args)
+{
+  logArgs(std::forward< Args >(args)...);
+  BOOST_LOG_TRIVIAL(warning) << "Skipping event";
 }
 
 void processEvent(Json::Value &&root)
 {
-  //TODO try catch if json is fucked up
   Event event;
   try
   {
     event = json_utils::parseEvent(root);
   }
-  catch (const std::exception &e)
+  catch (const Json::Exception &e)
   {
-    //TODO log bad json here
+    logSkipEvent("Bad json found", root);
     return;
   }
   switch (event.getType())
@@ -48,7 +75,7 @@ void processEvent(Json::Value &&root)
     std::shared_ptr< NewMessage > newMessage = std::dynamic_pointer_cast< NewMessage >(event.getEventObject());
     if (!newMessage)
     {
-      //TODO i cant even imagine how you would reach here but still...
+      logSkipEvent("Can not convert EventObject to newMessage", root);
       return;
     }
     commands::processMessage(newMessage);
@@ -68,7 +95,15 @@ public:
 
 std::shared_ptr< httpserver::http_response > hello_world_resource::render(const httpserver::http_request &req) {
   using namespace config;
-  Json::Value root = json_utils::stringToJsonValue(req.get_content());
+  Json::Value root;
+  try
+  {
+    Json::Value root = json_utils::stringToJsonValue(req.get_content());
+  } catch (const Json::Exception &e)
+  {
+    logSkipEvent("Got bad json from vk", req.get_content());
+    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
+  }
   switch (json_utils::parseEventType(root))
   {
   case CONFIRMATION:
@@ -83,10 +118,10 @@ std::shared_ptr< httpserver::http_response > hello_world_resource::render(const 
   }
   default:
   {
-    //TODO i cant even imagine...
+    logSkipEvent("Unrecognized event type found", root);
   }
   }
-  return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("Hello World!!!", 200));
+  return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
 }
 
 int main() {
