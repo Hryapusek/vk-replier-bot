@@ -20,12 +20,12 @@ namespace config
   {
     Mode mode;
     std::string token;
+    std::string secret_string;
+    int port;
     std::optional< TargetsTable > targetsTable;
     std::optional< int > sourceChatId;
     std::optional< std::vector< int > > statusCheckersIds;
     std::optional< std::vector< int > > godlikeIds;
-    std::string secret_string;
-    int port;
   };
 
   class ConfigHolder
@@ -41,16 +41,21 @@ namespace config
     /// @return Target ids from config in format id1, id2, ...
     /// @note Use this if you can instead of direct config use.
     /// String calculated only once on startup.
+    /// Work mode only.
     static const std::string &getTargetIds();
 
   private:
     static Config config;
     static std::shared_mutex mut;
-    static const std::string target_ids;
+    static std::string target_ids;
 
     struct ReadOnlyConfig
     {
-      ReadOnlyConfig() : config(config), lock(mut) { }
+      ReadOnlyConfig() : config(ConfigHolder::config), lock(mut) { }
+      ReadOnlyConfig(const ReadOnlyConfig&) = delete;
+      ReadOnlyConfig(ReadOnlyConfig&&) = delete;
+      ReadOnlyConfig &operator=(const ReadOnlyConfig&) = delete;
+      ReadOnlyConfig &operator=(ReadOnlyConfig&&) = delete;
       const Config &config;
     private:
       std::shared_lock< std::shared_mutex > lock;
@@ -58,7 +63,11 @@ namespace config
 
     struct ReadWriteConfig
     {
-      ReadWriteConfig() : config(config), lock(mut) { }
+      ReadWriteConfig() : config(ConfigHolder::config), lock(mut) { }
+      ReadWriteConfig(const ReadWriteConfig&) = delete;
+      ReadWriteConfig(ReadWriteConfig&&) = delete;
+      ReadWriteConfig &operator=(const ReadWriteConfig&) = delete;
+      ReadWriteConfig &operator=(ReadWriteConfig&&) = delete;
       Config &config;
     private:
       std::unique_lock< std::shared_mutex > lock;

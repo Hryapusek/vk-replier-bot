@@ -27,9 +27,11 @@ public:
   bool containsTarget(Target t);
   bool containsNum(int num);
   int &at(int key);
+  /// @return Underlying map
+  std::map<int, Target> &get() { return table; };
 
 private:
-  std::map<int, Target> map;
+  std::map<int, Target> table;
 };
 
 #endif
