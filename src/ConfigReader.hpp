@@ -20,6 +20,7 @@ namespace config
   {
     Mode mode;
     std::string token;
+    std::string v;
     std::string secret_string;
     int port;
     std::optional< TargetsTable > targetsTable;

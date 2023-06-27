@@ -80,6 +80,7 @@ namespace _details
     else
       logAndThrow("Incorrect mode found in config");
     config.token = root.get()["token"].asString();
+    config.v = root.get()["v"].asString();
     config.secret_string = root.get()["secret_string"].asString();
     config.port = root.get()["port"].asInt();
     extractTargetChats(root.get()["target_chats"], config);
@@ -109,7 +110,7 @@ namespace config
   Config ConfigHolder::config = Config();
   std::shared_mutex ConfigHolder::mut = std::shared_mutex();
   const std::vector< std::string > ConfigHolder::generalNecessaryFields = {
-    "mode", "token", "secret_string", "port"
+    "mode", "token", "secret_string", "port", "v"
   };
   std::string ConfigHolder::target_ids = std::string();
 
