@@ -10,11 +10,14 @@
 #include "ConfigReader.hpp"
 #include "Event/Event.hpp"
 #include "JsonUtils.hpp"
-#include "ApiRequests/ApiRequests.hpp"
+#include "ApiRequests/BaseRequest.hpp"
 #include "MessageProcessing/MessageProcessing.hpp"
 
 //TODO all threads should be joined before programm stopped.
 std::vector< std::thread > threads;
+
+//erases finished threads every n seconds
+void threadsCleaner();
 
 void init()
 {
@@ -33,8 +36,15 @@ void init()
   }
   config::ConfigHolder::readConfigFromFile("config.json");
   const auto &config =  config::ConfigHolder::getReadOnlyConfig().config;
-  vk::Requests::init(config.token, config.v);
+  if (config.baseUrl)
+    vk::BaseRequest::init(config.token, config.v, config.baseUrl.value());
+  else
+    vk::BaseRequest::init(config.token, config.v);
+  std::thread th(threadsCleaner);
+  th.detach();
 }
+
+//has operator<< checking
 
 template < class T, class ... Args >
 void logArgs(T &&message, Args &&... args)
@@ -113,8 +123,7 @@ std::shared_ptr< httpserver::http_response > hello_world_resource::render(const 
   }
   case MESSAGE_NEW:
   {
-    std::thread th(processEvent, std::move(root));
-    th.detach();
+    threads.emplace_back(processEvent, std::move(root));
   }
   default:
   {
