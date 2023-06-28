@@ -23,6 +23,7 @@ namespace config
     std::string v;
     std::string secret_string;
     int port;
+    std::optional< std::string > baseUrl;
     std::optional< TargetsTable > targetsTable;
     std::optional< int > sourceChatId;
     std::optional< std::vector< int > > statusCheckersIds;
@@ -54,10 +55,10 @@ namespace config
     struct ReadOnlyConfig
     {
       ReadOnlyConfig() : config(ConfigHolder::config), lock(mut) { }
-      ReadOnlyConfig(const ReadOnlyConfig&) = delete;
-      ReadOnlyConfig(ReadOnlyConfig&&) = delete;
-      ReadOnlyConfig &operator=(const ReadOnlyConfig&) = delete;
-      ReadOnlyConfig &operator=(ReadOnlyConfig&&) = delete;
+      ReadOnlyConfig(const ReadOnlyConfig &) = delete;
+      ReadOnlyConfig(ReadOnlyConfig &&) = delete;
+      ReadOnlyConfig &operator=(const ReadOnlyConfig &) = delete;
+      ReadOnlyConfig &operator=(ReadOnlyConfig &&) = delete;
       const Config &config;
     private:
       std::shared_lock< std::shared_mutex > lock;
@@ -66,10 +67,10 @@ namespace config
     struct ReadWriteConfig
     {
       ReadWriteConfig() : config(ConfigHolder::config), lock(mut) { }
-      ReadWriteConfig(const ReadWriteConfig&) = delete;
-      ReadWriteConfig(ReadWriteConfig&&) = delete;
-      ReadWriteConfig &operator=(const ReadWriteConfig&) = delete;
-      ReadWriteConfig &operator=(ReadWriteConfig&&) = delete;
+      ReadWriteConfig(const ReadWriteConfig &) = delete;
+      ReadWriteConfig(ReadWriteConfig &&) = delete;
+      ReadWriteConfig &operator=(const ReadWriteConfig &) = delete;
+      ReadWriteConfig &operator=(ReadWriteConfig &&) = delete;
       Config &config;
     private:
       std::unique_lock< std::shared_mutex > lock;

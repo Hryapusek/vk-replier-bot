@@ -86,6 +86,8 @@ namespace _details
     extractTargetChats(root.get()["target_chats"], config);
     if (root.get().isMember("source_chat"))
       config.sourceChatId = root.get()["source_chat"].asInt();
+    if (root.get().isMember("base_url"))
+      config.baseUrl = root.get()["base_url"].asString();
     extractIntVectorIntoField(root.get()["status_checkers"], config.statusCheckersIds);
     extractIntVectorIntoField(root.get()["godlike_ids"], config.godlikeIds);
   }
