@@ -3,17 +3,17 @@
 
 #include <string>
 #include <thread>
+#include <jsoncpp/json/json.h>
 #include <cpr/cpr.h>
 
 namespace vk
 {
-  //TODO pause between requests
-
   class BaseRequest
   {
-    using str_cref = const std::string &;
   public:
-    //TODO add general parameters in constructor
+    using str_cref = const std::string &;
+    BaseRequest(str_cref method);
+    BaseRequest(std::string &&method);
     static void init(str_cref token, str_cref v = "5.131", str_cref baseUrl = "https://api.vk.com/method/");
     void send();
     virtual ~BaseRequest() = default;

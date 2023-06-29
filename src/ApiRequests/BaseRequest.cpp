@@ -52,7 +52,17 @@ namespace vk
   };
   std::thread BaseRequest::pauseThread = std::thread();
 
-  void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
+  BaseRequest::BaseRequest(str_cref method):
+    method(method),
+    params(generalParameters)
+  {}
+
+  BaseRequest::BaseRequest(std::string &&method):
+    method(std::move(method)),
+    params(generalParameters)
+  {}
+
+void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
   {
     BaseRequest::baseUrl = baseUrl;
     BaseRequest::generalParameters.Add({ { "access_token", token }, { "v", v } });
