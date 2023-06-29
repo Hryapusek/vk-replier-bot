@@ -1,6 +1,7 @@
 #define BOOST_LOG_DYN_LINK 1
 #include <iostream>
 #include <thread>
+#include <numeric>
 
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
@@ -15,9 +16,26 @@
 
 //TODO all threads should be joined before programm stopped.
 std::vector< std::thread > threads;
+std::mutex threadsMutex;
 
 //erases finished threads every n seconds
-void threadsCleaner();
+void threadsCleaner()
+{
+  static const auto breakBetweenClenings = std::chrono::minutes(5);
+  while (true)
+  {
+    std::this_thread::sleep_for(breakBetweenClenings);
+    std::lock_guard<std::mutex> lock(threadsMutex);
+    threads.erase(
+      std::remove_if(
+        threads.begin(),
+        threads.end(),
+        [](std::thread &th) {
+      return !th.joinable();
+    }),
+      threads.end());
+  }
+}
 
 void init()
 {
@@ -34,6 +52,7 @@ void init()
       trivial::severity >= trivial::trace
     );
   }
+  // TODO add try catch
   config::ConfigHolder::readConfigFromFile("config.json");
   const auto &config =  config::ConfigHolder::getReadOnlyConfig().config;
   if (config.baseUrl)
@@ -139,5 +158,8 @@ int main() {
   hello_world_resource hwr;
   ws.register_resource("/notification", &hwr, true);
   ws.start(true);
+  std::lock_guard<std::mutex> lock(threadsMutex);
+  for (auto &th : threads)
+    th.join();
   return 0;
 }
