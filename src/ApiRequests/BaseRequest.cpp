@@ -68,9 +68,6 @@ void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
     BaseRequest::generalParameters.Add({ { "access_token", token }, { "v", v } });
   }
 
-  /// @throws Json::Exception - if bad json
-  /// @throws RequestException - if failed after retries
-  /// @note Does not throw anything if response.text is empty.
   void BaseRequest::send()
   {
     BOOST_LOG_TRIVIAL(info) << "Sending request.";
@@ -106,7 +103,6 @@ void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
     pauseThread = std::thread(pauseBetweenRequests);
   }
 
-  /// @throws RequestException if failed after retries
   void BaseRequest::retrySending()
   {
     cpr::Response response;

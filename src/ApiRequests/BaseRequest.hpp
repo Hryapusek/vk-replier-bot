@@ -15,6 +15,9 @@ namespace vk
     BaseRequest(str_cref method);
     BaseRequest(std::string &&method);
     static void init(str_cref token, str_cref v = "5.131", str_cref baseUrl = "https://api.vk.com/method/");
+    /// @throws Json::Exception - if bad json
+    /// @throws RequestException - if failed after retries
+    /// @note Does not throw anything if response.text is empty.
     void send();
     virtual ~BaseRequest() = default;
 
@@ -30,6 +33,7 @@ namespace vk
     static void waitForPauseBetweenRequests();
 
   private:
+    /// @throws RequestException if failed after retries
     void retrySending();
   };
 
