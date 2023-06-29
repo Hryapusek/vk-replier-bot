@@ -2,12 +2,12 @@
 #define BASE_REQUESTS_HPP
 
 #include <string>
+#include <thread>
 #include <cpr/cpr.h>
 
 namespace vk
 {
   //TODO pause between requests
-  //TODO add token and "v" to parameters
 
   class BaseRequest
   {
@@ -25,7 +25,9 @@ namespace vk
     static std::string baseUrl;
     static cpr::Parameters generalParameters;
     static const std::vector<std::chrono::seconds> breakTimes;
+    static std::thread pauseThread;
     cpr::Response performRequest();
+    static void waitForPauseBetweenRequests();
 
   private:
     void retrySending();

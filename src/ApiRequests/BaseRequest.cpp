@@ -6,6 +6,11 @@
 
 namespace
 {
+  void pauseBetweenRequests()
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+
   void logHttpError(long status_code)
   {
     BOOST_LOG_TRIVIAL(warning) << "Http error occured sending request. Code " << status_code;
@@ -13,7 +18,7 @@ namespace
 
   void logVkApiError(const Json::Value &responseJson)
   {
-    BOOST_LOG_TRIVIAL(warning) << "VK API error occured sending request.\n" << responseJson;  
+    BOOST_LOG_TRIVIAL(warning) << "VK API error occured sending request.\n" << responseJson;
   }
 
   bool isVkError(const Json::Value &responseJson)
@@ -45,6 +50,7 @@ namespace vk
     std::chrono::seconds(2),
     std::chrono::seconds(5)
   };
+  std::thread BaseRequest::pauseThread = std::thread();
 
   void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
   {
@@ -79,7 +85,15 @@ namespace vk
   cpr::Response BaseRequest::performRequest()
   {
     using namespace std::chrono_literals;
+    waitForPauseBetweenRequests();
     return cpr::Get(cpr::Url{ baseUrl + method }, params, cpr::Timeout{ 10s });
+  }
+
+  void BaseRequest::waitForPauseBetweenRequests()
+  {
+    if (pauseThread.joinable())
+      pauseThread.join();
+    pauseThread = std::thread(pauseBetweenRequests);
   }
 
   /// @throws RequestException if failed after retries
