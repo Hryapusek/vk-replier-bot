@@ -22,7 +22,13 @@ namespace vk
   MessagesSendRequest & MessagesSendRequest::peer_ids(vec_cref<int> peerIds)
   {
     params.Add({{"peer_ids", vectorToString(peerIds)}});
-    return *this;  
+    return *this;
+  }
+
+  MessagesSendRequest & MessagesSendRequest::peer_ids(str_cref peerIds)
+  {
+    params.Add({{"peer_ids", peerIds}});
+    return *this;
   }
 
   MessagesSendRequest & MessagesSendRequest::chat_id(int chatId)
