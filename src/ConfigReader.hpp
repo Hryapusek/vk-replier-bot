@@ -24,7 +24,7 @@ namespace config
     std::string secret_string;
     int port;
     std::optional< std::string > baseUrl;
-    std::optional< TargetsTable > targetsTable;
+    TargetsTable targetsTable;
     std::optional< int > sourceChatId;
     std::optional< std::vector< int > > statusCheckersIds;
     std::optional< std::vector< int > > godlikeIds;
@@ -37,7 +37,11 @@ namespace config
 
   public:
     static const std::vector< std::string > generalNecessaryFields;
-    static void readConfigFromFile(const std::string &fileName);
+    /// @brief Init function
+    /// @throws std::logic_error - Fatal error occured
+    /// @throws Json::Exception - Fatal error occured
+    static void readConfigFromFile(const std::string &configName);
+    static void updateConfigFile();
     //TODO get Token v secret_string port
     static ReadOnlyConfig getReadOnlyConfig();
     static ReadWriteConfig getReadWriteConfig();
@@ -51,10 +55,13 @@ namespace config
     static int getSourceChatId();
     /// @note Use this only in work mode.
     static Mode getMode();
+    /// @note Use this only in work mode.
+    static const TargetsTable &getTargetsTable();
 
   private:
     static Config config;
     static std::shared_mutex mut;
+    static std::string configName;
     static std::string target_ids;
 
     struct ReadOnlyConfig
@@ -76,6 +83,7 @@ namespace config
       ReadWriteConfig(ReadWriteConfig &&) = delete;
       ReadWriteConfig &operator=(const ReadWriteConfig &) = delete;
       ReadWriteConfig &operator=(ReadWriteConfig &&) = delete;
+      ~ReadWriteConfig() { updateConfigFile(); };
       Config &config;
     private:
       std::unique_lock< std::shared_mutex > lock;

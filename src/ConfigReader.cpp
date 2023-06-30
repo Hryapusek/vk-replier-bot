@@ -16,7 +16,7 @@ namespace _details
 
   void checkConfigValidity(Config &config)
   {
-    if (config.mode == Mode::WORK && (!config.sourceChatId || !config.targetsTable))
+    if (config.mode == Mode::WORK && (!config.sourceChatId || config.targetsTable.empty()))
       logAndThrow("source chat or target chats are missed for WORK mode");
   }
 
@@ -32,7 +32,10 @@ namespace _details
   void extractTargetChats(std::reference_wrapper< const Json::Value > root, Config &config)
   {
     if (root.get().empty())
+    {
+      config.targetsTable = TargetsTable();
       return;
+    }
     TargetsTable table;
     int count = 0;
     for (const auto &obj : root.get())
@@ -42,10 +45,10 @@ namespace _details
         logAndThrow("Incorrect object in target chats. Object count " + std::to_string(count));
       Target target;
       if (obj.isMember("title"))
-        target = { obj["peer_id"].asInt(), obj["title"].asString() }
+        target = Target{ obj["peer_id"].asInt(), obj["title"].asString() }
       ;
       else
-        target = { obj["peer_id"].asInt() }
+        target = Target{ obj["peer_id"].asInt() }
       ;
       table.insert(obj["num"].asInt(), target);
     }
@@ -94,16 +97,14 @@ namespace _details
 
   std::string getTargetIdsString(Config &config)
   {
-    if (!config.targetsTable)
-      return;
     std::string target_ids;
-    for (const auto &[unused, target] : config.targetsTable.value().get())
+    for (const auto &[unused, target] : config.targetsTable.get())
     {
       target_ids += target.peer_id + ',';
     }
     if (!target_ids.empty())
       target_ids.pop_back();
-    return std::move(target_ids);
+    return target_ids;
   }
 }
 
@@ -115,16 +116,16 @@ namespace config
     "mode", "token", "secret_string", "port", "v"
   };
   std::string ConfigHolder::target_ids = std::string();
+  std::string ConfigHolder::configName = std::string();
 
   using namespace _details;
 
-  /// @throws std::logic_error - Fatal error occured
-  /// @throws Json::Exception - Fatal error occured
-  void ConfigHolder::readConfigFromFile(const std::string &fileName)
+  void ConfigHolder::readConfigFromFile(const std::string &configName)
   {
-    std::ifstream configFile(fileName);
+    std::ifstream configFile(configName);
     if (!configFile.is_open())
-      logAndThrow("Can not open config file " + fileName);
+      logAndThrow("Can not open config file " + configName);
+    ConfigHolder::configName = configName;
     Json::Value root;
     Json::CharReaderBuilder builder;
     if (!parseFromStream(builder, configFile, &root, nullptr))
@@ -159,5 +160,10 @@ namespace config
   Mode ConfigHolder::getMode()
   {
     return config.mode;
+  }
+
+  const TargetsTable &ConfigHolder::getTargetsTable()
+  {
+    return config.targetsTable;
   }
 }
