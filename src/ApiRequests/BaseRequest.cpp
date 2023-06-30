@@ -128,6 +128,6 @@ void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
       return;
     }
     BOOST_LOG_TRIVIAL(error) << "Out of retry sendings. Throwing RequestException.";
-    throw RequestException("Failed after retries");
+    throw exceptions::RequestException("Failed after retries");
   }
 }
