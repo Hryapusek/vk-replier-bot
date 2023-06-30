@@ -12,6 +12,7 @@ namespace vk
       MessagesSendRequest();
       MessagesSendRequest &user_id(int userId);
       MessagesSendRequest &random_id(int randomId);
+      MessagesSendRequest &peer_id(int peerId);
       MessagesSendRequest &peer_ids(vec_cref<int> peerIds);
       MessagesSendRequest &peer_ids(str_cref peerIds);
       MessagesSendRequest &chat_id(int chatId);

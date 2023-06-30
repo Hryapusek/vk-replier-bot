@@ -19,6 +19,12 @@ namespace vk
     return *this;
   }
 
+  MessagesSendRequest & MessagesSendRequest::peer_id(int peerId)
+  {
+    params.Add({{"peer_id", std::to_string(peerId)}});
+    return *this;
+  }
+
   MessagesSendRequest & MessagesSendRequest::peer_ids(vec_cref<int> peerIds)
   {
     params.Add({{"peer_ids", vectorToString(peerIds)}});
