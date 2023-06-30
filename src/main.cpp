@@ -14,7 +14,6 @@
 #include "ApiRequests/BaseRequest.hpp"
 #include "MessageProcessing/MessageProcessing.hpp"
 
-//TODO all threads should be joined before programm stopped.
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
 
@@ -63,8 +62,6 @@ void init()
   th.detach();
 }
 
-//has operator<< checking
-
 template < class T, class ... Args >
 void logArgs(T &&message, Args &&... args)
 {
@@ -111,8 +108,8 @@ void processEvent(Json::Value &&root)
     break;
   }
   default:
-    //TODO logging
-    break;
+    logSkipEvent("Unsupported event", root);
+    return;
   }
 }
 
