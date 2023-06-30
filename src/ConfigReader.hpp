@@ -44,8 +44,13 @@ namespace config
     /// @return Target ids from config in format id1, id2, ...
     /// @note Use this if you can instead of direct config use.
     /// String calculated only once on startup.
-    /// Work mode only.
+    /// Use this only in work mode.
     static const std::string &getTargetIds();
+    /// @note Use this only in work mode.
+    /// @throw std::bad_optional_access
+    static int getSourceChatId();
+    /// @note Use this only in work mode.
+    static Mode getMode();
 
   private:
     static Config config;

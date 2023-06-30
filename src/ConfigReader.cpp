@@ -145,4 +145,19 @@ namespace config
   {
     return ReadWriteConfig();
   }
+
+  const std::string &ConfigHolder::getTargetIds()
+  {
+    return target_ids;
+  }
+
+  int ConfigHolder::getSourceChatId()
+  {
+    return config.sourceChatId.value();
+  }
+
+  Mode ConfigHolder::getMode()
+  {
+    return config.mode;
+  }
 }
