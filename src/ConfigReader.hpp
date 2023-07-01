@@ -25,8 +25,7 @@ namespace config
     int port;
     std::optional< std::string > baseUrl;
     TargetsTable targetsTable;
-    // TODO make sourceChat Taget, not int
-    std::optional< int > sourceChatId;
+    std::optional< Chat > sourceChat;
     std::optional< std::vector< int > > statusCheckersIds;
     std::optional< std::vector< int > > godlikeIds;
   };
@@ -53,7 +52,7 @@ namespace config
     static const std::string &getTargetIds();
     /// @note Use this only in work mode.
     /// @throw std::bad_optional_access
-    static int getSourceChatId();
+    static Chat getSourceChat();
     /// @note Use this only in work mode.
     static Mode getMode();
     /// @note Use this only in work mode.

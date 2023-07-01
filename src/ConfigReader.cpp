@@ -7,6 +7,7 @@
 
 namespace _details
 {
+  using json_crefw = std::reference_wrapper< const Json::Value >;
   using namespace config;
   void logAndThrow(const std::string &message)
   {
@@ -14,13 +15,14 @@ namespace _details
     throw std::logic_error(message);
   }
 
+  // TODO update it
   void checkConfigValidity(Config &config)
   {
-    if (config.mode == Mode::WORK && (!config.sourceChatId || config.targetsTable.empty()))
+    if (config.mode == Mode::WORK && (!config.sourceChat || config.targetsTable.empty()))
       logAndThrow("source chat or target chats are missed for WORK mode");
   }
 
-  void checkGeneralNecessaryFields(std::reference_wrapper< const Json::Value > root)
+  void checkGeneralNecessaryFields(json_crefw root)
   {
     for (const auto &field : ConfigHolder::generalNecessaryFields)
     {
@@ -29,7 +31,15 @@ namespace _details
     }
   }
 
-  void extractTargetChats(std::reference_wrapper< const Json::Value > root, Config &config)
+  Chat extractChat(const Json::Value &root)
+  {
+    if (root.isMember("title"))
+      return Chat{ root["peer_id"].asInt(), root["title"].asString() };
+    else
+      return Chat{ root["peer_id"].asInt() };
+  }
+
+  void extractTargetChats(json_crefw root, Config &config)
   {
     if (root.get().empty())
     {
@@ -43,19 +53,13 @@ namespace _details
       ++count;
       if (!obj.isMember("num") || !obj.isMember("peer_id"))
         logAndThrow("Incorrect object in target chats. Object count " + std::to_string(count));
-      Target target;
-      if (obj.isMember("title"))
-        target = Target{ obj["peer_id"].asInt(), obj["title"].asString() }
-      ;
-      else
-        target = Target{ obj["peer_id"].asInt() }
-      ;
+      Chat target = extractChat(obj);
       table.insert(obj["num"].asInt(), target);
     }
     config.targetsTable = table;
   }
 
-  std::vector< int > extractIntVector(std::reference_wrapper< const Json::Value > root)
+  std::vector< int > extractIntVector(json_crefw root)
   {
     std::vector< int > nums;
     for (const auto &obj : root.get())
@@ -66,14 +70,14 @@ namespace _details
   }
 
   //If root is empty - no changes will be applied to field.
-  void extractIntVectorIntoField(std::reference_wrapper< const Json::Value > root, std::optional< std::vector< int > > &field)
+  void extractIntVectorIntoField(json_crefw root, std::optional< std::vector< int > > &field)
   {
     if (root.get().empty())
       return;
     field = extractIntVector(root);
   }
 
-  void parseConfigJson(std::reference_wrapper< const Json::Value > root, Config &config)
+  void parseConfigJson(json_crefw root, Config &config)
   {
     checkGeneralNecessaryFields(root);
     if (root.get()["mode"].asString() == "config")
@@ -88,7 +92,7 @@ namespace _details
     config.port = root.get()["port"].asInt();
     extractTargetChats(root.get()["target_chats"], config);
     if (root.get().isMember("source_chat"))
-      config.sourceChatId = root.get()["source_chat"].asInt();
+      config.sourceChat = extractChat(root.get()["source_chat"]);
     if (root.get().isMember("base_url"))
       config.baseUrl = root.get()["base_url"].asString();
     extractIntVectorIntoField(root.get()["status_checkers"], config.statusCheckersIds);
@@ -152,9 +156,9 @@ namespace config
     return target_ids;
   }
 
-  int ConfigHolder::getSourceChatId()
+  Chat ConfigHolder::getSourceChat()
   {
-    return config.sourceChatId.value();
+    return config.sourceChat.value();
   }
 
   Mode ConfigHolder::getMode()
