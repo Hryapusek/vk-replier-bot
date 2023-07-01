@@ -5,7 +5,7 @@
 #include <string>
 #include <optional>
 
-struct Target
+struct Chat
 {
   int peer_id;
   std::optional<std::string> title;
@@ -14,23 +14,22 @@ struct Target
 class TargetsTable
 {
 public:
-  /// @brief Inserts pair in table.
   /// @param[in] num Targets identificator.
   /// @param[in] target Target to insert.
   /// @return True if inserted successfully. False otherwise.
-  bool insert(int num, Target target);
-  bool insert(Target target, bool checkIfTargetPresent = false);
-  /// @param[in] t
+  bool insert(int num, Chat target);
+  bool insert(Chat target);
   /// @return True if given Target.peer_id present somewhere in the table. False otherwise.
-  bool containsTarget(Target t) const;
+  bool containsTarget(Chat t) const;
+  /// @return True if num is busy(present in the table). False otherwise.
   bool containsNum(int num) const;
   bool empty() const;
   int &at(int key) const;
   /// @return Underlying map
-  std::map<int, Target> &get() { return table; };
+  std::map<int, Chat> &get() { return table; };
 
 private:
-  std::map<int, Target> table;
+  std::map<int, Chat> table;
 };
 
 #endif
