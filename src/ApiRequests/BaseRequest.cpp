@@ -98,6 +98,7 @@ void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
 
   void BaseRequest::waitForPauseBetweenRequests()
   {
+    // TODO mutex to prevent race condition to pauseThread
     if (pauseThread.joinable())
       pauseThread.join();
     pauseThread = std::thread(pauseBetweenRequests);

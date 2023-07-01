@@ -25,6 +25,7 @@ namespace config
     int port;
     std::optional< std::string > baseUrl;
     TargetsTable targetsTable;
+    // TODO make sourceChat Taget, not int
     std::optional< int > sourceChatId;
     std::optional< std::vector< int > > statusCheckersIds;
     std::optional< std::vector< int > > godlikeIds;
