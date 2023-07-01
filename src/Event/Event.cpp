@@ -1,7 +1,9 @@
 #include "Event.hpp"
+#include "EventObjects/NewMessage.hpp"
+#include "Utils.hpp"
 
 Event::Event() :
-  type(UNKNOWN),
+  type(EventType::UNKNOWN),
   object(nullptr),
   group_id(0)
 { }
@@ -40,4 +42,22 @@ int Event::getGroupId()
 void Event::setGroupId(int group_id)
 {
   this->group_id = group_id;
+}
+
+Event Event::fromJson(std::reference_wrapper<Json::Value> root)
+{
+  Event event;
+  event.type = parseEventType(root);
+  event.group_id = root.get()["group_id"].asInt();
+  switch (event.type)
+  {
+  case EventType::MESSAGE_NEW:
+    event.object = std::make_shared<NewMessage>(NewMessage::fromJson(root.get()["object"]));
+    break;
+  
+  default:
+    event.object = nullptr;
+    break;
+  }
+  return event;
 }
