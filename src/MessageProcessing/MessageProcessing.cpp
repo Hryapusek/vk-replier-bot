@@ -8,9 +8,10 @@
 namespace
 {
   using namespace commands;
+  using str_cref = const std::string &;
 
   /// @return True if EOL or EOF
-  bool skipWord(std::string::const_iterator &beg, const std::string &text)
+  bool skipWord(std::string::const_iterator &beg, str_cref text)
   {
     while (beg != text.cend() && !isspace(*beg))
       ++beg;
@@ -20,7 +21,7 @@ namespace
   }
 
   /// @throw \b std::logic_error if string is not closed with -> "
-  std::string extractString(std::string::const_iterator &beg, const std::string &text)
+  std::string extractString(std::string::const_iterator &beg, str_cref text)
   {
     if (*beg == '"')
       ++beg;
@@ -37,7 +38,7 @@ namespace
   /// @throws \b std::out_of_range, if number is incorrect.
   /// @throws \b std::invalid_argument if number is incorrect.
   /// @throws \b std::logic_error if command format is incorrect.
-  void extractNumAndTitle(const std::string &text, size_t pos, std::optional< int > &num, std::string &title)
+  void extractNumAndTitle(str_cref text, size_t pos, std::optional< int > &num, std::string &title)
   {
     title = "";
     std::string::const_iterator beg(&text[pos]);
@@ -60,13 +61,13 @@ namespace
       throw std::logic_error("");
   }
 
-  void logAndSendErrorMessage(vk::MessagesSendRequest &req, std::string command, std::string errorMessage)
+  void logAndSendErrorMessage(vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
     BOOST_LOG_TRIVIAL(warning) << command << ": " << errorMessage << ". Skipping message";
     req.message(errorMessage).execute();
   }
 
-  bool checkIfCommandNotFromChat(const Message &message, std::string command)
+  bool checkIfCommandNotFromChat(const Message &message, str_cref command)
   {
     if (!message.fromChat())
     {
@@ -76,9 +77,10 @@ namespace
     return true;
   }
 
-  bool checkIfChatSource(const Message &message, vk::MessagesSendRequest &req, std::string command, std::string errorMessage)
+  bool checkIfChatIsSource(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
-    if (config::ConfigHolder::getReadOnlyConfig().config.sourceChatId == message.peer_id)
+    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
+    if (sourceChat && sourceChat.value().peer_id == message.peer_id)
     {
       logAndSendErrorMessage(req, command, errorMessage);
       return false;
@@ -86,9 +88,9 @@ namespace
     return true;
   }
 
-  bool checkIfChatPresentInTable(const Message &message, vk::MessagesSendRequest &req, std::string command, std::string errorMessage)
+  bool checkIfChatPresentInTable(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
-    if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsTarget(Target{ message.peer_id, "" }))
+    if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsTarget(Chat{ message.peer_id, "" }))
     {
       logAndSendErrorMessage(req, command, errorMessage);
       return false;
@@ -98,7 +100,7 @@ namespace
 
   namespace reg_target_helpers
   {
-    bool checkIfNumberBusy(int num, vk::MessagesSendRequest &req, std::string command, std::string errorMessage)
+    bool checkIfNumberBusy(int num, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
     {
       try
       {
@@ -117,12 +119,12 @@ namespace
   {
     using namespace config;
     using namespace reg_target_helpers;
-    const char *command = "regTarget";
+    static const char *command = "regTarget";
     if (!checkIfCommandNotFromChat(message, command))
       return;
     vk::MessagesSendRequest req;
     req.random_id(0).peer_id(message.peer_id);
-    if (!checkIfChatSource(message, req, command, "This chat is source. Can not register") ||
+    if (!checkIfChatIsSource(message, req, command, "This chat is source. Can not register") ||
         !checkIfChatPresentInTable(message, req, command, "This chat is present somewhere in the table"))
       return;
     std::optional< int > numOpt;
@@ -132,7 +134,7 @@ namespace
     {
       if (!checkIfNumberBusy(numOpt.value(), req, command, "Given num is already busy"))
         return;
-      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), Target{ message.peer_id, "title" });
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), Chat{ message.peer_id, "title" });
       if (!res)
       {
         logAndSendErrorMessage(req, command, "Unknown error. Insertion in targetsTable failed");
@@ -141,7 +143,7 @@ namespace
     }
     else
     {
-      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(Target{ message.peer_id, "title" });
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(Chat{ message.peer_id, "title" });
       if (!res)
       {
         logAndSendErrorMessage(req, command, "Unknown error. Insertion in targetsTable failed");
@@ -149,48 +151,49 @@ namespace
       }
     }
     BOOST_LOG_TRIVIAL(info) << "Successfully registered target " << message.peer_id;
-    req.message("Successfully registered!").execute();
+    req.message("Successfully registered as target!").execute();
     return;
   }
 
   namespace reg_source_helpers
-  { }
+  {
+    bool checkIfSourceChatNotEmpty(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+    {
+      if (config::ConfigHolder::getReadOnlyConfig().config.sourceChat)
+      {
+        logAndSendErrorMessage(req, command, errorMessage);
+        return false;
+      }
+      return true;
+    }
+  }
 
   void regSource(const Message &message, size_t pos)
   {
     using namespace config;
-    using namespace reg_target_helpers;
-    if (!checkIfCommandNotFromChat(message, "regSource"))
+    using namespace reg_source_helpers;
+    static const char *command = "regSource";
+    if (!checkIfCommandNotFromChat(message, command))
       return;
     vk::MessagesSendRequest req;
     req.random_id(0).peer_id(message.peer_id);
-    if (!checkIfChatSource(message, req) || !checkIfChatPresentInTable(message, req))
+    if (!checkIfSourceChatNotEmpty(message, req, command, "Delete current sourceChat first") ||
+        !checkIfChatIsSource(message, req, command, "This chat is already source") ||
+        !checkIfChatPresentInTable(message, req, command, "This chat is present somewhere in the table"))
       return;
-    std::optional< int > numOpt;
-    std::string title;
-    extractNumAndTitle(message.text, pos, numOpt, title);
-    if (numOpt)
-    {
-      if (!checkIfNumberBusy(req, numOpt.value()))
-        return;
-      ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), Target{ message.peer_id, "title" });
-    }
-    else
-    {
-      ConfigHolder::getReadWriteConfig().config.targetsTable.insert(Target{ message.peer_id, "title" });
-    }
-    BOOST_LOG_TRIVIAL(info) << "Successfully registered target " << message.peer_id;
-    req.message("Successfully registered!").execute();
+    std::string title = extractTitle(message.text, pos);
+    ConfigHolder::getReadWriteConfig().config.sourceChat = Chat{ message.peer_id, title };
+    BOOST_LOG_TRIVIAL(info) << "Successfully registered source " << message.peer_id;
+    req.message("Successfully registered as source!").execute();
     return;
   }
 
-
-  void sendMessageToAllTargets(std::string &&title, int fwd_msg_id)
+  void sendMessageToAllTargets(str_cref title, int fwd_msg_id)
   {
     vk::MessagesSendRequest req;
     req.peer_ids(config::ConfigHolder::getTargetIds())
     .random_id(0)
-    .message(std::move(title))
+    .message(title)
     .forward_messages(std::to_string(fwd_msg_id))
     .execute();
   }
@@ -198,7 +201,7 @@ namespace
   /// @return Empty string if no quotes were found right after command.
   /// Quoted title otherwise.
   /// @throw \b std::logic_error if unclosed quote found
-  std::string extractTitle(const std::string &text, size_t pos)
+  std::string extractTitle(str_cref text, size_t pos)
   {
     std::string title;
     auto beg = std::string::const_iterator(&text[pos]);
@@ -208,7 +211,7 @@ namespace
       return extractString(beg, text);
   }
 
-  Tag findTag(const std::string &text, size_t &pos)
+  Tag findTag(str_cref text, size_t &pos)
   {
     for (const auto & [tag, strings_to_find] : tagStrings)
       for (const auto &str : strings_to_find)
@@ -220,7 +223,7 @@ namespace
     return Tag::NONE;
   }
 
-  Command findCommand(const std::string &text, size_t &pos)
+  Command findCommand(str_cref text, size_t &pos)
   {
     for (const auto & [cmd, strings_to_find] : commandStrings)
       for (const auto &str : strings_to_find)
@@ -234,7 +237,7 @@ namespace
 
   void processMessageWithTag(const Message &message)
   {
-    if (message.peer_id != config::ConfigHolder::getSourceChatId())
+    if (message.peer_id != config::ConfigHolder::getSourceChat().peer_id)
     {
       BOOST_LOG_TRIVIAL(info) << "Skipping new message - not from source\n";
       return;
