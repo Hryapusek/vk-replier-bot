@@ -90,7 +90,7 @@ namespace
 
   bool checkIfChatPresentInTable(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
-    if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsTarget(Chat{ message.peer_id, "" }))
+    if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsPeerId(message.peer_id))
     {
       logAndSendErrorMessage(req, command, errorMessage);
       return false;
@@ -188,6 +188,45 @@ namespace
     return;
   }
 
+  namespace reg_checker_helpers
+  {
+    bool checkIfAlreadyChecker(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+    {
+      auto configWrap = config::ConfigHolder::getReadOnlyConfig();
+      auto checkersOpt = configWrap.config.statusCheckersIds;
+      if (checkersOpt)
+      {
+        auto it = std::find(checkersOpt.value().begin(), checkersOpt.value().end(), message.peer_id);
+        if (it != checkersOpt.value().end())
+        {
+          logAndSendErrorMessage(req, command, errorMessage);
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  void regChecker(const Message &message, size_t pos)
+  {
+    using namespace config;
+    using namespace reg_checker_helpers;
+    static const char *command = "regChecker";
+    if (!message.fromDirect())
+    {
+      BOOST_LOG_TRIVIAL(warning) << "regChecker found BUT not in direct";
+      return;
+    }
+    vk::MessagesSendRequest req;
+    req.random_id(0).peer_id(message.peer_id);
+    if (!checkIfAlreadyChecker(message, req, command, "User is already checker"))
+      return;
+    ConfigHolder::getReadWriteConfig().config.statusCheckersIds.value().push_back(message.peer_id);
+    BOOST_LOG_TRIVIAL(info) << "Successfully registered checker " << message.peer_id;
+    req.message("Successfully registered checker!").execute();
+    return;
+  }
+
   void sendMessageToAllTargets(str_cref title, int fwd_msg_id)
   {
     vk::MessagesSendRequest req;
@@ -223,6 +262,7 @@ namespace
     return Tag::NONE;
   }
 
+  // TODO optimize by searching '/' first
   Command findCommand(str_cref text, size_t &pos)
   {
     for (const auto & [cmd, strings_to_find] : commandStrings)
@@ -312,6 +352,12 @@ namespace
       regSource(message, pos);
       break;
     }
+    case Command::REG_CHECKER:
+    {
+      BOOST_LOG_TRIVIAL(info) << "REG_CHECKER command found";
+      regChecker(message, pos);
+      break;
+    }
     case Command::NONE:
     {
       BOOST_LOG_TRIVIAL(info) << "No command found. Skipping";
@@ -347,7 +393,7 @@ namespace commands
     }
     catch (const vk::exceptions::RequestException &e)
     {
-      BOOST_LOG_TRIVIAL(error) << "Unexpected logic_error was thrown. Handling current event aborted.\n" << e.what();
+      BOOST_LOG_TRIVIAL(error) << "Unexpected RequestException was thrown. Handling current event aborted.\n" << e.what();
     }
     catch (const std::exception &e)
     {
