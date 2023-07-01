@@ -25,14 +25,15 @@ namespace vk
     cpr::Parameters params;
     std::string method;
     Json::Value responseJson;
-    static std::string baseUrl;
-    static cpr::Parameters generalParameters;
-    static const std::vector<std::chrono::seconds> breakTimes;
-    static std::thread pauseThread;
     cpr::Response performRequest();
     static void waitForPauseBetweenRequests();
 
   private:
+    static std::string baseUrl;
+    static cpr::Parameters generalParameters;
+    static const std::vector< std::chrono::seconds > breakTimes;
+    static std::thread pauseThread;
+    static std::mutex pauseThreadMutex;
     /// @throws RequestException if failed after retries
     void retrySending();
   };

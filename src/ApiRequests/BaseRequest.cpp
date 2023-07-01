@@ -51,6 +51,7 @@ namespace vk
     std::chrono::seconds(5)
   };
   std::thread BaseRequest::pauseThread = std::thread();
+  std::mutex BaseRequest::pauseThreadMutex = std::mutex();
 
   BaseRequest::BaseRequest(str_cref method):
     method(method),
@@ -98,7 +99,7 @@ void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
 
   void BaseRequest::waitForPauseBetweenRequests()
   {
-    // TODO mutex to prevent race condition to pauseThread
+    std::unique_lock<std::mutex> lock(pauseThreadMutex);
     if (pauseThread.joinable())
       pauseThread.join();
     pauseThread = std::thread(pauseBetweenRequests);
