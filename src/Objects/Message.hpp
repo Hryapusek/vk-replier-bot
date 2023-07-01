@@ -2,6 +2,7 @@
 #define MESSAGE_HPP
 
 #include <string>
+#include <jsoncpp/json/json.h>
 
 class Message
 {
@@ -18,6 +19,8 @@ public:
   bool fromDirect() const;
   bool fromChat() const;
   bool fromGroup() const;
+  /// @throw Json::Exception
+  static Message fromJson(std::reference_wrapper<Json::Value>);
 };
 
 #endif
