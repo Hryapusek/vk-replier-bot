@@ -11,6 +11,7 @@
 #include "ConfigReader.hpp"
 #include "Event/Event.hpp"
 #include "JsonUtils.hpp"
+#include "Event/Utils.hpp"
 #include "ApiRequests/BaseRequest.hpp"
 #include "MessageProcessing/MessageProcessing.hpp"
 
@@ -87,7 +88,7 @@ void processEvent(Json::Value &&root)
   Event event;
   try
   {
-    event = json_utils::parseEvent(root);
+    event = Event::fromJson(root);
   }
   catch (const Json::Exception &e)
   {
@@ -96,7 +97,7 @@ void processEvent(Json::Value &&root)
   }
   switch (event.getType())
   {
-  case MESSAGE_NEW:
+  case EventType::MESSAGE_NEW:
   {
     std::shared_ptr< NewMessage > newMessage = std::dynamic_pointer_cast< NewMessage >(event.getEventObject());
     if (!newMessage)
@@ -108,7 +109,7 @@ void processEvent(Json::Value &&root)
     break;
   }
   default:
-    logSkipEvent("Unsupported event", root);
+    logSkipEvent("Unrecognized event type found", root);
     return;
   }
 }
@@ -124,20 +125,20 @@ std::shared_ptr< httpserver::http_response > hello_world_resource::render(const 
   Json::Value root;
   try
   {
-    Json::Value root = json_utils::stringToJsonValue(req.get_content());
+    Json::Value root = stringToJson(req.get_content());
   } catch (const Json::Exception &e)
   {
     logSkipEvent("Got bad json from vk", req.get_content());
     return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
   }
-  switch (json_utils::parseEventType(root))
+  switch (parseEventType(root))
   {
-  case CONFIRMATION:
+  case EventType::CONFIRMATION:
   {
     auto config = ConfigHolder::getReadOnlyConfig();
     return std::shared_ptr< httpserver::http_response >(new httpserver::string_response(config.config.secret_string, 200));
   }
-  case MESSAGE_NEW:
+  case EventType::MESSAGE_NEW:
   {
     threads.emplace_back(processEvent, std::move(root));
   }
