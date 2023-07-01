@@ -9,6 +9,7 @@ namespace _details
 {
   using json_crefw = std::reference_wrapper< const Json::Value >;
   using namespace config;
+  
   void logAndThrow(const std::string &message)
   {
     BOOST_LOG_TRIVIAL(fatal) << message;
