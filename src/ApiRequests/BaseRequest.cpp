@@ -37,7 +37,7 @@ namespace
     {
       return Json::Value();
     }
-    return json_utils::stringToJsonValue(responseText);
+    return stringToJson(responseText);
   }
 }
 
