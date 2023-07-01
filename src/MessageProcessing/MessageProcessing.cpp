@@ -60,50 +60,53 @@ namespace
       throw std::logic_error("");
   }
 
+  void logAndSendErrorMessage(vk::MessagesSendRequest &req, std::string command, std::string errorMessage)
+  {
+    BOOST_LOG_TRIVIAL(warning) << command << ": " << errorMessage << ". Skipping message";
+    req.message(errorMessage).execute();
+  }
+
+  bool checkIfCommandNotFromChat(const Message &message, std::string command)
+  {
+    if (!message.fromChat())
+    {
+      BOOST_LOG_TRIVIAL(warning) << "Command  " << command << " not from chat. Skipping message";
+      return false;
+    }
+    return true;
+  }
+
+  bool checkIfChatSource(const Message &message, vk::MessagesSendRequest &req, std::string command, std::string errorMessage)
+  {
+    if (config::ConfigHolder::getReadOnlyConfig().config.sourceChatId == message.peer_id)
+    {
+      logAndSendErrorMessage(req, command, errorMessage);
+      return false;
+    }
+    return true;
+  }
+
+  bool checkIfChatPresentInTable(const Message &message, vk::MessagesSendRequest &req, std::string command, std::string errorMessage)
+  {
+    if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsTarget(Target{ message.peer_id, "" }))
+    {
+      logAndSendErrorMessage(req, command, errorMessage);
+      return false;
+    }
+    return true;
+  }
+
   namespace reg_target_helpers
   {
-    bool checkIfCommandNotFromChat(const Message &message)
-    {
-      if (!message.fromChat())
-      {
-        BOOST_LOG_TRIVIAL(warning) << "Command regTarget not from chat. Skipping message";
-        return false;
-      }
-      return true;
-    }
-
-    bool checkIfChatSource(const Message &message, vk::MessagesSendRequest &req)
-    {
-      if (config::ConfigHolder::getReadOnlyConfig().config.sourceChatId == message.peer_id)
-      {
-        BOOST_LOG_TRIVIAL(warning) << "regTarget: Given chat is source. Skipping message";
-        req.message("Given chat is source.").execute();
-        return false;
-      }
-      return true;
-    }
-
-    bool checkIfChatPresentInTable(const Message &message, vk::MessagesSendRequest &req)
-    {
-      if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsTarget(Target{ message.peer_id, "" }))
-      {
-        BOOST_LOG_TRIVIAL(warning) << "regTarget: Given chat is present somewhere in the table. Skipping message";
-        req.message("Given chat is present somewhere in the table.").execute();
-        return false;
-      }
-      return true;
-    }
-
-    bool checkIfNumberBusy(vk::MessagesSendRequest &req, int num)
+    bool checkIfNumberBusy(int num, vk::MessagesSendRequest &req, std::string command, std::string errorMessage)
     {
       try
       {
         config::ConfigHolder::getReadOnlyConfig().config.targetsTable.at(num);
-        BOOST_LOG_TRIVIAL(warning) << "regTarget: Given num is already busy. Skipping message";
-        req.message("Given num is already busy.").execute();
+        logAndSendErrorMessage(req, command, errorMessage);
         return false;
       }
-      catch (const std::exception &e)
+      catch (const std::out_of_range &e)
       {
         return true;
       }
@@ -114,7 +117,50 @@ namespace
   {
     using namespace config;
     using namespace reg_target_helpers;
-    if (!checkIfCommandNotFromChat(message))
+    const char *command = "regTarget";
+    if (!checkIfCommandNotFromChat(message, command))
+      return;
+    vk::MessagesSendRequest req;
+    req.random_id(0).peer_id(message.peer_id);
+    if (!checkIfChatSource(message, req, command, "This chat is source. Can not register") ||
+        !checkIfChatPresentInTable(message, req, command, "This chat is present somewhere in the table"))
+      return;
+    std::optional< int > numOpt;
+    std::string title;
+    extractNumAndTitle(message.text, pos, numOpt, title);
+    if (numOpt)
+    {
+      if (!checkIfNumberBusy(numOpt.value(), req, command, "Given num is already busy"))
+        return;
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), Target{ message.peer_id, "title" });
+      if (!res)
+      {
+        logAndSendErrorMessage(req, command, "Unknown error. Insertion in targetsTable failed");
+        return;
+      }
+    }
+    else
+    {
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(Target{ message.peer_id, "title" });
+      if (!res)
+      {
+        logAndSendErrorMessage(req, command, "Unknown error. Insertion in targetsTable failed");
+        return;
+      }
+    }
+    BOOST_LOG_TRIVIAL(info) << "Successfully registered target " << message.peer_id;
+    req.message("Successfully registered!").execute();
+    return;
+  }
+
+  namespace reg_source_helpers
+  { }
+
+  void regSource(const Message &message, size_t pos)
+  {
+    using namespace config;
+    using namespace reg_target_helpers;
+    if (!checkIfCommandNotFromChat(message, "regSource"))
       return;
     vk::MessagesSendRequest req;
     req.random_id(0).peer_id(message.peer_id);
@@ -138,6 +184,7 @@ namespace
     return;
   }
 
+
   void sendMessageToAllTargets(std::string &&title, int fwd_msg_id)
   {
     vk::MessagesSendRequest req;
@@ -148,8 +195,10 @@ namespace
     .execute();
   }
 
+  /// @return Empty string if no quotes were found right after command.
+  /// Quoted title otherwise.
   /// @throw \b std::logic_error if unclosed quote found
-  std::string getTitle(const std::string &text, size_t pos)
+  std::string extractTitle(const std::string &text, size_t pos)
   {
     std::string title;
     auto beg = std::string::const_iterator(&text[pos]);
@@ -196,11 +245,10 @@ namespace
     {
     case Tag::ALL:
     {
-      //try catch if bad title
       try
       {
         BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL(without @all)\n";
-        std::string title = getTitle(message.text, pos);
+        std::string title = extractTitle(message.text, pos);
         sendMessageToAllTargets(std::move(title), message.id);
       }
       catch (const std::logic_error &e)
@@ -216,10 +264,21 @@ namespace
 
     case Tag::ALL_IMPORTANT:
     {
-      BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL_IMPORTANT(with @all)\n";
-      std::string title = "@all, " + getTitle(message.text, pos);
-      sendMessageToAllTargets(std::move(title), message.id);
-      break;
+      try
+      {
+        BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL_IMPORTANT(with @all)\n";
+        std::string title = "@all, " + extractTitle(message.text, pos);
+        sendMessageToAllTargets(std::move(title), message.id);
+        break;
+      }
+      catch (const std::logic_error &e)
+      {
+        vk::MessagesSendRequest()
+        .peer_id(message.peer_id)
+        .random_id(0)
+        .message("Bad title found. Check unclosed quotes")
+        .execute();
+      }
     }
 
     case Tag::NONE:
@@ -227,7 +286,7 @@ namespace
       break;
 
     default:
-      BOOST_LOG_TRIVIAL(error) << "Incorrect tag found. Can not imagine how. Skipping";
+      BOOST_LOG_TRIVIAL(error) << "Tag variable was not initialized! Skipping";
       break;
     }
   }
@@ -244,7 +303,19 @@ namespace
       regTarget(message, pos);
       break;
     }
+    case Command::REG_SOURCE:
+    {
+      BOOST_LOG_TRIVIAL(info) << "REG_SOURCE command found";
+      regSource(message, pos);
+      break;
+    }
+    case Command::NONE:
+    {
+      BOOST_LOG_TRIVIAL(info) << "No command found. Skipping";
+      break;
+    }
     default:
+      BOOST_LOG_TRIVIAL(error) << "Command variable was not initialized! Skipping";
       break;
     }
   }
@@ -262,21 +333,21 @@ namespace commands
         processMessageWithTag(newMessage->getMessage());
       else if (mode == Mode::CONFIG)
         processMessageWithCommand(newMessage->getMessage());
-    } 
+    }
     catch (const Json::Exception &e)
-    { 
+    {
       BOOST_LOG_TRIVIAL(error) << "Unexpected Json exception was thrown. Handling current event aborted.\n" << e.what();
     }
     catch (const std::logic_error &e)
-    { 
+    {
       BOOST_LOG_TRIVIAL(error) << "Unexpected logic_error was thrown. Handling current event aborted.\n" << e.what();
     }
     catch (const vk::exceptions::RequestException &e)
-    { 
+    {
       BOOST_LOG_TRIVIAL(error) << "Unexpected logic_error was thrown. Handling current event aborted.\n" << e.what();
     }
     catch (const std::exception &e)
-    { 
+    {
       BOOST_LOG_TRIVIAL(error) << "Unexpected std::exception was thrown. Handling current event aborted.\n" << e.what();
     }
   }
