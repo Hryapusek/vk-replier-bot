@@ -1,7 +1,7 @@
 #include "BaseRequest.hpp"
 #include <boost/log/trivial.hpp>
 #include "Exceptions.hpp"
-#include "../JsonUtils.hpp"
+#include "../../JsonUtils.hpp"
 
 namespace
 {
@@ -40,7 +40,7 @@ namespace
   }
 }
 
-namespace vk
+namespace vk::requests::details
 {
   std::string BaseRequest::baseUrl = "";
   cpr::Parameters BaseRequest::generalParameters = cpr::Parameters{ };

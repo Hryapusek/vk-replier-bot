@@ -1,11 +1,11 @@
 #ifndef MESSAGES_SEND_REQUEST_HPP
 #define MESSAGES_SEND_REQUEST_HPP
 
-#include "BaseRequest.hpp"
+#include "../BaseRequest.hpp"
 
-namespace vk
+namespace vk::requests::messages
 {
-  class MessagesSendRequest : protected BaseRequest
+  class MessagesSendRequest : protected details::BaseRequest
   { 
     template < class T > using vec_cref = const std::vector<T> &;
     public:

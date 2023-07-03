@@ -2,13 +2,16 @@
 #include <boost/log/trivial.hpp>
 #include "MessageProcessing.hpp"
 #include "../ConfigReader.hpp"
-#include "../ApiRequests/MessagesSendRequest.hpp"
-#include "../ApiRequests/Exceptions.hpp"
-#include "../Chats.hpp"
+#include "../VkApi/Requests/Messages/MessagesSendRequest.hpp"
+#include "../VkApi/Exceptions.hpp"
+#include "../BotTypes/Chats.hpp"
 
 namespace
 {
   using namespace commands;
+  using namespace vk::requests::messages;
+  using namespace vk::objects;
+  using namespace vk::callback::event::objects;
   using str_cref = const std::string &;
 
   /// @return True if EOL or EOF
@@ -62,7 +65,7 @@ namespace
       throw std::logic_error("");
   }
 
-  void logAndSendErrorMessage(vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+  void logAndSendErrorMessage(MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
     BOOST_LOG_TRIVIAL(warning) << command << ": " << errorMessage << ". Skipping message";
     req.message(errorMessage).execute();
@@ -78,7 +81,7 @@ namespace
     return true;
   }
 
-  bool checkIfChatIsSource(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+  bool checkIfChatIsSource(const Message &message, MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
     auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
     if (sourceChat && sourceChat.value().peer_id == message.peer_id)
@@ -89,7 +92,7 @@ namespace
     return true;
   }
 
-  bool checkIfChatPresentInTable(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+  bool checkIfChatPresentInTable(const Message &message, MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
     if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsPeerId(message.peer_id))
     {
@@ -101,7 +104,7 @@ namespace
 
   namespace reg_target_helpers
   {
-    bool checkIfNumberBusy(int num, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+    bool checkIfNumberBusy(int num, MessagesSendRequest &req, str_cref command, str_cref errorMessage)
     {
       try
       {
@@ -123,7 +126,7 @@ namespace
     static const char *command = "regTarget";
     if (!checkIfCommandNotFromChat(message, command))
       return;
-    vk::MessagesSendRequest req;
+    MessagesSendRequest req;
     req.random_id(0).peer_id(message.peer_id);
     if (!checkIfChatIsSource(message, req, command, "This chat is source. Can not register") ||
         !checkIfChatPresentInTable(message, req, command, "This chat is present somewhere in the table"))
@@ -161,7 +164,7 @@ namespace
 
   namespace reg_source_helpers
   {
-    bool checkIfSourceChatNotEmpty(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+    bool checkIfSourceChatNotEmpty(const Message &message, MessagesSendRequest &req, str_cref command, str_cref errorMessage)
     {
       if (config::ConfigHolder::getReadOnlyConfig().config.sourceChat)
       {
@@ -179,7 +182,7 @@ namespace
     static const char *command = "regSource";
     if (!checkIfCommandNotFromChat(message, command))
       return;
-    vk::MessagesSendRequest req;
+    MessagesSendRequest req;
     req.random_id(0).peer_id(message.peer_id);
     if (!checkIfSourceChatNotEmpty(message, req, command, "Delete current sourceChat first") ||
         !checkIfChatIsSource(message, req, command, "This chat is already source") ||
@@ -194,7 +197,7 @@ namespace
 
   namespace reg_checker_helpers
   {
-    bool checkIfAlreadyChecker(const Message &message, vk::MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+    bool checkIfAlreadyChecker(const Message &message, MessagesSendRequest &req, str_cref command, str_cref errorMessage)
     {
       auto configWrap = config::ConfigHolder::getReadOnlyConfig();
       auto checkersOpt = configWrap.config.statusCheckersIds;
@@ -221,7 +224,7 @@ namespace
       BOOST_LOG_TRIVIAL(warning) << "regChecker found BUT not in direct";
       return;
     }
-    vk::MessagesSendRequest req;
+    MessagesSendRequest req;
     req.random_id(0).peer_id(message.peer_id);
     if (!checkIfAlreadyChecker(message, req, command, "User is already checker"))
       return;
@@ -233,7 +236,7 @@ namespace
 
   void sendMessageToAllTargets(str_cref title, int fwd_msg_id)
   {
-    vk::MessagesSendRequest req;
+    MessagesSendRequest req;
     req.peer_ids(config::ConfigHolder::getTargetIds())
     .random_id(0)
     .message(title)
@@ -300,7 +303,7 @@ namespace
       }
       catch (const std::logic_error &e)
       {
-        vk::MessagesSendRequest()
+        MessagesSendRequest()
         .peer_id(message.peer_id)
         .random_id(0)
         .message("Bad title found. Check unclosed quotes")
@@ -320,7 +323,7 @@ namespace
       }
       catch (const std::logic_error &e)
       {
-        vk::MessagesSendRequest()
+        MessagesSendRequest()
         .peer_id(message.peer_id)
         .random_id(0)
         .message("Bad title found. Check unclosed quotes")
@@ -380,7 +383,7 @@ namespace commands
   {
     try
     {
-      vk::MessagesSendRequest req;
+      MessagesSendRequest req;
       req.random_id(0).peer_id(peer_id).message(e.what()).execute();
     } catch (const std::exception &e)
     {  

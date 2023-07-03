@@ -6,7 +6,7 @@
 #include <jsoncpp/json/json.h>
 #include <cpr/cpr.h>
 
-namespace vk
+namespace vk::requests::details
 {
   class BaseRequest
   {

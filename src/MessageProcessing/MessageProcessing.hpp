@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include "../Event/EventObjects/NewMessage.hpp"
+#include "../VkApi/Callback/Event/EventObjects/NewMessage.hpp"
 
 namespace commands
 {

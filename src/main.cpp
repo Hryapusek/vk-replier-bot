@@ -9,11 +9,14 @@
 #include <httpserver.hpp>
 
 #include "ConfigReader.hpp"
-#include "Event/Event.hpp"
+#include "VkApi/Callback/Event/Event.hpp"
 #include "JsonUtils.hpp"
-#include "Event/Utils.hpp"
-#include "ApiRequests/BaseRequest.hpp"
+#include "VkApi/Callback/Event/Utils.hpp"
+#include "VkApi/Requests/BaseRequest.hpp"
 #include "MessageProcessing/MessageProcessing.hpp"
+
+// TODO api module separation
+// TODO add namespaces in api module
 
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
@@ -25,7 +28,7 @@ void threadsCleaner()
   while (true)
   {
     std::this_thread::sleep_for(breakBetweenClenings);
-    std::lock_guard<std::mutex> lock(threadsMutex);
+    std::lock_guard< std::mutex > lock(threadsMutex);
     threads.erase(
       std::remove_if(
         threads.begin(),
@@ -52,13 +55,15 @@ void init()
       trivial::severity >= trivial::trace
     );
   }
-  // TODO add try catch
   config::ConfigHolder::readConfigFromFile("config.json");
   const auto &config =  config::ConfigHolder::getReadOnlyConfig().config;
-  if (config.baseUrl)
-    vk::BaseRequest::init(config.token, config.v, config.baseUrl.value());
-  else
-    vk::BaseRequest::init(config.token, config.v);
+  {
+    using namespace vk::requests::details;
+    if (config.baseUrl)
+      BaseRequest::init(config.token, config.v, config.baseUrl.value());
+    else
+      BaseRequest::init(config.token, config.v);
+  }
   std::thread th(threadsCleaner);
   th.detach();
 }
@@ -85,6 +90,8 @@ void logSkipEvent(Args &&... args)
 
 void processEvent(Json::Value &&root)
 {
+  using namespace vk::callback::event;
+  using namespace vk::callback::event::objects;
   Event event;
   try
   {
@@ -120,8 +127,11 @@ public:
   std::shared_ptr< httpserver::http_response > render(const httpserver::http_request &);
 };
 
-std::shared_ptr< httpserver::http_response > hello_world_resource::render(const httpserver::http_request &req) {
+std::shared_ptr< httpserver::http_response > hello_world_resource::render(const httpserver::http_request &req)
+{
   using namespace config;
+  using namespace vk::callback::event::details;
+  using namespace vk::callback::event;
   Json::Value root;
   try
   {
@@ -156,7 +166,7 @@ int main() {
   hello_world_resource hwr;
   ws.register_resource("/notification", &hwr, true);
   ws.start(true);
-  std::lock_guard<std::mutex> lock(threadsMutex);
+  std::lock_guard< std::mutex > lock(threadsMutex);
   for (auto &th : threads)
     th.join();
   return 0;
