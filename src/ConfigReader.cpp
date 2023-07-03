@@ -9,7 +9,7 @@ namespace _details
 {
   using json_crefw = std::reference_wrapper< const Json::Value >;
   using namespace config;
-  
+
   void logAndThrow(const std::string &message)
   {
     BOOST_LOG_TRIVIAL(fatal) << message;
@@ -23,6 +23,33 @@ namespace _details
       logAndThrow("source chat or target chats are missed for WORK mode");
   }
 
+  Json::Value targetChatToJson(const TargetChat &chat)
+  {
+    Json::Value chatJson;
+    chatJson["num"] = chat.num;
+    chatJson["peer_id"] = chat.peer_id;
+    if (chat.title)
+      chatJson["title"] = chat.title.value();
+    return chatJson;
+  }
+
+  Json::Value sourceChatToJson(const SourceChat &chat)
+  {
+    Json::Value chatJson;
+    chatJson["peer_id"] = chat.peer_id;
+    if (chat.title)
+      chatJson["title"] = chat.title.value();
+    return chatJson;
+  }
+
+  Json::Value targetChatsToJson(Config &config)
+  {
+    Json::Value targetChats(Json::arrayValue);
+    for (const auto &pair : config.targetsTable.get())
+      targetChats.append(targetChatToJson(pair.second));
+    return targetChats;
+  }
+
   void checkGeneralNecessaryFields(json_crefw root)
   {
     for (const auto &field : ConfigHolder::generalNecessaryFields)
@@ -32,35 +59,44 @@ namespace _details
     }
   }
 
-  Chat extractChat(const Json::Value &root)
+  TargetChat targetChatFromJson(const Json::Value &root)
   {
+    if (!root.isMember("num") || !root.isMember("peer_id"))
+      logAndThrow("Incorrect object in target chats.");
     if (root.isMember("title"))
-      return Chat{ root["peer_id"].asInt(), root["title"].asString() };
+      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), root["title"].asString() }
+    ;
     else
-      return Chat{ root["peer_id"].asInt() };
+      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt() }
+    ;
   }
 
-  void extractTargetChats(json_crefw root, Config &config)
+  SourceChat sourceChatFromJson(const Json::Value &root)
+  {
+    if (!root.isMember("peer_id"))
+      logAndThrow("Incorrect object in source chat.");
+    if (root.isMember("title"))
+      return SourceChat{ root["peer_id"].asInt(), root["title"].asString() }
+    ;
+    else
+      return SourceChat{ root["peer_id"].asInt() }
+    ;
+  }
+
+  TargetsTable targetChatsFromJson(json_crefw root)
   {
     if (root.get().empty())
-    {
-      config.targetsTable = TargetsTable();
-      return;
-    }
+      return TargetsTable();
     TargetsTable table;
-    int count = 0;
     for (const auto &obj : root.get())
     {
-      ++count;
-      if (!obj.isMember("num") || !obj.isMember("peer_id"))
-        logAndThrow("Incorrect object in target chats. Object count " + std::to_string(count));
-      Chat target = extractChat(obj);
-      table.insert(obj["num"].asInt(), target);
+      TargetChat target = targetChatFromJson(obj);
+      table.insert(target.num, target);
     }
-    config.targetsTable = table;
+    return table;
   }
 
-  std::vector< int > extractIntVector(json_crefw root)
+  std::vector< int > intVectorFromJson(json_crefw root)
   {
     std::vector< int > nums;
     for (const auto &obj : root.get())
@@ -70,17 +106,18 @@ namespace _details
     return nums;
   }
 
-  //If root is empty - no changes will be applied to field.
-  void extractIntVectorIntoField(json_crefw root, std::optional< std::vector< int > > &field)
+  Json::Value intVectorToJson(std::vector< int > nums)
   {
-    if (root.get().empty())
-      return;
-    field = extractIntVector(root);
+    Json::Value arr(Json::arrayValue);
+    for (const auto num : nums)
+      arr.append(num);
+    return arr;
   }
 
-  void parseConfigJson(json_crefw root, Config &config)
+  Config parseConfigJson(json_crefw root)
   {
     checkGeneralNecessaryFields(root);
+    Config config;
     if (root.get()["mode"].asString() == "config")
       config.mode = Mode::CONFIG;
     else if (root.get()["mode"].asString() == "work")
@@ -91,13 +128,16 @@ namespace _details
     config.v = root.get()["v"].asString();
     config.secret_string = root.get()["secret_string"].asString();
     config.port = root.get()["port"].asInt();
-    extractTargetChats(root.get()["target_chats"], config);
+    config.targetsTable = targetChatsFromJson(root.get()["target_chats"]);
     if (root.get().isMember("source_chat"))
-      config.sourceChat = extractChat(root.get()["source_chat"]);
+      config.sourceChat = sourceChatFromJson(root.get()["source_chat"]);
     if (root.get().isMember("base_url"))
       config.baseUrl = root.get()["base_url"].asString();
-    extractIntVectorIntoField(root.get()["status_checkers"], config.statusCheckersIds);
-    extractIntVectorIntoField(root.get()["godlike_ids"], config.godlikeIds);
+    if (!root.get()["status_checkers"].empty())
+      config.statusCheckersIds = intVectorFromJson(root.get()["status_checkers"]);
+    if (!root.get()["godlike_ids"].empty())
+      config.godlikeIds = intVectorFromJson(root.get()["godlike_ids"]);
+    return config;
   }
 
   std::string getTargetIdsString(Config &config)
@@ -135,11 +175,38 @@ namespace config
     Json::CharReaderBuilder builder;
     if (!parseFromStream(builder, configFile, &root, nullptr))
       logAndThrow("Error while parsing json file");
-    Config tempConfig;
-    parseConfigJson(root, tempConfig);
+    Config tempConfig = parseConfigJson(root);
     checkConfigValidity(tempConfig);
     target_ids = getTargetIdsString(tempConfig);
     config = std::move(tempConfig);
+  }
+
+  void ConfigHolder::updateConfigFile()
+  {
+    std::ofstream out(configName);
+    if (!out.is_open())
+      return;
+    Json::Value configJson;
+    if (config.mode = Mode::CONFIG)
+      configJson["mode"] = "config";
+    else if (config.mode = Mode::WORK)
+      configJson["mode"] = "work";
+    configJson["token"] = config.token;
+    configJson["v"] = config.v;
+    configJson["secret_string"] = config.secret_string;
+    configJson["port"] = config.port;
+    configJson["target_chats"] = targetChatsToJson(config);
+    if (config.sourceChat)
+      configJson["source_chat"] = sourceChatToJson(config.sourceChat.value());
+    if (config.baseUrl)
+      configJson["base_url"] = config.baseUrl.value();
+    if (config.statusCheckersIds)
+      configJson["status_checkers"] = intVectorToJson(config.statusCheckersIds.value());
+    if (config.godlikeIds)
+      configJson["godlike_ids"] = intVectorToJson(config.godlikeIds.value());
+    Json::StreamWriterBuilder builder;
+    const std::unique_ptr< Json::StreamWriter > writer(builder.newStreamWriter());
+    writer->write(configJson, &out);
   }
 
   ConfigHolder::ReadOnlyConfig ConfigHolder::getReadOnlyConfig()
@@ -157,7 +224,7 @@ namespace config
     return target_ids;
   }
 
-  Chat ConfigHolder::getSourceChat()
+  SourceChat ConfigHolder::getSourceChat()
   {
     return config.sourceChat.value();
   }

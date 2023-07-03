@@ -25,7 +25,7 @@ namespace config
     int port;
     std::optional< std::string > baseUrl;
     TargetsTable targetsTable;
-    std::optional< Chat > sourceChat;
+    std::optional< SourceChat > sourceChat;
     std::optional< std::vector< int > > statusCheckersIds;
     std::optional< std::vector< int > > godlikeIds;
   };
@@ -52,7 +52,7 @@ namespace config
     static const std::string &getTargetIds();
     /// @note Use this only in work mode.
     /// @throw std::bad_optional_access
-    static Chat getSourceChat();
+    static SourceChat getSourceChat();
     /// @note Use this only in work mode.
     static Mode getMode();
     /// @note Use this only in work mode.

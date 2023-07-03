@@ -2,18 +2,21 @@
 #include <limits>
 #include <stdexcept>
 
-bool TargetsTable::insert(int num, Chat chat)
+bool TargetsTable::insert(int num, TargetChat chat)
 {
+  if (chat.num != num)
+    throw std::logic_error("chat.num and num must be equal");
   if (containsNum(num))
     return false;
   table[num] = chat;
   return true;
 }
 
-bool TargetsTable::insert(Chat chat)
+bool TargetsTable::insert(TargetChat chat)
 {
   for (int num = std::numeric_limits<int>::min(); num < std::numeric_limits<int>::max(); ++num)
   {
+    chat.num = num;
     if (!insert(num, chat))
       continue;
     return true;
@@ -49,12 +52,12 @@ bool TargetsTable::empty() const
   return table.empty();
 }
 
-const Chat &TargetsTable::at(int num) const
+const TargetChat &TargetsTable::at(int num) const
 {
   return table.at(num);
 }
 
-Chat &TargetsTable::at(int num)
+TargetChat &TargetsTable::at(int num)
 {
   return table.at(num);
 }
