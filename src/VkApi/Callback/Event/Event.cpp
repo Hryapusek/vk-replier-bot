@@ -50,6 +50,7 @@ namespace vk::callback::event
   {
     Event event;
     event.type = details::parseEventType(root);
+    // TODO check if member EVERYWHERE
     event.group_id = root.get()["group_id"].asInt();
     switch (event.type)
     {
