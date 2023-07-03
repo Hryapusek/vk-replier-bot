@@ -4,6 +4,7 @@
 #include "../ConfigReader.hpp"
 #include "../ApiRequests/MessagesSendRequest.hpp"
 #include "../ApiRequests/Exceptions.hpp"
+#include "../Chats.hpp"
 
 namespace
 {
@@ -134,7 +135,7 @@ namespace
     {
       if (!checkIfNumberBusy(numOpt.value(), req, command, "Given num is already busy"))
         return;
-      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), Chat{ message.peer_id, "title" });
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), TargetChat{ numOpt.value(), message.peer_id, "title" });
       if (!res)
       {
         logAndSendErrorMessage(req, command, "Unknown error. Insertion in targetsTable failed");
@@ -143,7 +144,10 @@ namespace
     }
     else
     {
-      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(Chat{ message.peer_id, "title" });
+      TargetChat chat = TargetChat();
+      chat.peer_id = message.peer_id;
+      chat.title = title;
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(std::move(chat));
       if (!res)
       {
         logAndSendErrorMessage(req, command, "Unknown error. Insertion in targetsTable failed");
@@ -182,7 +186,7 @@ namespace
         !checkIfChatPresentInTable(message, req, command, "This chat is present somewhere in the table"))
       return;
     std::string title = extractTitle(message.text, pos);
-    ConfigHolder::getReadWriteConfig().config.sourceChat = Chat{ message.peer_id, title };
+    ConfigHolder::getReadWriteConfig().config.sourceChat = SourceChat{ message.peer_id, title };
     BOOST_LOG_TRIVIAL(info) << "Successfully registered source " << message.peer_id;
     req.message("Successfully registered as source!").execute();
     return;
@@ -372,6 +376,18 @@ namespace
 
 namespace commands
 {
+  void sendErrorMessage(const std::exception &e, int peer_id)
+  {
+    try
+    {
+      vk::MessagesSendRequest req;
+      req.random_id(0).peer_id(peer_id).message(e.what()).execute();
+    } catch (const std::exception &e)
+    {  
+      BOOST_LOG_TRIVIAL(error) << "Error while sending exception message";
+    }
+  }
+
   void processMessage(std::shared_ptr< NewMessage > newMessage)
   {
     using namespace config;
@@ -386,18 +402,22 @@ namespace commands
     catch (const Json::Exception &e)
     {
       BOOST_LOG_TRIVIAL(error) << "Unexpected Json exception was thrown. Handling current event aborted.\n" << e.what();
+      sendErrorMessage(e, newMessage->getMessage().peer_id);
     }
     catch (const std::logic_error &e)
     {
       BOOST_LOG_TRIVIAL(error) << "Unexpected logic_error was thrown. Handling current event aborted.\n" << e.what();
+      sendErrorMessage(e, newMessage->getMessage().peer_id);
     }
     catch (const vk::exceptions::RequestException &e)
     {
       BOOST_LOG_TRIVIAL(error) << "Unexpected RequestException was thrown. Handling current event aborted.\n" << e.what();
+      sendErrorMessage(e, newMessage->getMessage().peer_id);
     }
     catch (const std::exception &e)
     {
       BOOST_LOG_TRIVIAL(error) << "Unexpected std::exception was thrown. Handling current event aborted.\n" << e.what();
+      sendErrorMessage(e, newMessage->getMessage().peer_id);
     }
   }
 }
