@@ -4,6 +4,7 @@
 #include <numeric>
 
 #include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/trivial.hpp>
 #include <httpserver.hpp>
@@ -47,8 +48,10 @@ void init()
     add_file_log
     (
       keywords::file_name = "logfile.log",
-      keywords::rotation_size = 10 * 1024 * 1024 //bytes
+      keywords::rotation_size = 10 * 1024 * 1024, //bytes
+      keywords::auto_flush = true
     );
+    add_console_log(std::cout);    
 
     core::get()->set_filter
     (
@@ -72,7 +75,8 @@ template < class T, class ... Args >
 void logArgs(T &&message, Args &&... args)
 {
   BOOST_LOG_TRIVIAL(warning) << message;
-  logArgs(std::forward< Args >(args)...);
+  if constexpr (sizeof...(Args) != 0)
+    logArgs(std::forward< Args >(args)...);
 }
 
 template < class T >
@@ -135,7 +139,7 @@ std::shared_ptr< httpserver::http_response > hello_world_resource::render(const 
   Json::Value root;
   try
   {
-    Json::Value root = stringToJson(req.get_content());
+    root = stringToJson(req.get_content());
   } catch (const Json::Exception &e)
   {
     logSkipEvent("Got bad json from vk", req.get_content());
@@ -151,10 +155,12 @@ std::shared_ptr< httpserver::http_response > hello_world_resource::render(const 
   case EventType::MESSAGE_NEW:
   {
     threads.emplace_back(processEvent, std::move(root));
+    break;
   }
   default:
   {
     logSkipEvent("Unrecognized event type found", root);
+    break;
   }
   }
   return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
@@ -162,7 +168,7 @@ std::shared_ptr< httpserver::http_response > hello_world_resource::render(const 
 
 int main() {
   init();
-  httpserver::webserver ws = httpserver::create_webserver(8080);
+  httpserver::webserver ws = httpserver::create_webserver(config::ConfigHolder::getReadOnlyConfig().config.port);
   hello_world_resource hwr;
   ws.register_resource("/notification", &hwr, true);
   ws.start(true);
