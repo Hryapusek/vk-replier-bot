@@ -45,7 +45,7 @@ namespace commands
     {Command::PRINT_MAP,           {"/print_map"}},
   };
 
-  void processMessage(std::shared_ptr< NewMessage >);
+  void processMessage(std::shared_ptr< vk::callback::event::objects::NewMessage >);
 }
 
 #endif
