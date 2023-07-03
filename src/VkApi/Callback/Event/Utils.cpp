@@ -11,6 +11,6 @@ namespace vk::callback::event::details
       return EventType::MESSAGE_NEW;
     else if (type == "confirmation")
       return EventType::CONFIRMATION;
-    return;
+    return EventType::UNKNOWN;
   }
 }
