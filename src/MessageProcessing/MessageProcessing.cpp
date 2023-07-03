@@ -65,6 +65,19 @@ namespace
       throw std::logic_error("");
   }
 
+  /// @return Empty string if no quotes were found right after command.
+  /// Quoted title otherwise.
+  /// @throw \b std::logic_error if unclosed quote found
+  std::string extractTitle(str_cref text, size_t pos)
+  {
+    std::string title;
+    auto beg = std::string::const_iterator(&text[pos]);
+    if (!skipWord(beg, text) || *beg != '"')
+      return title;
+    else
+      return extractString(beg, text);
+  }
+
   void logAndSendErrorMessage(MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
     BOOST_LOG_TRIVIAL(warning) << command << ": " << errorMessage << ". Skipping message";
@@ -244,19 +257,6 @@ namespace
     .execute();
   }
 
-  /// @return Empty string if no quotes were found right after command.
-  /// Quoted title otherwise.
-  /// @throw \b std::logic_error if unclosed quote found
-  std::string extractTitle(str_cref text, size_t pos)
-  {
-    std::string title;
-    auto beg = std::string::const_iterator(&text[pos]);
-    if (!skipWord(beg, text) || *beg != '"')
-      return title;
-    else
-      return extractString(beg, text);
-  }
-
   Tag findTag(str_cref text, size_t &pos)
   {
     for (const auto & [tag, strings_to_find] : tagStrings)
@@ -386,7 +386,7 @@ namespace commands
       MessagesSendRequest req;
       req.random_id(0).peer_id(peer_id).message(e.what()).execute();
     } catch (const std::exception &e)
-    {  
+    {
       BOOST_LOG_TRIVIAL(error) << "Error while sending exception message";
     }
   }
