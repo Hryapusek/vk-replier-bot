@@ -1,4 +1,3 @@
-#define BOOST_LOG_DYN_LINK 1
 #include "BaseRequest.hpp"
 #include <boost/log/trivial.hpp>
 #include "Exceptions.hpp"
