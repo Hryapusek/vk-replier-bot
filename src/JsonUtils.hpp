@@ -4,6 +4,7 @@
 #include <jsoncpp/json/json.h>
 #include <string_view>
 #include <string>
+#include <functional>
 
 /// @throws Json::Exception.
 Json::Value stringToJson(std::string_view s);
@@ -17,25 +18,6 @@ struct JsonFieldT;
 
 /// @brief Use this struct to check if field is some of Json::ValueType.
 struct JsonFieldVT;
-
-/**
- * @param root json in which we search
- * @param field field to find in json
- * @return True if field with same name and type found. False otherwise.
- * @throw Json::Logic_error if root is not null or is not object
- * @overload
- */
-template < class T >
-bool isCorrectField(const Json::Value &root, const JsonFieldT< T > &field);
-
-/**
- * @param root json in which we search
- * @param field field to find in json
- * @return True if field with same name and type found. False otherwise.
- * @throw Json::Logic_error if root is not null or is not object
- * @overload
- */
-bool isCorrectField(const Json::Value &root, const JsonFieldVT &field);
 
 /**
  * @brief Checks if json contains exact field.
@@ -73,78 +55,108 @@ struct JsonFieldT
   using type = T;
 
   JsonFieldT(std::string fieldName, bool isNecessary = true) :
-    fieldName(std::move(fieldName)),
+    fieldName(fieldName),
     isNecessary(isNecessary)
-  { }
-
-  const std::string &getName() const
   {
-    return fieldName;
+    funcIfIncorrect = [fieldName=this->fieldName]() {defaultFuncIfIncorrect(fieldName);};
   }
 
-  bool isFieldNecessary() const
+  /// @param fieldName Expected name of the field
+  /// @param isNecessary True if field must present in json
+  /// @param funcIfIncorrect Function that is called if json
+  /// will fail field validation
+  JsonFieldT(std::string fieldName, bool isNecessary, std::function< void() > funcIfIncorrect) :
+    fieldName(fieldName),
+    isNecessary(isNecessary),
+    funcIfIncorrect(funcIfIncorrect)
+  { }
+
+  /// @brief Checks if valid field respectively to this present in json.
+  /// @throw Json::Exception if field is not valid and no other function
+  /// was passed in constructor
+  void validateJson(const Json::Value &root) const
   {
-    return this->isNecessary;
+    if ((!root.isNull() && !root.isObject()) || !isValid(root))
+      if (funcIfIncorrect)
+        funcIfIncorrect();
+  }
+
+  /// @brief Find out if valid field respectively to this present in json. 
+  /// @return True or False depend on isNecessary and Type conditions.
+  bool isValid(const Json::Value &root) const
+  {
+    bool hasField = root.isMember(fieldName);
+    if (!hasField && !isNecessary)
+      return true;
+    bool correctType = root[fieldName].template is< typename std::remove_reference_t< T > >();
+    return hasField && correctType;
+  }
+
+  static void defaultFuncIfIncorrect(std::string field)
+  {
+    throw Json::Exception(field + " - field was not found or it's type incorrect");
   }
 
 private:
   std::string fieldName;
   bool isNecessary;
+  std::function< void() > funcIfIncorrect;
 };
 
 struct JsonFieldVT
 {
   JsonFieldVT(std::string fieldName, Json::ValueType valueType, bool isNecessary = true) :
-    fieldName(std::move(fieldName)),
+    fieldName(fieldName),
     valueType(valueType),
     isNecessary(isNecessary)
+  {
+    funcIfIncorrect = [fieldName=this->fieldName]() {defaultFuncIfIncorrect(fieldName);};
+  }
+
+  JsonFieldVT(std::string fieldName, Json::ValueType valueType, bool isNecessary, std::function< void() > funcIfIncorrect) :
+    fieldName(fieldName),
+    valueType(valueType),
+    isNecessary(isNecessary),
+    funcIfIncorrect(funcIfIncorrect)
   { }
 
-  Json::ValueType getValueType() const
+  /// @brief Checks if valid field respectively to this present in json.
+  /// @throw Json::Exception if field is not valid and no other function
+  /// was passed in constructor
+  void validateJson(const Json::Value &root) const
   {
-    return valueType;
+    if ((!root.isNull() && !root.isObject()) || !isValid(root))
+      if (funcIfIncorrect)
+        funcIfIncorrect();
   }
 
-  const std::string &getName() const
+  /// @brief Find out if valid field respectively to this present in json. 
+  /// @return True or False depend on isNecessary and Type conditions.
+  bool isValid(const Json::Value &root) const
   {
-    return fieldName;
+    bool hasField = root.isMember(fieldName);
+    if (!hasField && !isNecessary)
+      return true;
+    bool correctType = root[fieldName].type() == valueType;
+    return hasField && correctType;
   }
 
-  bool isFieldNecessary() const
+  static void defaultFuncIfIncorrect(std::string field)
   {
-    return this->isNecessary;
+    throw Json::Exception(field + " - field was not found or it's type incorrect");
   }
 
 private:
   std::string fieldName;
   Json::ValueType valueType;
   bool isNecessary;
+  std::function< void() > funcIfIncorrect;
 };
-
-template < class T >
-bool isCorrectField(const Json::Value &root, const JsonFieldT< T > &field)
-{
-  bool hasField = root.isMember(field.getName());
-  if (!hasField && !field.isFieldNecessary())
-    return true;
-  bool correctType = root[field.getName()].template is< typename std::remove_reference_t< T > >();
-  return hasField && correctType;
-}
-
-bool isCorrectField(const Json::Value &root, const JsonFieldVT &field)
-{
-  bool hasField = root.isMember(field.getName());
-  if (!hasField && !field.isFieldNecessary())
-    return true;
-  bool correctType = root[field.getName()].type() == field.getValueType();
-  return hasField && correctType;
-}
 
 template < class Field >
 void checkJsonField(const Json::Value &root, const Field &field)
 {
-  if (!isCorrectField(root, field))
-    throw Json::Exception(field.getName() + " - field was not found");
+  field.validateJson(root);
 }
 
 template < class ... Args >
