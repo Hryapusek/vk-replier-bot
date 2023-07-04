@@ -3,14 +3,16 @@
 
 namespace vk::objects
 {
+  const int Message::CHAT_START_ID = 2e9;
+
   bool Message::fromDirect() const
   {
-    return peer_id > 0 && peer_id < CHAT_START_ID;
+    return peer_id > 0 && peer_id < Message::CHAT_START_ID;
   }
 
   bool Message::fromChat() const
   {
-    return peer_id > CHAT_START_ID;
+    return peer_id > Message::CHAT_START_ID;
   }
 
   bool Message::fromGroup() const
@@ -18,21 +20,25 @@ namespace vk::objects
     return peer_id < 0;
   }
 
-  Message Message::fromJson(std::reference_wrapper< Json::Value > root)
+  Message Message::fromJson(const Json::Value &root)
   {
     const bool necessary = true;
     const static auto fields = std::tuple{
-      JsonFieldT<int>("id",           !necessary),
-      JsonFieldT<int>("peer_id",      !necessary),
-      JsonFieldT<int>("from_id",      !necessary),
-      JsonFieldT<std::string>("text", !necessary),
+      JsonFieldT< int >("id",           !necessary),
+      JsonFieldT< int >("peer_id",      !necessary),
+      JsonFieldT< int >("from_id",      !necessary),
+      JsonFieldT< std::string >("text", !necessary),
     };
-    checkJsonFields(root.get(), std::move(fields));
+    checkJsonFields(root, fields);
     Message msg;
-    msg.id = root.get()["id"].asInt();
-    msg.peer_id = root.get()["peer_id"].asInt();
-    msg.from_id = root.get()["from_id"].asInt();
-    msg.text = root.get()["text"].asString();
+    if (root.isMember("id"))
+      msg.id = root["id"].asInt();
+    if (root.isMember("peer_id"))
+      msg.peer_id = root["peer_id"].asInt();
+    if (root.isMember("from_id"))
+      msg.from_id = root["from_id"].asInt();
+    if (root.isMember("text"))
+      msg.text = root["text"].asString();
     return msg;
   }
 }
