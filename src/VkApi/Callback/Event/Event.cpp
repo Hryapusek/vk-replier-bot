@@ -1,6 +1,8 @@
 #include "Event.hpp"
+
 #include "EventObjects/NewMessage.hpp"
 #include "Utils.hpp"
+#include "../../../JsonUtils.hpp"
 
 namespace vk::callback::event
 {
@@ -48,9 +50,14 @@ namespace vk::callback::event
 
   Event Event::fromJson(std::reference_wrapper< Json::Value > root)
   {
+    static const auto fields = std::tuple{
+      JsonFieldT<std::string>("type"),
+      JsonFieldVT("object", Json::ValueType::objectValue),
+      JsonFieldT<int>("group_id")
+    };
+    checkJsonFields(root.get(), fields);
     Event event;
     event.type = details::parseEventType(root);
-    // TODO check if member EVERYWHERE
     event.group_id = root.get()["group_id"].asInt();
     switch (event.type)
     {
