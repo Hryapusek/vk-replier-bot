@@ -97,7 +97,7 @@ namespace
   bool checkIfChatIsSource(const Message &message, MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
     auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
-    if (sourceChat && sourceChat.value().peer_id == message.peer_id)
+    if (sourceChat && sourceChat.value().peer_id == message.peer_id.value())
     {
       logAndSendErrorMessage(req, command, errorMessage);
       return false;
@@ -107,7 +107,7 @@ namespace
 
   bool checkIfChatPresentInTable(const Message &message, MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
-    if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsPeerId(message.peer_id))
+    if (config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsPeerId(message.peer_id.value()))
     {
       logAndSendErrorMessage(req, command, errorMessage);
       return false;
@@ -140,18 +140,18 @@ namespace
     if (!checkIfCommandNotFromChat(message, command))
       return;
     MessagesSendRequest req;
-    req.random_id(0).peer_id(message.peer_id);
+    req.random_id(0).peer_id(message.peer_id.value());
     if (!checkIfChatIsSource(message, req, command, "This chat is source. Can not register") ||
         !checkIfChatPresentInTable(message, req, command, "This chat is present somewhere in the table"))
       return;
     std::optional< int > numOpt;
     std::string title;
-    extractNumAndTitle(message.text, pos, numOpt, title);
+    extractNumAndTitle(message.text.value(), pos, numOpt, title);
     if (numOpt)
     {
       if (!checkIfNumberBusy(numOpt.value(), req, command, "Given num is already busy"))
         return;
-      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), TargetChat{ numOpt.value(), message.peer_id, "title" });
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), TargetChat{ numOpt.value(), message.peer_id.value(), "title" });
       if (!res)
       {
         logAndSendErrorMessage(req, command, "Unknown error. Insertion in targetsTable failed");
@@ -161,7 +161,7 @@ namespace
     else
     {
       TargetChat chat = TargetChat();
-      chat.peer_id = message.peer_id;
+      chat.peer_id = message.peer_id.value();
       chat.title = title;
       auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(std::move(chat));
       if (!res)
@@ -170,7 +170,7 @@ namespace
         return;
       }
     }
-    BOOST_LOG_TRIVIAL(info) << "Successfully registered target " << message.peer_id;
+    BOOST_LOG_TRIVIAL(info) << "Successfully registered target " << message.peer_id.value();
     req.message("Successfully registered as target!").execute();
     return;
   }
@@ -196,14 +196,14 @@ namespace
     if (!checkIfCommandNotFromChat(message, command))
       return;
     MessagesSendRequest req;
-    req.random_id(0).peer_id(message.peer_id);
+    req.random_id(0).peer_id(message.peer_id.value());
     if (!checkIfSourceChatNotEmpty(message, req, command, "Delete current sourceChat first") ||
         !checkIfChatIsSource(message, req, command, "This chat is already source") ||
         !checkIfChatPresentInTable(message, req, command, "This chat is present somewhere in the table"))
       return;
-    std::string title = extractTitle(message.text, pos);
-    ConfigHolder::getReadWriteConfig().config.sourceChat = SourceChat{ message.peer_id, title };
-    BOOST_LOG_TRIVIAL(info) << "Successfully registered source " << message.peer_id;
+    std::string title = extractTitle(message.text.value(), pos);
+    ConfigHolder::getReadWriteConfig().config.sourceChat = SourceChat{ message.peer_id.value(), title };
+    BOOST_LOG_TRIVIAL(info) << "Successfully registered source " << message.peer_id.value();
     req.message("Successfully registered as source!").execute();
     return;
   }
@@ -216,7 +216,7 @@ namespace
       auto checkersOpt = configWrap.config.statusCheckersIds;
       if (checkersOpt)
       {
-        auto it = std::find(checkersOpt.value().begin(), checkersOpt.value().end(), message.peer_id);
+        auto it = std::find(checkersOpt.value().begin(), checkersOpt.value().end(), message.peer_id.value());
         if (it != checkersOpt.value().end())
         {
           logAndSendErrorMessage(req, command, errorMessage);
@@ -238,11 +238,11 @@ namespace
       return;
     }
     MessagesSendRequest req;
-    req.random_id(0).peer_id(message.peer_id);
+    req.random_id(0).peer_id(message.peer_id.value());
     if (!checkIfAlreadyChecker(message, req, command, "User is already checker"))
       return;
-    ConfigHolder::getReadWriteConfig().config.statusCheckersIds.value().push_back(message.peer_id);
-    BOOST_LOG_TRIVIAL(info) << "Successfully registered checker " << message.peer_id;
+    ConfigHolder::getReadWriteConfig().config.statusCheckersIds.value().push_back(message.peer_id.value());
+    BOOST_LOG_TRIVIAL(info) << "Successfully registered checker " << message.peer_id.value();
     req.message("Successfully registered checker!").execute();
     return;
   }
@@ -284,13 +284,13 @@ namespace
 
   void processMessageWithTag(const Message &message)
   {
-    if (message.peer_id != config::ConfigHolder::getSourceChat().peer_id)
+    if (message.peer_id.value() != config::ConfigHolder::getSourceChat().peer_id)
     {
       BOOST_LOG_TRIVIAL(info) << "Skipping new message - not from source\n";
       return;
     }
     size_t pos = 0;
-    Tag tag = findTag(message.text, pos);
+    Tag tag = findTag(message.text.value(), pos);
     switch (tag)
     {
     case Tag::ALL:
@@ -298,13 +298,13 @@ namespace
       try
       {
         BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL(without @all)\n";
-        std::string title = extractTitle(message.text, pos);
-        sendMessageToAllTargets(std::move(title), message.id);
+        std::string title = extractTitle(message.text.value(), pos);
+        sendMessageToAllTargets(std::move(title), message.id.value());
       }
       catch (const std::logic_error &e)
       {
         MessagesSendRequest()
-        .peer_id(message.peer_id)
+        .peer_id(message.peer_id.value())
         .random_id(0)
         .message("Bad title found. Check unclosed quotes")
         .execute();
@@ -317,14 +317,14 @@ namespace
       try
       {
         BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL_IMPORTANT(with @all)\n";
-        std::string title = "@all, " + extractTitle(message.text, pos);
-        sendMessageToAllTargets(std::move(title), message.id);
+        std::string title = "@all, " + extractTitle(message.text.value(), pos);
+        sendMessageToAllTargets(std::move(title), message.id.value());
         break;
       }
       catch (const std::logic_error &e)
       {
         MessagesSendRequest()
-        .peer_id(message.peer_id)
+        .peer_id(message.peer_id.value())
         .random_id(0)
         .message("Bad title found. Check unclosed quotes")
         .execute();
@@ -344,7 +344,7 @@ namespace
   void processMessageWithCommand(const Message &message)
   {
     size_t pos = 0;
-    Command cmd = findCommand(message.text, pos);
+    Command cmd = findCommand(message.text.value(), pos);
     switch (cmd)
     {
     case Command::REG_TARGET:
@@ -394,6 +394,11 @@ namespace commands
   void processMessage(std::shared_ptr< NewMessage > newMessage)
   {
     using namespace config;
+    if (!newMessage->getMessage().text)
+    {
+      BOOST_LOG_TRIVIAL(info) << "Message does not contain any text. Skipping";
+      return;
+    }
     Mode mode = ConfigHolder::getMode();
     try
     {
@@ -405,22 +410,22 @@ namespace commands
     catch (const Json::Exception &e)
     {
       BOOST_LOG_TRIVIAL(error) << "Unexpected Json exception was thrown. Handling current event aborted.\n" << e.what();
-      sendErrorMessage(e, newMessage->getMessage().peer_id);
+      sendErrorMessage(e, newMessage->getMessage().peer_id.value());
     }
     catch (const std::logic_error &e)
     {
       BOOST_LOG_TRIVIAL(error) << "Unexpected logic_error was thrown. Handling current event aborted.\n" << e.what();
-      sendErrorMessage(e, newMessage->getMessage().peer_id);
+      sendErrorMessage(e, newMessage->getMessage().peer_id.value());
     }
     catch (const vk::exceptions::RequestException &e)
     {
       BOOST_LOG_TRIVIAL(error) << "Unexpected RequestException was thrown. Handling current event aborted.\n" << e.what();
-      sendErrorMessage(e, newMessage->getMessage().peer_id);
+      sendErrorMessage(e, newMessage->getMessage().peer_id.value());
     }
     catch (const std::exception &e)
     {
       BOOST_LOG_TRIVIAL(error) << "Unexpected std::exception was thrown. Handling current event aborted.\n" << e.what();
-      sendErrorMessage(e, newMessage->getMessage().peer_id);
+      sendErrorMessage(e, newMessage->getMessage().peer_id.value());
     }
   }
 }
