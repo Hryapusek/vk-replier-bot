@@ -7,8 +7,32 @@
 
 namespace _details
 {
-  using json_crefw = std::reference_wrapper< const Json::Value >;
+  using json_cref = const Json::Value &;
+  using json_crefwrp = std::reference_wrapper< const Json::Value >;
   using namespace config;
+
+  void doIfFieldIncorrect(std::string fieldName);
+  void logAndThrow(const std::string &message);
+
+  const bool necessary = true;
+
+  const std::tuple configFields{
+    JsonFieldT< std::string >("mode", necessary, std::bind(doIfFieldIncorrect, "mode")),
+    JsonFieldT< std::string >("token", necessary, std::bind(doIfFieldIncorrect, "token")),
+    JsonFieldT< std::string >("v", necessary, std::bind(doIfFieldIncorrect, "v")),
+    JsonFieldT< std::string >("secret_string", necessary, std::bind(doIfFieldIncorrect, "secret_string")),
+    JsonFieldT< int >("port", necessary, std::bind(doIfFieldIncorrect, "port")),
+    JsonFieldT< std::string >("base_url", !necessary, std::bind(doIfFieldIncorrect, "base_url")),
+    JsonFieldVT("target_chats", Json::ValueType::arrayValue, !necessary, std::bind(doIfFieldIncorrect, "target_chats")),
+    JsonFieldVT("source_chat", Json::ValueType::objectValue, !necessary, std::bind(doIfFieldIncorrect, "source_chat")),
+    JsonFieldVT("status_checkers", Json::ValueType::arrayValue, !necessary, std::bind(doIfFieldIncorrect, "status_checkers")),
+    JsonFieldVT("godlike_ids", Json::ValueType::arrayValue, !necessary, std::bind(doIfFieldIncorrect, "godlike_ids")),
+  };
+
+  void doIfFieldIncorrect(std::string fieldName)
+  {
+    logAndThrow(fieldName + " - field was not found or it's type incorrect in ConfigReader.cpp");
+  }
 
   void logAndThrow(const std::string &message)
   {
@@ -16,7 +40,6 @@ namespace _details
     throw std::logic_error(message);
   }
 
-  // TODO update it
   void checkConfigValidity(Config &config)
   {
     if (config.mode == Mode::WORK && (!config.sourceChat || config.targetsTable.empty()))
@@ -50,19 +73,14 @@ namespace _details
     return targetChats;
   }
 
-  void checkGeneralNecessaryFields(json_crefw root)
-  {
-    for (const auto &field : ConfigHolder::generalNecessaryFields)
-    {
-      if (!root.get().isMember(field))
-        logAndThrow("Field " + field + " not found");
-    }
-  }
-
   TargetChat targetChatFromJson(const Json::Value &root)
   {
-    if (!root.isMember("num") || !root.isMember("peer_id"))
-      logAndThrow("Incorrect object in target chats.");
+    static const auto fields = std::tuple{
+      JsonFieldT<int>("num", true, std::bind(doIfFieldIncorrect, "num")),
+      JsonFieldT<int>("peer_id", true, std::bind(doIfFieldIncorrect, "peer_id")),
+      JsonFieldT<int>("title", false, std::bind(doIfFieldIncorrect, "title")),
+    };
+    checkJsonFields(root, fields);
     if (root.isMember("title"))
       return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), root["title"].asString() }
     ;
@@ -73,8 +91,11 @@ namespace _details
 
   SourceChat sourceChatFromJson(const Json::Value &root)
   {
-    if (!root.isMember("peer_id"))
-      logAndThrow("Incorrect object in source chat.");
+    static const auto fields = std::tuple{
+      JsonFieldT<int>("peer_id", necessary, std::bind(doIfFieldIncorrect, "peer_id")),
+      JsonFieldT<int>("title", !necessary, std::bind(doIfFieldIncorrect, "title")),
+    };
+    checkJsonFields(root, fields);
     if (root.isMember("title"))
       return SourceChat{ root["peer_id"].asInt(), root["title"].asString() }
     ;
@@ -83,7 +104,7 @@ namespace _details
     ;
   }
 
-  TargetsTable targetChatsFromJson(json_crefw root)
+  TargetsTable targetChatsFromJson(json_crefwrp root)
   {
     if (root.get().empty())
       return TargetsTable();
@@ -96,7 +117,7 @@ namespace _details
     return table;
   }
 
-  std::vector< int > intVectorFromJson(json_crefw root)
+  std::vector< int > intVectorFromJson(json_crefwrp root)
   {
     std::vector< int > nums;
     for (const auto &obj : root.get())
@@ -114,29 +135,29 @@ namespace _details
     return arr;
   }
 
-  Config parseConfigJson(json_crefw root)
+  Config parseConfigJson(json_cref root)
   {
-    checkGeneralNecessaryFields(root);
+    checkJsonFields(root, configFields);
     Config config;
-    if (root.get()["mode"].asString() == "config")
+    if (root["mode"].asString() == "config")
       config.mode = Mode::CONFIG;
-    else if (root.get()["mode"].asString() == "work")
+    else if (root["mode"].asString() == "work")
       config.mode = Mode::WORK;
     else
       logAndThrow("Incorrect mode found in config");
-    config.token = root.get()["token"].asString();
-    config.v = root.get()["v"].asString();
-    config.secret_string = root.get()["secret_string"].asString();
-    config.port = root.get()["port"].asInt();
-    config.targetsTable = targetChatsFromJson(root.get()["target_chats"]);
-    if (root.get().isMember("source_chat"))
-      config.sourceChat = sourceChatFromJson(root.get()["source_chat"]);
-    if (root.get().isMember("base_url"))
-      config.baseUrl = root.get()["base_url"].asString();
-    if (!root.get()["status_checkers"].empty())
-      config.statusCheckersIds = intVectorFromJson(root.get()["status_checkers"]);
-    if (!root.get()["godlike_ids"].empty())
-      config.godlikeIds = intVectorFromJson(root.get()["godlike_ids"]);
+    config.token = root["token"].asString();
+    config.v = root["v"].asString();
+    config.secret_string = root["secret_string"].asString();
+    config.port = root["port"].asInt();
+    config.targetsTable = targetChatsFromJson(root["target_chats"]);
+    if (root.isMember("source_chat"))
+      config.sourceChat = sourceChatFromJson(root["source_chat"]);
+    if (root.isMember("base_url"))
+      config.baseUrl = root["base_url"].asString();
+    if (root.isMember("status_checkers") && !root["status_checkers"].empty())
+      config.statusCheckersIds = intVectorFromJson(root["status_checkers"]);
+    if (root.isMember("godlike_ids") && !root["godlike_ids"].empty())
+      config.godlikeIds = intVectorFromJson(root["godlike_ids"]);
     return config;
   }
 
@@ -157,9 +178,6 @@ namespace config
 {
   Config ConfigHolder::config = Config();
   std::shared_mutex ConfigHolder::mut = std::shared_mutex();
-  const std::vector< std::string > ConfigHolder::generalNecessaryFields = {
-    "mode", "token", "secret_string", "port", "v"
-  };
   std::string ConfigHolder::target_ids = std::string();
   std::string ConfigHolder::configName = std::string();
 

@@ -6,7 +6,9 @@
 #include <vector>
 #include <array>
 #include <shared_mutex>
+#include <jsoncpp/json/json.h>
 #include "TargetsTable.hpp"
+#include "JsonUtils.hpp"
 
 namespace config
 {
@@ -36,7 +38,6 @@ namespace config
     struct ReadWriteConfig;
 
   public:
-    static const std::vector< std::string > generalNecessaryFields;
     /// @brief Init function
     /// @throws std::logic_error - Fatal error occured
     /// @throws Json::Exception - Fatal error occured
