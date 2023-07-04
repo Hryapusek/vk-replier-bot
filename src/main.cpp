@@ -16,8 +16,7 @@
 #include "VkApi/Requests/BaseRequest.hpp"
 #include "MessageProcessing/MessageProcessing.hpp"
 
-// TODO api module separation
-// TODO add namespaces in api module
+// TODO add trace logging
 
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
@@ -41,23 +40,22 @@ void threadsCleaner()
   }
 }
 
+void initLogger()
+{
+  using namespace boost::log;
+  add_file_log
+  (
+    keywords::file_name = "logfile.log",
+    keywords::rotation_size = 10 * 1024 * 1024,   //bytes
+    keywords::auto_flush = true
+  );
+  add_console_log(std::cout);
+  core::get()->set_filter(trivial::severity >= trivial::trace);
+}
+
 void init()
 {
-  {
-    using namespace boost::log;
-    add_file_log
-    (
-      keywords::file_name = "logfile.log",
-      keywords::rotation_size = 10 * 1024 * 1024, //bytes
-      keywords::auto_flush = true
-    );
-    add_console_log(std::cout);    
-
-    core::get()->set_filter
-    (
-      trivial::severity >= trivial::trace
-    );
-  }
+  initLogger();
   config::ConfigHolder::readConfigFromFile("config.json");
   const auto &config =  config::ConfigHolder::getReadOnlyConfig().config;
   {
@@ -103,7 +101,7 @@ void processEvent(Json::Value &&root)
   }
   catch (const Json::Exception &e)
   {
-    logSkipEvent("Bad json found", root);
+    logSkipEvent("Bad json found", root, e.what());
     return;
   }
   switch (event.getType())
