@@ -25,7 +25,7 @@ namespace vk::callback::event
      * @see <a href="https://dev.vk.com/api/community-events/json-schema">VK event json</a>
      * @note If event type is unsupported one - EventObject will contain nullptr.
      */
-    static Event fromJson(std::reference_wrapper< Json::Value >);
+    static Event fromJson(const Json::Value &);
 
   private:
     EventType type;

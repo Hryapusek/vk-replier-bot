@@ -48,21 +48,21 @@ namespace vk::callback::event
     this->group_id = group_id;
   }
 
-  Event Event::fromJson(std::reference_wrapper< Json::Value > root)
+  Event Event::fromJson(const Json::Value &root)
   {
     static const auto fields = std::tuple{
       JsonFieldT<std::string>("type"),
       JsonFieldVT("object", Json::ValueType::objectValue),
       JsonFieldT<int>("group_id")
     };
-    checkJsonFields(root.get(), fields);
+    checkJsonFields(root, fields);
     Event event;
     event.type = details::parseEventType(root);
-    event.group_id = root.get()["group_id"].asInt();
+    event.group_id = root["group_id"].asInt();
     switch (event.type)
     {
     case EventType::MESSAGE_NEW:
-      event.object = std::make_shared< objects::NewMessage >(objects::NewMessage::fromJson(root.get()["object"]));
+      event.object = std::make_shared< objects::NewMessage >(objects::NewMessage::fromJson(root["object"]));
       break;
 
     default:

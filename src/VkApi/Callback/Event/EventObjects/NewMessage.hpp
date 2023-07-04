@@ -25,7 +25,7 @@ namespace vk::callback::event::objects
       return message;
     }
     /// @throw Json::Exception
-    static NewMessage fromJson(std::reference_wrapper< Json::Value >);
+    static NewMessage fromJson(const Json::Value &);
 
   private:
     Message message;

@@ -2,11 +2,11 @@
 
 namespace vk::callback::event::details
 {
-  EventType parseEventType(std::reference_wrapper< const Json::Value > root)
+  EventType parseEventType(const Json::Value &root)
   {
-    if (!root.get().isMember("type"))
+    if (!root.isMember("type"))
       return EventType::UNKNOWN;
-    auto type = root.get()["type"].asString();
+    auto type = root["type"].asString();
     if (type == "message_new")
       return EventType::MESSAGE_NEW;
     else if (type == "confirmation")
