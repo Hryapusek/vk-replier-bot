@@ -7,17 +7,17 @@ namespace vk::objects
 
   bool Message::fromDirect() const
   {
-    return peer_id > 0 && peer_id < Message::CHAT_START_ID;
+    return *peer_id > 0 && *peer_id < Message::CHAT_START_ID;
   }
 
   bool Message::fromChat() const
   {
-    return peer_id > Message::CHAT_START_ID;
+    return *peer_id > Message::CHAT_START_ID;
   }
 
   bool Message::fromGroup() const
   {
-    return peer_id < 0;
+    return *peer_id < 0;
   }
 
   Message Message::fromJson(const Json::Value &root)
