@@ -1,7 +1,6 @@
 #ifndef MESSAGE_PROCESSING_HPP
 #define MESSAGE_PROCESSING_HPP
 
-#include <memory>
 #include <map>
 #include <vector>
 #include <string>
