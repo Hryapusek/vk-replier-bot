@@ -46,18 +46,30 @@ namespace config
     //TODO get Token v secret_string port
     static ReadOnlyConfig getReadOnlyConfig();
     static ReadWriteConfig getReadWriteConfig();
-    /// @return Target ids from config in format id1, id2, ...
-    /// @note Use this if you can instead of direct config use.
-    /// String calculated only once on startup.
-    /// Use this only in work mode.
+    /// @return Target ids string from config in format "id1, id2, ..."
+    /// @note String calculated only once on startup.
+    /// It is supposed that target id's are constant after startup.
     static const std::string &getTargetIds();
-    /// @note Use this only in work mode.
-    /// @throw std::bad_optional_access
-    static SourceChat getSourceChat();
-    /// @note Use this only in work mode.
+    /// @brief Direct access to config field since
+    /// it's constant and necessary in config file.
     static Mode getMode();
-    /// @note Use this only in work mode.
-    static const TargetsTable &getTargetsTable();
+    /// @brief Direct access to config field since
+    /// it's constant and necessary in config file.
+    static const std::string &getToken();
+    /// @brief Direct access to config field since
+    /// it's constant and necessary in config file.
+    static const std::string &getV();
+    /// @brief Direct access to config field since
+    /// it's constant and necessary in config file.
+    static int getPort();
+    /// @brief Direct access to config field since
+    /// it's constant and necessary in config file.
+    static const std::string &getSecretString();
+    static bool hasBaseUrl();
+    /// @brief Direct access to config field since
+    /// it's constant and necessary in config file.
+    /// @note Probably you'd like to call hasBaseUrl() before
+    static const std::string &getBaseUrl();
 
   private:
     static Config config;
