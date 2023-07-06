@@ -17,6 +17,24 @@ namespace
   using namespace vk::callback::event::objects;
   using str_cref = const std::string &;
 
+  bool hasMessageNecessaryFields(const vk::objects::Message &m)
+  {
+    return m.hasFromId() && m.hasId() && m.hasPeerId() && m.hasText();
+  }
+
+  void logAndSendErrorMessage(const std::exception &e, int peer_id, const char *exceptionName)
+  {
+    BOOST_LOG_TRIVIAL(error) << "Unexpected " << exceptionName << " was thrown. Handling current event aborted.\n" << e.what();
+    try
+    {
+      MessagesSendRequest req;
+      req.random_id(0).peer_id(peer_id).message(e.what()).execute();
+    } catch (const std::exception &e)
+    {
+      BOOST_LOG_TRIVIAL(error) << "Error while sending exception message";
+    }
+  }
+
   /// @return True if EOL or EOF
   bool skipWord(std::string::const_iterator &beg, str_cref text)
   {
@@ -27,7 +45,7 @@ namespace
     return !(beg == text.cend() || *beg == '\n');
   }
 
-  /// @throw \b std::logic_error if string is not closed with -> "
+  /// @throw \b std::exception if string is not closed with -> "
   std::string extractString(std::string::const_iterator &beg, str_cref text)
   {
     if (*beg == '"')
@@ -36,15 +54,16 @@ namespace
     while (beg != text.cend() && *beg != '"')
     {
       result += *beg;
+      ++beg;
     }
     if (beg == text.cend() || *beg != '"')
-      throw std::logic_error("");
+      throw std::exception();
     return result;
   }
 
   /// @throws \b std::out_of_range, if number is incorrect.
   /// @throws \b std::invalid_argument if number is incorrect.
-  /// @throws \b std::logic_error if command format is incorrect.
+  /// @throws \b std::exception if command format is incorrect.
   void extractNumAndTitle(str_cref text, size_t pos, std::optional< int > &num, std::string &title)
   {
     title = "";
@@ -65,7 +84,7 @@ namespace
       return;
     }
     else
-      throw std::logic_error("");
+      throw std::exception();
   }
 
   /// @return Empty string if no quotes were found right after command.
@@ -149,12 +168,25 @@ namespace
       return;
     std::optional< int > numOpt;
     std::string title;
-    extractNumAndTitle(message.getText(), pos, numOpt, title);
+    try
+    {
+      extractNumAndTitle(message.getText(), pos, numOpt, title);
+    }
+    catch(const std::logic_error &e)
+    {
+      logAndSendErrorMessage(req, command, "Incorrect number passed");
+      return;
+    }
+    catch (const std::exception &e)
+    {
+      logAndSendErrorMessage(req, command, "Unclosed \" found");
+      return;
+    }
     if (numOpt)
     {
       if (!checkIfNumberBusy(numOpt.value(), req, command, "Given num is already busy"))
         return;
-      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), TargetChat{ numOpt.value(), message.getPeerId(), "title" });
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), TargetChat{ numOpt.value(), message.getPeerId(), title });
       if (!res)
       {
         logAndSendErrorMessage(req, command, "Unknown error. Insertion in targetsTable failed");
@@ -173,7 +205,7 @@ namespace
         return;
       }
     }
-    BOOST_LOG_TRIVIAL(info) << "Successfully registered target " << message.getPeerId();
+    BOOST_LOG_TRIVIAL(info) << command << ": Successfully registered target " << message.getPeerId();
     req.message("Successfully registered as target!").execute();
     return;
   }
@@ -206,7 +238,7 @@ namespace
       return;
     std::string title = extractTitle(message.getText(), pos);
     ConfigHolder::getReadWriteConfig().config.sourceChat = SourceChat{ message.getPeerId(), title };
-    BOOST_LOG_TRIVIAL(info) << "Successfully registered source " << message.getPeerId();
+    BOOST_LOG_TRIVIAL(info) << command << ": Successfully registered source " << message.getPeerId();
     req.message("Successfully registered as source!").execute();
     return;
   }
@@ -245,7 +277,7 @@ namespace
     if (!checkIfAlreadyChecker(message, req, command, "User is already checker"))
       return;
     ConfigHolder::getReadWriteConfig().config.statusCheckersIds.value().push_back(message.getPeerId());
-    BOOST_LOG_TRIVIAL(info) << "Successfully registered checker " << message.getPeerId();
+    BOOST_LOG_TRIVIAL(info) << command << ": Successfully registered checker " << message.getPeerId();
     req.message("Successfully registered checker!").execute();
     return;
   }
@@ -287,119 +319,117 @@ namespace
 
   void processMessageWithTag(const Message &message)
   {
-    if (message.getPeerId() != config::ConfigHolder::getSourceChat().peer_id)
     {
-      BOOST_LOG_TRIVIAL(info) << "Skipping new message - not from source\n";
-      return;
+      auto configWrap = config::ConfigHolder::getReadOnlyConfig();
+      const auto &config = configWrap.config;
+      if (!config.sourceChat)
+      {
+        BOOST_LOG_TRIVIAL(warning) << "Source chat not registered\n";
+        return;
+      }
+      else if (message.getPeerId() != config.sourceChat->peer_id)
+      {
+        BOOST_LOG_TRIVIAL(info) << "Skipping new message - not from source\n";
+        return;
+      }
     }
     size_t pos = 0;
     Tag tag = findTag(message.getText(), pos);
     switch (tag)
     {
-    case Tag::ALL:
-    {
-      try
+      case Tag::ALL:
       {
-        BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL(without @all)\n";
-        std::string title = extractTitle(message.getText(), pos);
-        sendMessageToAllTargets(std::move(title), message.getId());
-      }
-      catch (const std::logic_error &e)
-      {
-        MessagesSendRequest()
-        .peer_id(message.getPeerId())
-        .random_id(0)
-        .message("Bad title found. Check unclosed quotes")
-        .execute();
-      }
-      break;
-    }
-
-    case Tag::ALL_IMPORTANT:
-    {
-      try
-      {
-        BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL_IMPORTANT(with @all)\n";
-        std::string title = "@all, " + extractTitle(message.getText(), pos);
-        sendMessageToAllTargets(std::move(title), message.getId());
+        try
+        {
+          BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL(without @all)\n";
+          std::string title = extractTitle(message.getText(), pos);
+          sendMessageToAllTargets(std::move(title), message.getId());
+        }
+        catch (const std::logic_error &e)
+        {
+          MessagesSendRequest()
+          .peer_id(message.getPeerId())
+          .random_id(0)
+          .message("Bad title found. Check unclosed quotes")
+          .execute();
+        }
         break;
       }
-      catch (const std::logic_error &e)
+
+      case Tag::ALL_IMPORTANT:
       {
-        MessagesSendRequest()
-        .peer_id(message.getPeerId())
-        .random_id(0)
-        .message("Bad title found. Check unclosed quotes")
-        .execute();
+        try
+        {
+          BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL_IMPORTANT(with @all)\n";
+          std::string title = "@all, " + extractTitle(message.getText(), pos);
+          sendMessageToAllTargets(std::move(title), message.getId());
+          break;
+        }
+        catch (const std::logic_error &e)
+        {
+          MessagesSendRequest()
+          .peer_id(message.getPeerId())
+          .random_id(0)
+          .message("Bad title found. Check unclosed quotes")
+          .execute();
+        }
       }
-    }
 
-    case Tag::NONE:
-      BOOST_LOG_TRIVIAL(info) << "No tag found in message. Skipping";
-      break;
+      case Tag::NONE:
+        BOOST_LOG_TRIVIAL(info) << "No tag found in message. Skipping";
+        break;
 
-    default:
-      BOOST_LOG_TRIVIAL(error) << "Tag variable was not initialized! Skipping";
-      break;
+      default:
+        BOOST_LOG_TRIVIAL(error) << "Tag variable was not initialized! Skipping";
+        break;
     }
   }
 
   void processMessageWithCommand(const Message &message)
   {
+    BOOST_LOG_TRIVIAL(info) << "Processing new message as a command";
     size_t pos = 0;
     Command cmd = findCommand(message.getText(), pos);
     switch (cmd)
     {
-    case Command::REG_TARGET:
-    {
-      BOOST_LOG_TRIVIAL(info) << "REG_TARGET command found";
-      regTarget(message, pos);
-      break;
-    }
-    case Command::REG_SOURCE:
-    {
-      BOOST_LOG_TRIVIAL(info) << "REG_SOURCE command found";
-      regSource(message, pos);
-      break;
-    }
-    case Command::REG_CHECKER:
-    {
-      BOOST_LOG_TRIVIAL(info) << "REG_CHECKER command found";
-      regChecker(message, pos);
-      break;
-    }
-    case Command::NONE:
-    {
-      BOOST_LOG_TRIVIAL(info) << "No command found. Skipping";
-      break;
-    }
-    default:
-      BOOST_LOG_TRIVIAL(error) << "Command variable was not initialized! Skipping";
-      break;
+      case Command::REG_TARGET:
+      {
+        BOOST_LOG_TRIVIAL(info) << "REG_TARGET command found";
+        regTarget(message, pos);
+        break;
+      }
+      case Command::REG_SOURCE:
+      {
+        BOOST_LOG_TRIVIAL(info) << "REG_SOURCE command found";
+        regSource(message, pos);
+        break;
+      }
+      case Command::REG_CHECKER:
+      {
+        BOOST_LOG_TRIVIAL(info) << "REG_CHECKER command found";
+        regChecker(message, pos);
+        break;
+      }
+      case Command::NONE:
+      {
+        BOOST_LOG_TRIVIAL(info) << "No command found. Skipping";
+        break;
+      }
+      default:
+        BOOST_LOG_TRIVIAL(error) << "Command variable was not initialized! Skipping";
+        break;
     }
   }
 }
 
 namespace commands
 {
-  void sendErrorMessage(const std::exception &e, int peer_id)
-  {
-    try
-    {
-      MessagesSendRequest req;
-      req.random_id(0).peer_id(peer_id).message(e.what()).execute();
-    } catch (const std::exception &e)
-    {
-      BOOST_LOG_TRIVIAL(error) << "Error while sending exception message";
-    }
-  }
-
   void processMessage(std::shared_ptr< NewMessage > newMessage)
   {
     using namespace config;
-    if (!newMessage->getMessage().hasText())
+    if (!hasMessageNecessaryFields(newMessage->getMessage()))
     {
-      BOOST_LOG_TRIVIAL(info) << "Message does not contain any text. Skipping";
+      BOOST_LOG_TRIVIAL(info) << "Message does not contain necessary fields. Skipping";
       return;
     }
     Mode mode = ConfigHolder::getMode();
@@ -412,23 +442,19 @@ namespace commands
     }
     catch (const Json::Exception &e)
     {
-      BOOST_LOG_TRIVIAL(error) << "Unexpected Json exception was thrown. Handling current event aborted.\n" << e.what();
-      sendErrorMessage(e, newMessage->getMessage().getPeerId());
+      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "Json exception");
     }
     catch (const std::logic_error &e)
     {
-      BOOST_LOG_TRIVIAL(error) << "Unexpected logic_error was thrown. Handling current event aborted.\n" << e.what();
-      sendErrorMessage(e, newMessage->getMessage().getPeerId());
+      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "std::logic_error");
     }
     catch (const vk::exceptions::RequestException &e)
     {
-      BOOST_LOG_TRIVIAL(error) << "Unexpected RequestException was thrown. Handling current event aborted.\n" << e.what();
-      sendErrorMessage(e, newMessage->getMessage().getPeerId());
+      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "RequestException");
     }
     catch (const std::exception &e)
     {
-      BOOST_LOG_TRIVIAL(error) << "Unexpected std::exception was thrown. Handling current event aborted.\n" << e.what();
-      sendErrorMessage(e, newMessage->getMessage().getPeerId());
+      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "std::excepiton");
     }
   }
 }
