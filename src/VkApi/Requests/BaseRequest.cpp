@@ -93,7 +93,7 @@ void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
   {
     using namespace std::chrono_literals;
     waitForPauseBetweenRequests();
-    return cpr::Get(cpr::Url{ baseUrl + method }, params, cpr::Timeout{ 10s });
+    return cpr::Get(cpr::Url{ baseUrl + "/" + method }, params, cpr::Timeout{ 10s });
   }
 
   void BaseRequest::waitForPauseBetweenRequests()
