@@ -36,3 +36,5 @@
 main
 .~lock.New requirements.odt#
 build
+__pycache__
+
