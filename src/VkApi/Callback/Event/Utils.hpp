@@ -7,8 +7,10 @@
 namespace vk::callback::event::details
 {
  /**
- * @return EventType or UNKNOWN if json does not
- * contain field "type" or its value is not supported.
+ * @return EventType or UNKNOWN if value of field "type"
+ *  is not supported.
+ * 
+ * @throw Json::Exception
  */
   EventType parseEventType(const Json::Value &);
 }
