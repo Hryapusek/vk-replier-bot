@@ -1,0 +1,12 @@
+{
+  "type": "message_new",
+  "group_id": 1234,
+  "object": {
+    "message": {
+      "id": 2,
+      "text": "sus",
+      "from_id": 2,
+      "peer_id": 2000000001
+    }
+  }
+}
