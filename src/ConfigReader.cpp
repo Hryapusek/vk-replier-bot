@@ -78,7 +78,7 @@ namespace _details
     static const auto fields = std::tuple{
       JsonFieldT<int>("num", true, std::bind(doIfFieldIncorrect, "num")),
       JsonFieldT<int>("peer_id", true, std::bind(doIfFieldIncorrect, "peer_id")),
-      JsonFieldT<int>("title", false, std::bind(doIfFieldIncorrect, "title")),
+      JsonFieldT<std::string>("title", false, std::bind(doIfFieldIncorrect, "title")),
     };
     checkJsonFields(root, fields);
     if (root.isMember("title"))
@@ -93,7 +93,7 @@ namespace _details
   {
     static const auto fields = std::tuple{
       JsonFieldT<int>("peer_id", necessary, std::bind(doIfFieldIncorrect, "peer_id")),
-      JsonFieldT<int>("title", !necessary, std::bind(doIfFieldIncorrect, "title")),
+      JsonFieldT<std::string>("title", !necessary, std::bind(doIfFieldIncorrect, "title")),
     };
     checkJsonFields(root, fields);
     if (root.isMember("title"))
@@ -242,18 +242,38 @@ namespace config
     return target_ids;
   }
 
-  SourceChat ConfigHolder::getSourceChat()
-  {
-    return config.sourceChat.value();
-  }
-
   Mode ConfigHolder::getMode()
   {
     return config.mode;
   }
 
-  const TargetsTable &ConfigHolder::getTargetsTable()
+  const std::string &ConfigHolder::getToken()
   {
-    return config.targetsTable;
+    return config.token;
+  }
+
+  const std::string &ConfigHolder::getV()
+  {
+    return config.v;
+  }
+
+  int ConfigHolder::getPort()
+  {
+    return config.port;
+  }
+
+  const std::string &ConfigHolder::getSecretString()
+  {
+    return config.secret_string;
+  }
+
+  bool ConfigHolder::hasBaseUrl()
+  {
+    return config.baseUrl.has_value();
+  }
+  
+  const std::string &ConfigHolder::getBaseUrl()
+  {
+    return config.baseUrl.value();
   }
 }
