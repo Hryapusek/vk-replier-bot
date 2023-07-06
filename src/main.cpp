@@ -17,6 +17,8 @@
 #include "MessageProcessing/MessageProcessing.hpp"
 
 // TODO add trace logging
+// TODO print TimeStamp, LineID, ProcessID, ThreadID
+// TODO make clearer log position(from where it came)
 
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
@@ -51,19 +53,20 @@ void initLogger()
   );
   add_console_log(std::cout);
   core::get()->set_filter(trivial::severity >= trivial::trace);
+  add_common_attributes();
 }
 
 void init()
 {
+  using namespace config;
   initLogger();
-  config::ConfigHolder::readConfigFromFile("config.json");
-  const auto &config =  config::ConfigHolder::getReadOnlyConfig().config;
+  ConfigHolder::readConfigFromFile("config.json");
   {
     using namespace vk::requests::details;
-    if (config.baseUrl)
-      BaseRequest::init(config.token, config.v, config.baseUrl.value());
+    if (ConfigHolder::hasBaseUrl())
+      BaseRequest::init(ConfigHolder::getToken(), ConfigHolder::getV(), ConfigHolder::getBaseUrl());
     else
-      BaseRequest::init(config.token, config.v);
+      BaseRequest::init(ConfigHolder::getToken(), ConfigHolder::getV());
   }
   std::thread th(threadsCleaner);
   th.detach();
@@ -101,74 +104,103 @@ void processEvent(Json::Value &&root)
   }
   catch (const Json::Exception &e)
   {
-    logSkipEvent("Bad json found", root, e.what());
+    logSkipEvent("Can not get Event from json", e.what(), "Json:", root);
     return;
   }
   switch (event.getType())
   {
-  case EventType::MESSAGE_NEW:
-  {
-    std::shared_ptr< NewMessage > newMessage = std::dynamic_pointer_cast< NewMessage >(event.getEventObject());
-    if (!newMessage)
+    case EventType::MESSAGE_NEW:
     {
-      logSkipEvent("Can not convert EventObject to newMessage", root);
+      std::shared_ptr< NewMessage > newMessage = std::dynamic_pointer_cast< NewMessage >(event.getEventObject());
+      if (!newMessage)
+      {
+        logSkipEvent("Can not cast EventObject to NewMessage", "Json:", root);
+        return;
+      }
+      commands::processMessage(newMessage);
+      break;
+    }
+    case EventType::UNKNOWN:
+    {
+      logSkipEvent("Can't even imagine how you get unknown event in processEvent");
       return;
     }
-    commands::processMessage(newMessage);
-    break;
-  }
-  default:
-    logSkipEvent("Unrecognized event type found", root);
-    return;
+    default:
+    {
+      logSkipEvent("Can't even imagine how you get uninitialized event.getType() in processEvent");
+      return;
+    }
   }
 }
 
-class hello_world_resource: public httpserver::http_resource
+class HttpHandler: public httpserver::http_resource
 {
 public:
   std::shared_ptr< httpserver::http_response > render(const httpserver::http_request &);
 };
 
-std::shared_ptr< httpserver::http_response > hello_world_resource::render(const httpserver::http_request &req)
+std::shared_ptr< httpserver::http_response > HttpHandler::render(const httpserver::http_request &req)
 {
   using namespace config;
   using namespace vk::callback::event::details;
   using namespace vk::callback::event;
+  BOOST_LOG_TRIVIAL(info) << "Got new event";
   Json::Value root;
   try
   {
     root = stringToJson(req.get_content());
   } catch (const Json::Exception &e)
   {
-    logSkipEvent("Got bad json from vk", req.get_content());
+    logSkipEvent("Bad json in request body", "Content:", req.get_content());
     return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
   }
-  switch (parseEventType(root))
+  if (!root.isMember("type"))
   {
-  case EventType::CONFIRMATION:
-  {
-    auto config = ConfigHolder::getReadOnlyConfig();
-    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response(config.config.secret_string, 200));
+    logSkipEvent("\"type\" field was not found", "Json:", root);
+    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
   }
-  case EventType::MESSAGE_NEW:
+  EventType eventType;
+  try
   {
-    threads.emplace_back(processEvent, std::move(root));
-    break;
+    eventType = parseEventType(root);
   }
-  default:
+  catch (const Json::Exception &e)
   {
-    logSkipEvent("Unrecognized event type found", root);
-    break;
+    logSkipEvent("Incorrect \"type\" field type", "Json:", root);
+    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
   }
+  switch (eventType)
+  {
+    case EventType::CONFIRMATION:
+    {
+      BOOST_LOG_TRIVIAL(info) << "Event type is CONFIRMATION. Sending secret_string";
+      return std::shared_ptr< httpserver::http_response >(new httpserver::string_response(ConfigHolder::getSecretString(), 200));
+    }
+    case EventType::MESSAGE_NEW:
+    {
+      BOOST_LOG_TRIVIAL(info) << "Event type is MESSAGE_NEW. Starting eventProcess thread";
+      threads.emplace_back(processEvent, std::move(root));
+      break;
+    }
+    case EventType::UNKNOWN:
+    {
+      logSkipEvent("Unsupported event type", "Json:", root);
+      break;
+    }
+    default:
+    {
+      logSkipEvent("eventType variable is not initialized", "Json:", root);
+      break;
+    }
   }
   return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
 }
 
 int main() {
   init();
-  httpserver::webserver ws = httpserver::create_webserver(config::ConfigHolder::getReadOnlyConfig().config.port);
-  hello_world_resource hwr;
-  ws.register_resource("/notification", &hwr, true);
+  httpserver::webserver ws = httpserver::create_webserver(config::ConfigHolder::getPort());
+  HttpHandler handler;
+  ws.register_resource("/notification", &handler, true);
   ws.start(true);
   std::lock_guard< std::mutex > lock(threadsMutex);
   for (auto &th : threads)
