@@ -1,17 +1,41 @@
 {
-  "mode" : "",
-  "token" : "",
-  "secret_string" : "",
-  "port" : 0,
-  "target_chats" : [
-    {
-      "num" : 21,
-      "peer_id" : 2,
-      "title" : ""
-    }
-  ],
-  "source_chat" : 0,
-  "status_checkers" : [],
-  "log_file_max_size" : 1024,
-  "godlike_ids" : []
+	"base_url" : "localhost:8080",
+	"mode" : "config",
+	"port" : 8081,
+	"secret_string" : "secret",
+	"source_chat" : 
+	{
+		"peer_id" : 1000
+	},
+	"status_checkers" : 
+	[
+		21,
+		34,
+		140
+	],
+	"target_chats" : 
+	[
+		{
+			"num" : -2147483648,
+			"peer_id" : 2000000001,
+			"title" : ""
+		},
+		{
+			"num" : 2001,
+			"peer_id" : 2000000002,
+			"title" : "title"
+		},
+		{
+			"num" : 2002,
+			"peer_id" : 2000000003,
+			"title" : ""
+		},
+		{
+			"num" : 2003,
+			"peer_id" : 2000000004,
+			"title" : "Jeez christ"
+		}
+	],
+	"token" : "token",
+	"v" : "5.151"
 }
