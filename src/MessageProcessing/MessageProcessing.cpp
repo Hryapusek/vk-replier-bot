@@ -8,6 +8,10 @@
 #include "../BotTypes/Chats.hpp"
 
 // TODO shorten title
+// TODO join command and tag processing
+// TODO check groupID if message from this bot(infinite cycle message sending)
+// TODO add /help
+// TODO print current message in logs
 
 namespace
 {
@@ -17,12 +21,22 @@ namespace
   using namespace vk::callback::event::objects;
   using str_cref = const std::string &;
 
+  /// @note id, from_id, peer_id and text should be in message 
+  void logMessage(const vk::objects::Message &msg)
+  {
+    BOOST_LOG_TRIVIAL(info) << "Current message:\n" 
+    << "id: " << msg.getId() << '\n'
+    << "from_id: " << msg.getFromId() << '\n'
+    << "peer_id: " << msg.getPeerId() << '\n'
+    << "text: " << msg.getText();
+  }
+
   bool hasMessageNecessaryFields(const vk::objects::Message &m)
   {
     return m.hasFromId() && m.hasId() && m.hasPeerId() && m.hasText();
   }
 
-  void logAndSendErrorMessage(const std::exception &e, int peer_id, const char *exceptionName)
+  void logAndSendErrorMessage(const std::exception &e, int peer_id, str_cref exceptionName)
   {
     BOOST_LOG_TRIVIAL(error) << "Unexpected " << exceptionName << " was thrown. Handling current event aborted.\n" << e.what();
     try
@@ -35,7 +49,7 @@ namespace
     }
   }
 
-  /// @return True if EOL or EOF
+  /// @return True if not EOL or EOF
   bool skipWord(std::string::const_iterator &beg, str_cref text)
   {
     while (beg != text.cend() && !isspace(*beg))
@@ -56,7 +70,7 @@ namespace
       result += *beg;
       ++beg;
     }
-    if (beg == text.cend() || *beg != '"')
+    if (beg == text.cend())
       throw std::exception();
     return result;
   }
@@ -89,7 +103,7 @@ namespace
 
   /// @return Empty string if no quotes were found right after command.
   /// Quoted title otherwise.
-  /// @throw \b std::logic_error if unclosed quote found
+  /// @throw \b std::exception if unclosed quote found
   std::string extractTitle(str_cref text, size_t pos)
   {
     std::string title;
@@ -158,7 +172,7 @@ namespace
   {
     using namespace config;
     using namespace reg_target_helpers;
-    static const char *command = "regTarget";
+    static str_cref command = "regTarget";
     if (!checkIfCommandNotFromChat(message, command))
       return;
     MessagesSendRequest req;
@@ -172,7 +186,7 @@ namespace
     {
       extractNumAndTitle(message.getText(), pos, numOpt, title);
     }
-    catch(const std::logic_error &e)
+    catch (const std::logic_error &e)
     {
       logAndSendErrorMessage(req, command, "Incorrect number passed");
       return;
@@ -227,7 +241,7 @@ namespace
   {
     using namespace config;
     using namespace reg_source_helpers;
-    static const char *command = "regSource";
+    static str_cref command = "regSource";
     if (!checkIfCommandNotFromChat(message, command))
       return;
     MessagesSendRequest req;
@@ -266,7 +280,7 @@ namespace
   {
     using namespace config;
     using namespace reg_checker_helpers;
-    static const char *command = "regChecker";
+    static str_cref command = "regChecker";
     if (!message.fromDirect())
     {
       BOOST_LOG_TRIVIAL(warning) << "regChecker found BUT not in direct";
@@ -317,106 +331,162 @@ namespace
     return Command::NONE;
   }
 
-  void processMessageWithTag(const Message &message)
+  bool checkIfSourceChatPresent(str_cref command, str_cref errorMessage)
   {
+    if (!config::ConfigHolder::getReadOnlyConfig().config.sourceChat)
     {
-      auto configWrap = config::ConfigHolder::getReadOnlyConfig();
-      const auto &config = configWrap.config;
-      if (!config.sourceChat)
-      {
-        BOOST_LOG_TRIVIAL(warning) << "Source chat not registered\n";
-        return;
-      }
-      else if (message.getPeerId() != config.sourceChat->peer_id)
-      {
-        BOOST_LOG_TRIVIAL(info) << "Skipping new message - not from source\n";
-        return;
-      }
+      BOOST_LOG_TRIVIAL(warning) << command << ": " << errorMessage;
+      return false;
     }
-    size_t pos = 0;
-    Tag tag = findTag(message.getText(), pos);
+    return true;
+  }
+
+  bool checkIfChatIsSource(int peerId, str_cref command, str_cref errorMessage)
+  {
+    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
+    if (sourceChat && sourceChat.value().peer_id == peerId)
+    {
+      BOOST_LOG_TRIVIAL(warning) << command << ": " << errorMessage;
+      return false;
+    }
+    return true;
+  }
+
+  bool checkMode(config::Mode mode, str_cref errorMessage)
+  {
+    if (config::ConfigHolder::getMode() != mode)
+    {
+      std::string postfix;
+      switch (mode)
+      {
+        case config::Mode::CONFIG:
+          postfix = " - mode is not CONFIG";
+          break;
+
+        case config::Mode::WORK:
+          postfix = " - mode is not WORK";
+          break;
+      }
+      BOOST_LOG_TRIVIAL(warning) << errorMessage << postfix;
+      return false;
+    }
+    return true;
+  }
+
+  void tagAll(const Message &message, size_t pos)
+  {
+    std::string title;
+    try
+    {
+      BOOST_LOG_TRIVIAL(info) << "Extracting title";
+      title = extractTitle(message.getText(), pos);
+    }
+    catch (const std::exception &e)
+    {
+      MessagesSendRequest()
+      .peer_id(message.getPeerId())
+      .random_id(0)
+      .message("Bad title found. After tag should be a new line or a quoted sentence. Make sure that quotes are closed")
+      .execute();
+      return;
+    }
+    BOOST_LOG_TRIVIAL(info) << "Forwarding messages";
+    sendMessageToAllTargets(std::move(title), message.getId());
+  }
+
+  void tagAllImportant(const Message &message, size_t pos)
+  {
+    if (!checkMode(config::Mode::WORK, "Skipping TAG::ALL_IMPORTANT"))
+      return;
+    std::string title;
+    try
+    {
+      BOOST_LOG_TRIVIAL(info) << "Extracting title";
+      title = "@all, " + extractTitle(message.getText(), pos);
+    }
+    catch (const std::exception &e)
+    {
+      MessagesSendRequest()
+      .peer_id(message.getPeerId())
+      .random_id(0)
+      .message("Bad title found. After tag should be a new line or a quoted sentence. Make sure that quotes are closed")
+      .execute();
+      return;
+    }
+    BOOST_LOG_TRIVIAL(info) << "Forwarding messages";
+    sendMessageToAllTargets(std::move(title), message.getId());
+  }
+
+  void processMessageWithTag(const Message &message, Tag tag, size_t pos)
+  {
     switch (tag)
     {
       case Tag::ALL:
       {
-        try
-        {
-          BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL(without @all)\n";
-          std::string title = extractTitle(message.getText(), pos);
-          sendMessageToAllTargets(std::move(title), message.getId());
-        }
-        catch (const std::logic_error &e)
-        {
-          MessagesSendRequest()
-          .peer_id(message.getPeerId())
-          .random_id(0)
-          .message("Bad title found. Check unclosed quotes")
-          .execute();
-        }
+        static const std::string tagName = "TAG:ALL";
+        BOOST_LOG_TRIVIAL(info) << "Message with " << tagName;
+        if (!checkIfSourceChatPresent(tagName, "Source chat not registered. Skipping message") ||
+            !checkIfChatIsSource(message.getPeerId(), tagName, "Tag used outside the source chat. Skipping message") ||
+            !checkMode(config::Mode::WORK, "Skipping message with " + tagName))
+          return;
+        tagAll(message, pos);
         break;
       }
 
       case Tag::ALL_IMPORTANT:
       {
-        try
-        {
-          BOOST_LOG_TRIVIAL(info) << "Found Tag::ALL_IMPORTANT(with @all)\n";
-          std::string title = "@all, " + extractTitle(message.getText(), pos);
-          sendMessageToAllTargets(std::move(title), message.getId());
-          break;
-        }
-        catch (const std::logic_error &e)
-        {
-          MessagesSendRequest()
-          .peer_id(message.getPeerId())
-          .random_id(0)
-          .message("Bad title found. Check unclosed quotes")
-          .execute();
-        }
+        static const std::string tagName = "Tag::ALL_IMPORTANT";
+        BOOST_LOG_TRIVIAL(info) << "Message with " << tagName;
+        if (!checkIfSourceChatPresent(tagName, "Source chat not registered. Skipping message") ||
+            !checkIfChatIsSource(message.getPeerId(), tagName, "Tag used outside the source chat. Skipping message") ||
+            !checkMode(config::Mode::WORK, "Skipping message with " + tagName))
+          return;
+        tagAllImportant(message, pos);
+        break;
       }
 
       case Tag::NONE:
-        BOOST_LOG_TRIVIAL(info) << "No tag found in message. Skipping";
+        BOOST_LOG_TRIVIAL(warning) << "TAG::NONE in processMessageWithTag. Skipping";
         break;
 
       default:
-        BOOST_LOG_TRIVIAL(error) << "Tag variable was not initialized! Skipping";
+        BOOST_LOG_TRIVIAL(warning) << "Tag variable was not initialized in processMessageWithTag. Skipping";
         break;
     }
   }
 
-  void processMessageWithCommand(const Message &message)
+  void processMessageWithCommand(const Message &message, Command cmd, size_t pos)
   {
-    BOOST_LOG_TRIVIAL(info) << "Processing new message as a command";
-    size_t pos = 0;
-    Command cmd = findCommand(message.getText(), pos);
     switch (cmd)
     {
       case Command::REG_TARGET:
       {
         BOOST_LOG_TRIVIAL(info) << "REG_TARGET command found";
+        checkMode(config::Mode::CONFIG, "Can not use this command");
         regTarget(message, pos);
         break;
       }
       case Command::REG_SOURCE:
       {
         BOOST_LOG_TRIVIAL(info) << "REG_SOURCE command found";
+        checkMode(config::Mode::CONFIG, "Can not use this command");
         regSource(message, pos);
         break;
       }
       case Command::REG_CHECKER:
       {
         BOOST_LOG_TRIVIAL(info) << "REG_CHECKER command found";
+        checkMode(config::Mode::CONFIG, "Can not use this command");
         regChecker(message);
         break;
       }
       case Command::NONE:
       {
-        BOOST_LOG_TRIVIAL(info) << "No command found. Skipping";
+        BOOST_LOG_TRIVIAL(warning) << "No command found. Skipping";
         break;
       }
       default:
-        BOOST_LOG_TRIVIAL(error) << "Command variable was not initialized! Skipping";
+        BOOST_LOG_TRIVIAL(warning) << "Command variable was not initialized. Skipping";
         break;
     }
   }
@@ -432,13 +502,32 @@ namespace commands
       BOOST_LOG_TRIVIAL(info) << "Message does not contain necessary fields. Skipping";
       return;
     }
-    Mode mode = ConfigHolder::getMode();
+    if (newMessage->getMessage().getFromId() == config::ConfigHolder::getGroupId())
+    {
+      BOOST_LOG_TRIVIAL(info) << "Message from bot. Skipping";
+      return;
+    }
+    logMessage(newMessage->getMessage());
     try
     {
-      if (mode == Mode::WORK)
-        processMessageWithTag(newMessage->getMessage());
-      else if (mode == Mode::CONFIG)
-        processMessageWithCommand(newMessage->getMessage());
+      size_t pos;
+      Tag tag = findTag(newMessage->getMessage().getText(), pos);
+      if (tag != Tag::NONE)
+      {
+        BOOST_LOG_TRIVIAL(info) << "Message with tag";
+        processMessageWithTag(newMessage->getMessage(), tag, pos);
+        BOOST_LOG_TRIVIAL(info) << "Message tag processing finished successfully";
+        return;
+      }
+      Command cmd = findCommand(newMessage->getMessage().getText(), pos);
+      if (cmd != Command::NONE)
+      {
+        BOOST_LOG_TRIVIAL(info) << "Message with command";
+        processMessageWithCommand(newMessage->getMessage(), cmd, pos);
+        BOOST_LOG_TRIVIAL(info) << "Message command processing finished successfully";
+        return;
+      }
+      BOOST_LOG_TRIVIAL(info) << "Neither a command nor a tag were found. Skipping";
     }
     catch (const Json::Exception &e)
     {
