@@ -7,7 +7,7 @@
 #include <array>
 #include <shared_mutex>
 #include <jsoncpp/json/json.h>
-#include "TargetsTable.hpp"
+#include "BotTypes/TargetsTable.hpp"
 #include "JsonUtils.hpp"
 
 namespace config
