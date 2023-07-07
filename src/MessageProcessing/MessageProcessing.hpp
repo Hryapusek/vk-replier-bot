@@ -6,7 +6,7 @@
 #include <string>
 #include "../VkApi/Callback/Event/EventObjects/NewMessage.hpp"
 
-namespace commands
+namespace message_processing
 {
   enum class Tag
   {

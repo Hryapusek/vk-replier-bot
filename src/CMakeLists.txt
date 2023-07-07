@@ -53,6 +53,12 @@ set(SOURCE_FILES_LIST
   VkApi/Exceptions.cpp
   MessageProcessing/MessageProcessing.cpp
   BotTypes/TargetsTable.cpp
+  MessageProcessing/Commands/RegChecker.cpp
+  MessageProcessing/Commands/RegSource.cpp
+  MessageProcessing/Commands/RegTarget.cpp
+  MessageProcessing/Tags/TagAll.cpp
+  MessageProcessing/Tags/TagAllImportant.cpp
+  MessageProcessing/Utils.cpp
 )
 target_sources(${TARGET} PRIVATE ${SOURCE_FILES_LIST})
 target_include_directories(${TARGET} PRIVATE BotTypes MessageProcessing VkApi)

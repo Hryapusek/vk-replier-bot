@@ -16,9 +16,7 @@
 #include "VkApi/Requests/BaseRequest.hpp"
 #include "MessageProcessing/MessageProcessing.hpp"
 
-// TODO add trace logging
 // TODO print TimeStamp, LineID, ProcessID, ThreadID
-// TODO make clearer log position(from where it came)
 
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
@@ -117,7 +115,7 @@ void processEvent(Json::Value &&root)
         logSkipEvent("Can not cast EventObject to NewMessage", "Json:", root);
         return;
       }
-      commands::processMessage(newMessage);
+      message_processing::processMessage(newMessage);
       break;
     }
     case EventType::UNKNOWN:
@@ -144,7 +142,7 @@ std::shared_ptr< httpserver::http_response > HttpHandler::render(const httpserve
   using namespace config;
   using namespace vk::callback::event::details;
   using namespace vk::callback::event;
-  BOOST_LOG_TRIVIAL(info) << "Got new event";
+  BOOST_LOG_TRIVIAL(info) << "Got new request";
   Json::Value root;
   try
   {
