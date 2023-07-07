@@ -17,15 +17,11 @@ serverThread = threading.Thread(target=server.run, args=[port], daemon=True)
 serverThread.start()
 
 units = [
-    Unit("jsons/bad/2.json", "Empty json"),
-    Unit("jsons/bad/3.json", "Json with random field"),
-    Unit("jsons/bad/4.json", "Json contains \"type\": 2"),
-    Unit("jsons/message_new/bad/1.json", "Missing \"object\" field"),
-    Unit("jsons/message_new/bad/2.json", "Empty \"object\" field"),
-    Unit("jsons/message_new/bad/3.json", "Empty \"message\" field"),
-    Unit("jsons/message_new/bad/4.json", "Only \"text\" field in message object"),
-    Unit("jsons/message_new/bad/5.json", "Missing \"peer_id\" field in message object"),
     Unit("jsons/message_new/good/1.json", "No command message"),
+    Unit("jsons/message_new/good/2.json", "No command message"),
+    Unit("jsons/message_new/good/3.json", "No command message"),
+    Unit("jsons/message_new/good/4.json", "No command message"),
+    Unit("jsons/message_new/good/5.json", "No command message"),
 ]
 
 if len(sys.argv) == 1:

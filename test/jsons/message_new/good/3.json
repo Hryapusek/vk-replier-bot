@@ -4,9 +4,9 @@
   "object": {
     "message": {
       "id": 2,
-      "text": "/reg_target 2004 \"Jeez christ",
+      "text": "/reg_target 25 \"25 квартира\"",
       "from_id": 2,
-      "peer_id": 2000000005
+      "peer_id": 2000000003
     }
   }
 }
