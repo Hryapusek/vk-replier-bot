@@ -212,7 +212,7 @@ namespace
 
   namespace reg_source_helpers
   {
-    bool checkIfSourceChatNotEmpty(const Message &message, MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+    bool checkIfSourceChatNotEmpty(MessagesSendRequest &req, str_cref command, str_cref errorMessage)
     {
       if (config::ConfigHolder::getReadOnlyConfig().config.sourceChat)
       {
@@ -232,7 +232,7 @@ namespace
       return;
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkIfSourceChatNotEmpty(message, req, command, "Delete current sourceChat first") ||
+    if (!checkIfSourceChatNotEmpty(req, command, "Delete current sourceChat first") ||
         !checkIfChatIsSource(message, req, command, "This chat is already source") ||
         !checkIfChatPresentInTable(message, req, command, "This chat is present somewhere in the table"))
       return;
@@ -262,7 +262,7 @@ namespace
     }
   }
 
-  void regChecker(const Message &message, size_t pos)
+  void regChecker(const Message &message)
   {
     using namespace config;
     using namespace reg_checker_helpers;
@@ -407,7 +407,7 @@ namespace
       case Command::REG_CHECKER:
       {
         BOOST_LOG_TRIVIAL(info) << "REG_CHECKER command found";
-        regChecker(message, pos);
+        regChecker(message);
         break;
       }
       case Command::NONE:

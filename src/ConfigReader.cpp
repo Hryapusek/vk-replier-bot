@@ -85,7 +85,7 @@ namespace _details
       return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), root["title"].asString() }
     ;
     else
-      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt() }
+      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), std::nullopt }
     ;
   }
 
@@ -100,7 +100,7 @@ namespace _details
       return SourceChat{ root["peer_id"].asInt(), root["title"].asString() }
     ;
     else
-      return SourceChat{ root["peer_id"].asInt() }
+      return SourceChat{ root["peer_id"].asInt(), std::nullopt }
     ;
   }
 
@@ -205,9 +205,9 @@ namespace config
     if (!out.is_open())
       return;
     Json::Value configJson;
-    if (config.mode = Mode::CONFIG)
+    if (config.mode == Mode::CONFIG)
       configJson["mode"] = "config";
-    else if (config.mode = Mode::WORK)
+    else if (config.mode == Mode::WORK)
       configJson["mode"] = "work";
     configJson["token"] = config.token;
     configJson["v"] = config.v;

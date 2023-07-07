@@ -43,7 +43,6 @@ namespace config
     /// @throws Json::Exception - Fatal error occured
     static void readConfigFromFile(const std::string &configName);
     static void updateConfigFile();
-    //TODO get Token v secret_string port
     static ReadOnlyConfig getReadOnlyConfig();
     static ReadWriteConfig getReadWriteConfig();
     /// @return Target ids string from config in format "id1, id2, ..."

@@ -22,8 +22,8 @@ namespace vk::requests::details
     virtual ~BaseRequest() = default;
 
   protected:
-    cpr::Parameters params;
     std::string method;
+    cpr::Parameters params;
     Json::Value responseJson;
     cpr::Response performRequest();
     static void waitForPauseBetweenRequests();
