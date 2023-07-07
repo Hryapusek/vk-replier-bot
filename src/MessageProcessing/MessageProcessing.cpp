@@ -9,10 +9,7 @@
 #include "../VkApi/Exceptions.hpp"
 
 // TODO shorten title
-// TODO join command and tag processing
-// TODO check groupID if message from this bot(infinite cycle message sending)
 // TODO add /help
-// TODO print current message in logs
 
 namespace
 {

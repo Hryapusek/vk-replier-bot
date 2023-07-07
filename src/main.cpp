@@ -17,6 +17,7 @@
 #include "MessageProcessing/MessageProcessing.hpp"
 
 // TODO print TimeStamp, LineID, ProcessID, ThreadID
+// TODO UNICODE support
 
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
