@@ -22,6 +22,7 @@ namespace _details
     JsonFieldT< std::string >("v", necessary, std::bind(doIfFieldIncorrect, "v")),
     JsonFieldT< std::string >("secret_string", necessary, std::bind(doIfFieldIncorrect, "secret_string")),
     JsonFieldT< int >("port", necessary, std::bind(doIfFieldIncorrect, "port")),
+    JsonFieldT< int >("group_id", necessary, std::bind(doIfFieldIncorrect, "group_id")),
     JsonFieldT< std::string >("base_url", !necessary, std::bind(doIfFieldIncorrect, "base_url")),
     JsonFieldVT("target_chats", Json::ValueType::arrayValue, !necessary, std::bind(doIfFieldIncorrect, "target_chats")),
     JsonFieldVT("source_chat", Json::ValueType::objectValue, !necessary, std::bind(doIfFieldIncorrect, "source_chat")),
@@ -149,6 +150,7 @@ namespace _details
     config.v = root["v"].asString();
     config.secret_string = root["secret_string"].asString();
     config.port = root["port"].asInt();
+    config.groupID = root["group_id"].asInt();
     config.targetsTable = targetChatsFromJson(root["target_chats"]);
     if (root.isMember("source_chat"))
       config.sourceChat = sourceChatFromJson(root["source_chat"]);
@@ -213,6 +215,7 @@ namespace config
     configJson["v"] = config.v;
     configJson["secret_string"] = config.secret_string;
     configJson["port"] = config.port;
+    configJson["group_id"] = config.groupID;
     configJson["target_chats"] = targetChatsToJson(config);
     if (config.sourceChat)
       configJson["source_chat"] = sourceChatToJson(config.sourceChat.value());
@@ -260,6 +263,11 @@ namespace config
   int ConfigHolder::getPort()
   {
     return config.port;
+  }
+
+  int ConfigHolder::getGroupId()
+  {
+    return config.groupID;
   }
 
   const std::string &ConfigHolder::getSecretString()

@@ -25,6 +25,7 @@ namespace config
     std::string v;
     std::string secret_string;
     int port;
+    int groupID;
     std::optional< std::string > baseUrl;
     TargetsTable targetsTable;
     std::optional< SourceChat > sourceChat;
@@ -61,6 +62,9 @@ namespace config
     /// @brief Direct access to config field since
     /// it's constant and necessary in config file.
     static int getPort();
+    /// @brief Direct access to config field since
+    /// it's constant and necessary in config file.
+    static int getGroupId();
     /// @brief Direct access to config field since
     /// it's constant and necessary in config file.
     static const std::string &getSecretString();
