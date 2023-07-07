@@ -40,14 +40,20 @@ namespace message_processing::commands
     static str_cref commandName = "regChecker";
     if (!message.fromDirect())
     {
-      BOOST_LOG_TRIVIAL(warning) << commandName << "regChecker found BUT not in direct";
+      BOOST_LOG_TRIVIAL(warning) << commandName << " not in direct. Skipping message";
       return;
     }
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
     if (!checkIfAlreadyChecker(message, req, commandName, "User is already checker"))
       return;
-    ConfigHolder::getReadWriteConfig().config.statusCheckersIds.value().push_back(message.getPeerId());
+    {
+      auto configWrap = ConfigHolder::getReadWriteConfig();
+      auto &config = configWrap.config;
+      if (!config.statusCheckersIds)
+        config.statusCheckersIds = std::vector<int>();
+      config.statusCheckersIds->push_back(message.getPeerId());
+    }
     BOOST_LOG_TRIVIAL(info) << commandName << ": Successfully registered checker " << message.getPeerId();
     req.message("Successfully registered checker!").execute();
     return;
