@@ -31,6 +31,13 @@ endif()
 
 set(TARGET vk-bot)
 add_executable(${TARGET})
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(MSVC)
+        target_compile_options(${TARGET} PRIVATE /W4 /WX)
+    else()
+        target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+endif()
 set_target_properties(${TARGET} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED TRUE)
 set(SOURCE_FILES_LIST
   main.cpp
