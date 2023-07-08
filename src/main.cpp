@@ -18,6 +18,7 @@
 
 // TODO print TimeStamp, LineID, ProcessID, ThreadID
 // TODO UNICODE support
+// TODO create cool testing
 
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
