@@ -32,11 +32,11 @@ namespace message_processing::commands
     static str_cref commandName = "regSource";
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkMode(Mode::CONFIG, "Can not perform " + commandName)
+    if (!checkMode(Mode::CONFIG, commandName, "Can not perform command")
         || !checkIfSourceChatNotEmpty(req, commandName, "Delete current sourceChat first")
-        || !checkIfCommandFromChat(message, commandName)
-        || !checkIfChatIsSource(message, req, commandName, "This chat is already source")
-        || !checkIfChatPresentInTable(message, req, commandName, "This chat is present somewhere in the table"))
+        || !checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat")
+        || !checkIfChatIsNotSource(message.getPeerId(), req, commandName, "This chat is already source")
+        || !checkIfPeerIdNotInTargetsTable(message, req, commandName, "This chat is present somewhere in the table"))
       return;
     std::string title = extractTitle(message.getText(), pos);
     ConfigHolder::getReadWriteConfig().config.sourceChat = SourceChat{ message.getPeerId(), title };

@@ -37,10 +37,10 @@ namespace message_processing::commands
     static str_cref commandName = "regTarget";
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkMode(Mode::CONFIG, "Can not perform " + commandName)
-        || !checkIfCommandFromChat(message, commandName)
-        || !checkIfChatIsSource(message, req, commandName, "This chat is source. Can not register")
-        || !checkIfChatPresentInTable(message, req, commandName, "This chat is present somewhere in the table"))
+    if (!checkMode(Mode::CONFIG, commandName, "Can not perform command")
+        || !checkIfCommandFromChat(message, commandName, "Command not from chat. Skipping")
+        || !checkIfChatIsNotSource(message.getPeerId(), req, commandName, "This chat is source. Can not register")
+        || !checkIfPeerIdNotInTargetsTable(message, req, commandName, "This chat is present somewhere in the table"))
       return;
     std::optional< int > numOpt;
     std::string title;
@@ -62,7 +62,7 @@ namespace message_processing::commands
     {
       if (!checkIfNumberBusy(numOpt.value(), req, commandName, "Given num is already busy"))
         return;
-      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(numOpt.value(), TargetChat{ numOpt.value(), message.getPeerId(), title });
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(TargetChat{ numOpt.value(), message.getPeerId(), title });
       if (!res)
       {
         logAndSendErrorMessage(req, commandName, "Unknown error. Insertion in targetsTable failed");
@@ -74,7 +74,7 @@ namespace message_processing::commands
       TargetChat chat = TargetChat();
       chat.peer_id = message.getPeerId();
       chat.title = title;
-      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(std::move(chat));
+      auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.generateNumAndInsert(std::move(chat));
       if (!res)
       {
         logAndSendErrorMessage(req, commandName, "Unknown error. Insertion in targetsTable failed");

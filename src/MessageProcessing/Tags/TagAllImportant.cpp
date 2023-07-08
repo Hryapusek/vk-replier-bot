@@ -14,9 +14,9 @@ namespace message_processing::tags
   {
     static const std::string tagName = "Tag::ALL_IMPORTANT";
     BOOST_LOG_TRIVIAL(info) << "Message with " << tagName;
-    if (!checkIfSourceChatPresent(tagName, "Source chat not registered. Skipping message") ||
-        !checkIfChatIsSource(message.getPeerId(), tagName, "Tag used outside the source chat. Skipping message") ||
-        !checkMode(config::Mode::WORK, "Skipping message with " + tagName))
+    if (!checkMode(config::Mode::WORK, tagName, "Skipping message")
+        || !checkIfSourceChatPresent(tagName, "Source chat not registered. Skipping message")
+        || !checkIfChatIsSource(message.getPeerId(), tagName, "Tag used outside the source chat. Skipping message"))
       return;
     std::string title;
     try
