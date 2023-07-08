@@ -29,8 +29,8 @@ namespace config
     std::optional< std::string > baseUrl;
     TargetsTable targetsTable;
     std::optional< SourceChat > sourceChat;
-    std::optional< std::vector< int > > statusCheckersIds;
-    std::optional< std::vector< int > > godlikeIds;
+    std::vector< int > statusCheckersIds;
+    std::vector< int > godlikeIds;
   };
 
   class ConfigHolder

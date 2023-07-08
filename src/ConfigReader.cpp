@@ -113,7 +113,7 @@ namespace _details
     for (const auto &obj : root.get())
     {
       TargetChat target = targetChatFromJson(obj);
-      table.insert(target.num, target);
+      table.insert(target);
     }
     return table;
   }
@@ -128,7 +128,7 @@ namespace _details
     return nums;
   }
 
-  Json::Value intVectorToJson(std::vector< int > nums)
+  Json::Value intVectorToJson(const std::vector< int > &nums)
   {
     Json::Value arr(Json::arrayValue);
     for (const auto num : nums)
@@ -156,9 +156,9 @@ namespace _details
       config.sourceChat = sourceChatFromJson(root["source_chat"]);
     if (root.isMember("base_url"))
       config.baseUrl = root["base_url"].asString();
-    if (root.isMember("status_checkers") && !root["status_checkers"].empty())
+    if (root.isMember("status_checkers"))
       config.statusCheckersIds = intVectorFromJson(root["status_checkers"]);
-    if (root.isMember("godlike_ids") && !root["godlike_ids"].empty())
+    if (root.isMember("godlike_ids"))
       config.godlikeIds = intVectorFromJson(root["godlike_ids"]);
     return config;
   }
@@ -221,10 +221,10 @@ namespace config
       configJson["source_chat"] = sourceChatToJson(config.sourceChat.value());
     if (config.baseUrl)
       configJson["base_url"] = config.baseUrl.value();
-    if (config.statusCheckersIds)
-      configJson["status_checkers"] = intVectorToJson(config.statusCheckersIds.value());
-    if (config.godlikeIds)
-      configJson["godlike_ids"] = intVectorToJson(config.godlikeIds.value());
+    if (!config.statusCheckersIds.empty())
+      configJson["status_checkers"] = intVectorToJson(config.statusCheckersIds);
+    if (!config.godlikeIds.empty())
+      configJson["godlike_ids"] = intVectorToJson(config.godlikeIds);
     Json::StreamWriterBuilder builder;
     const std::unique_ptr< Json::StreamWriter > writer(builder.newStreamWriter());
     writer->write(configJson, &out);
