@@ -156,6 +156,24 @@ namespace message_processing
         regChecker(message);
         break;
       }
+      case Command::DEL_TARGET:
+      {
+        BOOST_LOG_TRIVIAL(info) << "DEL_TARGET command found";
+        delTarget(message);
+        break;
+      }
+      case Command::DEL_SOURCE:
+      {
+        BOOST_LOG_TRIVIAL(info) << "DEL_SOURCE command found";
+        delSource(message);
+        break;
+      }
+      case Command::DEL_CHECKER:
+      {
+        BOOST_LOG_TRIVIAL(info) << "DEL_CHECKER command found";
+        delChecker(message);
+        break;
+      }
       case Command::NONE:
       {
         BOOST_LOG_TRIVIAL(warning) << "No command found. Skipping";
