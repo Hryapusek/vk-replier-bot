@@ -6,13 +6,18 @@
 
 class TargetsTable
 {
+  using Map = std::map<int, TargetChat>;
 public:
-  /// @param[in] num Chat's identificator.
-  /// @param[in] chat Chat to insert.
+  /// @param[in] chat Chat to insert. Chat.num will be used ad a key
   /// @return True if inserted successfully. False otherwise.
-  /// @throw std::logic_error is chat.num and num are not equal.
-  bool insert(int num, TargetChat chat);
   bool insert(TargetChat chat);
+  bool generateNumAndInsert(TargetChat chat);
+  bool removeByPeerID(int peerId);
+  bool removeByNum(int num);
+  Map::iterator findByPeerId(int peerId);
+  Map::iterator findByNum(int num);
+  Map::const_iterator findByPeerId(int peerId) const;
+  Map::const_iterator findByNum(int num) const;
   /// @return True if chat with given peer_id present somewhere in the table. False otherwise.
   bool containsPeerId(int peer_id) const;
   /// @return True if num is busy(present in the table). False otherwise.
@@ -24,7 +29,7 @@ public:
   std::map<int, TargetChat> &get() { return table; };
 
 private:
-  std::map<int, TargetChat> table;
+  Map table;
 };
 
 #endif

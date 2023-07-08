@@ -2,49 +2,73 @@
 #include <limits>
 #include <stdexcept>
 
-bool TargetsTable::insert(int num, TargetChat chat)
+bool TargetsTable::insert(TargetChat chat)
 {
-  if (chat.num != num)
-    throw std::logic_error("chat.num and num must be equal");
-  if (containsNum(num))
+  if (containsNum(chat.num))
     return false;
-  table[num] = chat;
+  table[chat.num] = chat;
   return true;
 }
 
-bool TargetsTable::insert(TargetChat chat)
+bool TargetsTable::generateNumAndInsert(TargetChat chat)
 {
   for (int num = std::numeric_limits<int>::min(); num < std::numeric_limits<int>::max(); ++num)
   {
     chat.num = num;
-    if (!insert(num, chat))
+    if (!insert(chat))
       continue;
     return true;
   }
   return false;
 }
 
+bool TargetsTable::removeByPeerID(int peerId)
+{
+  auto it = findByPeerId(peerId);
+  if (it == table.end())
+    return false;
+  table.erase(it);
+  return true;
+}
+
+TargetsTable::Map::iterator TargetsTable::findByPeerId(int peerId)
+{
+  for (auto beg = table.begin(); beg != table.end(); ++beg)
+    if (beg->second.peer_id == peerId)
+      return beg;
+  return table.end();
+}
+
+TargetsTable::Map::iterator TargetsTable::findByNum(int num)
+{
+  return table.find(num);
+}
+
+TargetsTable::Map::const_iterator TargetsTable::findByPeerId(int peerId) const
+{
+  for (auto beg = table.cbegin(); beg != table.cend(); ++beg)
+  {
+    if (beg->second.peer_id == peerId)
+    {
+      return beg;
+    }
+  }
+  return table.cend();
+}
+
+TargetsTable::Map::const_iterator TargetsTable::findByNum(int num) const
+{
+  return table.find(num);
+}
+
 bool TargetsTable::containsPeerId(int peer_id) const
 {
-  for (const auto &pair : table)
-  {
-    if (pair.second.peer_id == peer_id)
-      return true;
-  }
-  return false;
+  return findByPeerId(peer_id) != table.cend();
 }
 
 bool TargetsTable::containsNum(int num) const
 {
-  try
-  {
-    this->at(num);
-    return true;
-  }
-  catch (const std::out_of_range &e)
-  {
-    return false;
-  }
+  return findByNum(num) != table.cend();
 }
 
 bool TargetsTable::empty() const
