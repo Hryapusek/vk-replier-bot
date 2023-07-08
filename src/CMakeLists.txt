@@ -56,6 +56,9 @@ set(SOURCE_FILES_LIST
   MessageProcessing/Commands/RegChecker.cpp
   MessageProcessing/Commands/RegSource.cpp
   MessageProcessing/Commands/RegTarget.cpp
+  MessageProcessing/Commands/DelChecker.cpp
+  MessageProcessing/Commands/DelSource.cpp
+  MessageProcessing/Commands/DelTarget.cpp
   MessageProcessing/Tags/TagAll.cpp
   MessageProcessing/Tags/TagAllImportant.cpp
   MessageProcessing/Utils.cpp
