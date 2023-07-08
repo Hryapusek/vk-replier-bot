@@ -25,10 +25,10 @@ std::mutex threadsMutex;
 //erases finished threads every n seconds
 void threadsCleaner()
 {
-  static const auto breakBetweenClenings = std::chrono::minutes(5);
+  static const auto breakBetweenCleanings = std::chrono::minutes(5);
   while (true)
   {
-    std::this_thread::sleep_for(breakBetweenClenings);
+    std::this_thread::sleep_for(breakBetweenCleanings);
     std::lock_guard< std::mutex > lock(threadsMutex);
     threads.erase(
       std::remove_if(
