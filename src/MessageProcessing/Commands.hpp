@@ -1,3 +1,6 @@
-#include "Commands/RegChecker.hpp"
 #include "Commands/RegSource.hpp"
 #include "Commands/RegTarget.hpp"
+#include "Commands/RegChecker.hpp"
+#include "Commands/DelSource.hpp"
+#include "Commands/DelTarget.hpp"
+#include "Commands/DelChecker.hpp"
