@@ -42,8 +42,8 @@ namespace _details
 
   void checkConfigValidity(Config &config)
   {
-    if (config.mode == Mode::WORK && (!config.sourceChat || config.targetsTable.empty()))
-      logAndThrow("source chat or target chats are missed for WORK mode");
+    if (!ConfigHolder::isModeValid(config.mode))
+      logAndThrow("Config mode and fields can not work together");
   }
 
   Json::Value targetChatToJson(const TargetChat &chat)
@@ -277,5 +277,20 @@ namespace config
   const std::string &ConfigHolder::getBaseUrl()
   {
     return config.baseUrl.value();
+  }
+
+  bool ConfigHolder::isModeValid(Mode mode)
+  {
+    switch (mode)
+    {
+    case Mode::CONFIG:
+      return true;
+    
+    case Mode::WORK:
+      return config.sourceChat && !config.targetsTable.empty();
+    
+    default:
+      return false;
+    }
   }
 }

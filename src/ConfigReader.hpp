@@ -4,7 +4,7 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include <array>
+#include <map>
 #include <shared_mutex>
 #include <jsoncpp/json/json.h>
 #include "BotTypes/TargetsTable.hpp"
@@ -16,6 +16,12 @@ namespace config
   {
     WORK,
     CONFIG
+  };
+
+  const std::map<Mode, std::string> modeToString
+  {
+    { Mode::WORK, "WORK" },
+    { Mode::CONFIG, "CONFIG" },
   };
 
   struct Config
@@ -73,6 +79,7 @@ namespace config
     /// it's constant and necessary in config file.
     /// @note Probably you'd like to call hasBaseUrl() before
     static const std::string &getBaseUrl();
+    static bool isModeValid(Mode mode);
 
   private:
     static Config config;
