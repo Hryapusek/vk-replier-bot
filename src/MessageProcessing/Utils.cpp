@@ -2,6 +2,37 @@
 #include <boost/log/trivial.hpp>
 #include "../ConfigReader.hpp"
 
+namespace
+{
+  using namespace vk::objects;
+  using namespace vk::requests::messages;
+  using namespace config;
+
+  bool _checkIfChatIsNotSourceCond(int peerId)
+  {
+    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
+    return !(sourceChat && sourceChat->peer_id == peerId);
+  }
+
+  bool _checkIfChatIsSourceCond(int peerId)
+  {
+    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
+    return sourceChat && sourceChat->peer_id == peerId;
+  }
+
+  bool _checkIfCheckerCond(int peerId)
+  {
+    const auto &checkers = config::ConfigHolder::getReadOnlyConfig().config.statusCheckersIds;
+    return std::find(checkers.cbegin(), checkers.cend(), peerId) != checkers.end();
+  }
+  
+  bool _checkIfNotCheckerCond(int peerId)
+  {
+    const auto &checkers = config::ConfigHolder::getReadOnlyConfig().config.statusCheckersIds;
+    return std::find(checkers.cbegin(), checkers.cend(), peerId) == checkers.end();
+  }
+}
+
 namespace message_processing::utils
 {
   using namespace vk::objects;
@@ -19,8 +50,6 @@ namespace message_processing::utils
 
   std::string extractString(std::string::const_iterator &beg, str_cref text)
   {
-    if (*beg == '"')
-      ++beg;
     std::string result;
     while (beg != text.cend() && *beg != '"')
     {
@@ -40,7 +69,7 @@ namespace message_processing::utils
       return;
     if (*beg == '"')
     {
-      title = extractString(beg, text);
+      title = extractString(++beg, text);
       return;
     }
     num = std::stoi(beg.base());
@@ -48,7 +77,7 @@ namespace message_processing::utils
       return;
     if (*beg == '"')
     {
-      title = extractString(beg, text);
+      title = extractString(++beg, text);
       return;
     }
     else
@@ -59,10 +88,13 @@ namespace message_processing::utils
   {
     std::string title;
     auto beg = std::string::const_iterator(&text[pos]);
-    if (!skipWord(beg, text) || *beg != '"')
+    bool EOL = !skipWord(beg, text);
+    if (EOL)
       return title;
+    else if (*beg != '"')
+      throw std::exception();
     else
-      return extractString(beg, text);
+      return extractString(++beg, text);
   }
 
   void logAndSendErrorMessage(MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
@@ -88,8 +120,7 @@ namespace message_processing::utils
 
   bool checkIfChatIsNotSource(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
-    auto sourceChat = ConfigHolder::getReadOnlyConfig().config.sourceChat;
-    bool cond = sourceChat && sourceChat->peer_id == peerId;
+    bool cond = _checkIfChatIsNotSourceCond(peerId);
     return checkIf(cond, req, commandName, errorMessage);
   }
 
@@ -107,7 +138,7 @@ namespace message_processing::utils
         case Mode::WORK:
           postfix = " - mode is not WORK";
           break;
-        
+
         default:
           postfix = "- CAN NOT CHECK THE MODE. IT'S NOT INITIALIZED!!!";
       }
@@ -118,29 +149,26 @@ namespace message_processing::utils
   }
 
   bool checkIfSourceChatPresent(str_cref commandName, str_cref errorMessage)
-  {    
+  {
     bool cond = config::ConfigHolder::getReadOnlyConfig().config.sourceChat.has_value();
     return checkIf(cond, commandName, errorMessage);
   }
 
   bool checkIfChatIsNotSource(int peerId, str_cref commandName, str_cref errorMessage)
   {
-    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
-    bool cond = !(sourceChat && sourceChat->peer_id == peerId);
+    bool cond = _checkIfChatIsNotSourceCond(peerId);
     return checkIf(cond, commandName, errorMessage);
   }
 
   bool checkIfChatIsSource(int peerId, str_cref commandName, str_cref errorMessage)
   {
-    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
-    bool cond = sourceChat && sourceChat->peer_id == peerId;
+    bool cond = _checkIfChatIsSourceCond(peerId);
     return checkIf(cond, commandName, errorMessage);
   }
 
-  bool checkIfChatIsSource(int peerId, vk::requests::messages::MessagesSendRequest & req, str_cref commandName, str_cref errorMessage)
+  bool checkIfChatIsSource(int peerId, vk::requests::messages::MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
-    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
-    bool cond = sourceChat && sourceChat->peer_id == peerId;
+    bool cond = _checkIfChatIsSourceCond(peerId);
     return checkIf(cond, req, commandName, errorMessage);
   }
 
@@ -156,26 +184,30 @@ namespace message_processing::utils
     return checkIf(cond, req, commandName, errorMessage);
   }
 
-  bool checkIfFromDirect(const Message & message, str_cref commandName, str_cref errorMessage)
+  bool checkIfFromDirect(const Message &message, str_cref commandName, str_cref errorMessage)
   {
     return checkIf(message.fromDirect(), commandName, errorMessage);
   }
 
-  bool checkIfChecker(const Message &message, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
+  bool checkIfChecker(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
-    const auto &checkers = config::ConfigHolder::getReadOnlyConfig().config.statusCheckersIds;
-    bool cond = std::find(checkers.cbegin(), checkers.cend(), message.getPeerId()) != checkers.end();
+    bool cond = _checkIfCheckerCond(peerId);
     return checkIf(cond, req, commandName, errorMessage);
   }
 
-  bool checkIfNotChecker(const Message &message, str_cref commandName, str_cref errorMessage)
+  bool checkIfNotChecker(int peerId, str_cref commandName, str_cref errorMessage)
   {
-    const auto &checkers = config::ConfigHolder::getReadOnlyConfig().config.statusCheckersIds;
-    bool cond = std::find(checkers.cbegin(), checkers.cend(), message.getPeerId()) == checkers.end();
+    bool cond = _checkIfNotCheckerCond(peerId);
     return checkIf(cond, commandName, errorMessage);
   }
 
-  bool checkIf(bool cond, MessagesSendRequest & req, str_cref commandName, str_cref errorMessage)
+  bool checkIfNotChecker(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = _checkIfNotCheckerCond(peerId);
+    return checkIf(cond, req, commandName, errorMessage);
+  }
+
+  bool checkIf(bool cond, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
     if (!cond)
       logAndSendErrorMessage(req, commandName, errorMessage);

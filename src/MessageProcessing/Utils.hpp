@@ -14,17 +14,19 @@ namespace message_processing::utils
   /// @return True if not EOL or EOF
   bool skipWord(std::string::const_iterator &beg, str_cref text);
 
+  /// @brief Extracts words until quote.
   /// @throw \b std::exception if string is not closed with -> "
+  /// @return extracted quoted string
   std::string extractString(std::string::const_iterator &beg, str_cref text);
 
   /// @throws \b std::out_of_range, if number is incorrect.
   /// @throws \b std::invalid_argument if number is incorrect.
-  /// @throws \b std::exception if command format is incorrect.
+  /// @throws \b std::exception if after number are unquoted words on the same line.
   void extractNumAndTitle(str_cref text, size_t pos, std::optional< int > &num, std::string &title);
 
   /// @return Empty string if no quotes were found right after command.
   /// Quoted title otherwise.
-  /// @throw \b std::exception if unclosed quote found
+  /// @throw \b std::exception if string is not closed with -> "
   std::string extractTitle(str_cref text, size_t pos);
   void logAndSendErrorMessage(vk::requests::messages::MessagesSendRequest &req, str_cref commandName, str_cref errorMessage);
 
@@ -54,10 +56,13 @@ namespace message_processing::utils
 
   bool checkIfFromDirect(const vk::objects::Message &message, str_cref commandName, str_cref errorMessage);
 
-  bool checkIfChecker(const vk::objects::Message &message, vk::requests::messages::MessagesSendRequest &req,
-                             str_cref commandName, str_cref errorMessage);
+  bool checkIfChecker(int peerId, vk::requests::messages::MessagesSendRequest &req,
+                      str_cref commandName, str_cref errorMessage);
 
-  bool checkIfNotChecker(const vk::objects::Message &message, str_cref commandName, str_cref errorMessage);
+  bool checkIfNotChecker(int peerId, str_cref commandName, str_cref errorMessage);
+
+  bool checkIfNotChecker(int peerId, vk::requests::messages::MessagesSendRequest &req,
+                         str_cref commandName, str_cref errorMessage);
 
   /// @brief if cond is False - logAndSendErrorMessage called.
   /// If True - nothing happens.
