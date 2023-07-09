@@ -19,7 +19,7 @@ namespace message_processing::commands
       return;
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkIfChecker(message, req, commandName, "User is already checker"))
+    if (!checkIfNotChecker(message.getPeerId(), req, commandName, "User is already checker"))
       return;
     {
       auto configWrap = ConfigHolder::getReadWriteConfig();
