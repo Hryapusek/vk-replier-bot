@@ -25,23 +25,27 @@ namespace message_processing
     REG_TARGET,
     REG_SOURCE,
     REG_CHECKER,
+    REG_GODLIKE,
     DEL_TARGET,
     DEL_TARGET_BY_NUM,
     DEL_SOURCE,
     DEL_CHECKER,
-    PRINT_MAP,
+    CHANGE_MODE,
+    STATUS,
     NONE
   };
 
   const std::map< Command, const std::vector< std::string > > commandStrings = {
-    { Command::REG_TARGET,          { "/reg_target" } },
-    { Command::REG_SOURCE,          { "/reg_source" } },
-    { Command::REG_CHECKER,         { "/reg_checker" } },
-    { Command::DEL_TARGET,          { "/del_target" } },
-    { Command::DEL_TARGET_BY_NUM,   { "/del_target_by_num" } },
-    { Command::DEL_SOURCE,          { "/del_source" } },
-    { Command::DEL_CHECKER,         { "/del_checker" } },
-    { Command::PRINT_MAP,           { "/print_map" } },
+    { Command::REG_TARGET,          { "reg_target" } },
+    { Command::REG_SOURCE,          { "reg_source" } },
+    { Command::REG_CHECKER,         { "reg_checker" } },
+    { Command::REG_GODLIKE,         { "reg_godlike" } },
+    { Command::DEL_TARGET,          { "del_target" } },
+    { Command::DEL_TARGET_BY_NUM,   { "del_target_by_num" } },
+    { Command::DEL_SOURCE,          { "del_source" } },
+    { Command::DEL_CHECKER,         { "del_checker" } },
+    { Command::CHANGE_MODE,         { "change_mode" } },
+    { Command::STATUS,              { "status" } },
   };
 
   void processMessage(std::shared_ptr< vk::callback::event::objects::NewMessage >);
