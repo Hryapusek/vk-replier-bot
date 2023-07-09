@@ -60,16 +60,6 @@ namespace message_processing::utils
 
   bool checkIfFromDirect(const vk::objects::Message &message, str_cref commandName, str_cref errorMessage);
 
-  bool checkIfChecker(int peerId, vk::requests::messages::MessagesSendRequest &req,
-                      str_cref commandName, str_cref errorMessage);
-
-  bool checkIfChecker(int peerId, str_cref commandName, str_cref errorMessage);
-
-  bool checkIfNotChecker(int peerId, str_cref commandName, str_cref errorMessage);
-
-  bool checkIfNotChecker(int peerId, vk::requests::messages::MessagesSendRequest &req,
-                         str_cref commandName, str_cref errorMessage);
-
   bool checkIfGodlike(int peerId, str_cref commandName, str_cref errorMessage);
 
   bool checkIfNotGodlike(int peerId, vk::requests::messages::MessagesSendRequest &req,

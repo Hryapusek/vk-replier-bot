@@ -53,10 +53,8 @@ set(SOURCE_FILES_LIST
   VkApi/Exceptions.cpp
   MessageProcessing/MessageProcessing.cpp
   BotTypes/TargetsTable.cpp
-  MessageProcessing/Commands/RegChecker.cpp
   MessageProcessing/Commands/RegSource.cpp
   MessageProcessing/Commands/RegTarget.cpp
-  MessageProcessing/Commands/DelChecker.cpp
   MessageProcessing/Commands/DelSource.cpp
   MessageProcessing/Commands/DelTarget.cpp
   MessageProcessing/Commands/DelTargetByNum.cpp

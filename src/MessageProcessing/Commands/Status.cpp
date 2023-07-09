@@ -21,8 +21,6 @@ namespace message_processing::commands
   {
     using namespace config;
     static str_cref commandName = "status";
-    if (!checkIfChecker(message.getFromId(), commandName, "Can not perform command. Not from checker"))
-      return;
     MessagesSendRequest()
     .random_id(0)
     .message("YAHAY BALYA")

@@ -35,7 +35,6 @@ namespace config
     std::optional< std::string > baseUrl;
     TargetsTable targetsTable;
     std::optional< SourceChat > sourceChat;
-    std::vector< int > statusCheckersIds;
     std::vector< int > godlikeIds;
   };
 

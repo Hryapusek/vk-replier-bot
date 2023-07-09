@@ -163,12 +163,6 @@ namespace message_processing
         regSource(message, pos);
         break;
       }
-      case Command::REG_CHECKER:
-      {
-        BOOST_LOG_TRIVIAL(info) << "REG_CHECKER command found";
-        regChecker(message);
-        break;
-      }
       case Command::DEL_TARGET:
       {
         BOOST_LOG_TRIVIAL(info) << "DEL_TARGET command found";
@@ -179,12 +173,6 @@ namespace message_processing
       {
         BOOST_LOG_TRIVIAL(info) << "DEL_SOURCE command found";
         delSource(message);
-        break;
-      }
-      case Command::DEL_CHECKER:
-      {
-        BOOST_LOG_TRIVIAL(info) << "DEL_CHECKER command found";
-        delChecker(message);
         break;
       }
       case Command::REG_GODLIKE:

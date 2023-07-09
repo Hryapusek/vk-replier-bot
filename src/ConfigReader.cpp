@@ -25,7 +25,6 @@ namespace _details
     JsonFieldT< std::string >("base_url", !necessary, std::bind(doIfFieldIncorrect, "base_url")),
     JsonFieldVT("target_chats", Json::ValueType::arrayValue, !necessary, std::bind(doIfFieldIncorrect, "target_chats")),
     JsonFieldVT("source_chat", Json::ValueType::objectValue, !necessary, std::bind(doIfFieldIncorrect, "source_chat")),
-    JsonFieldVT("status_checkers", Json::ValueType::arrayValue, !necessary, std::bind(doIfFieldIncorrect, "status_checkers")),
     JsonFieldVT("godlike_ids", Json::ValueType::arrayValue, !necessary, std::bind(doIfFieldIncorrect, "godlike_ids")),
   };
 
@@ -150,8 +149,6 @@ namespace _details
       config.sourceChat = sourceChatFromJson(root["source_chat"]);
     if (root.isMember("base_url"))
       config.baseUrl = root["base_url"].asString();
-    if (root.isMember("status_checkers"))
-      config.statusCheckersIds = intVectorFromJson(root["status_checkers"]);
     if (root.isMember("godlike_ids"))
       config.godlikeIds = intVectorFromJson(root["godlike_ids"]);
     return config;
@@ -215,8 +212,6 @@ namespace config
       configJson["source_chat"] = sourceChatToJson(config.sourceChat.value());
     if (config.baseUrl)
       configJson["base_url"] = config.baseUrl.value();
-    if (!config.statusCheckersIds.empty())
-      configJson["status_checkers"] = intVectorToJson(config.statusCheckersIds);
     if (!config.godlikeIds.empty())
       configJson["godlike_ids"] = intVectorToJson(config.godlikeIds);
     Json::StreamWriterBuilder builder;

@@ -20,20 +20,6 @@ namespace
     return sourceChat && sourceChat->peer_id == peerId;
   }
 
-  bool _checkIfCheckerCond(int peerId)
-  {
-    auto configWrap = ConfigHolder::getReadOnlyConfig();
-    const auto &checkers = configWrap.config.statusCheckersIds;
-    return std::find(checkers.cbegin(), checkers.cend(), peerId) != checkers.end();
-  }
-  
-  bool _checkIfNotCheckerCond(int peerId)
-  {
-    auto configWrap = ConfigHolder::getReadOnlyConfig();
-    const auto &checkers = configWrap.config.statusCheckersIds;
-    return std::find(checkers.cbegin(), checkers.cend(), peerId) == checkers.end();
-  }
-
   bool _checkIfGodlikeCond(int peerId)
   {
     auto configWrap = ConfigHolder::getReadOnlyConfig();
@@ -216,30 +202,6 @@ namespace message_processing::utils
   bool checkIfFromDirect(const Message &message, str_cref commandName, str_cref errorMessage)
   {
     return checkIf(message.fromDirect(), commandName, errorMessage);
-  }
-
-  bool checkIfChecker(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
-  {
-    bool cond = _checkIfCheckerCond(peerId);
-    return checkIf(cond, req, commandName, errorMessage);
-  }
-
-  bool checkIfChecker(int peerId, str_cref commandName, str_cref errorMessage)
-  {
-    bool cond = _checkIfCheckerCond(peerId);
-    return checkIf(cond, commandName, errorMessage);
-  }
-
-  bool checkIfNotChecker(int peerId, str_cref commandName, str_cref errorMessage)
-  {
-    bool cond = _checkIfNotCheckerCond(peerId);
-    return checkIf(cond, commandName, errorMessage);
-  }
-
-  bool checkIfNotChecker(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
-  {
-    bool cond = _checkIfNotCheckerCond(peerId);
-    return checkIf(cond, req, commandName, errorMessage);
   }
 
   bool checkIfGodlike(int peerId, str_cref commandName, str_cref errorMessage)
