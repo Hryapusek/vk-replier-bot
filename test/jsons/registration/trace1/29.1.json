@@ -1,0 +1,12 @@
+{
+  "type": "message_new",
+  "group_id": -100000,
+  "object": {
+    "message": {
+      "id": 2,
+      "text": "/del_target_by_num 23",
+      "from_id": 2,
+      "peer_id": 4
+    }
+  }
+}
