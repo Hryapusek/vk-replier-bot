@@ -1,4 +1,3 @@
-#define BOOST_LOG_DYN_LINK 1
 #include "ConfigReader.hpp"
 #include <fstream>
 #include <boost/log/trivial.hpp>
@@ -77,32 +76,29 @@ namespace _details
   TargetChat targetChatFromJson(const Json::Value &root)
   {
     static const auto fields = std::tuple{
-      JsonFieldT<int>("num", true, std::bind(doIfFieldIncorrect, "num")),
-      JsonFieldT<int>("peer_id", true, std::bind(doIfFieldIncorrect, "peer_id")),
-      JsonFieldT<std::string>("title", false, std::bind(doIfFieldIncorrect, "title")),
+      JsonFieldT< int >("num", true, std::bind(doIfFieldIncorrect, "num")),
+      JsonFieldT< int >("peer_id", true, std::bind(doIfFieldIncorrect, "peer_id")),
+      JsonFieldT< std::string >("title", false, std::bind(doIfFieldIncorrect, "title")),
     };
     checkJsonFields(root, fields);
     if (root.isMember("title"))
-      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), root["title"].asString() }
-    ;
+      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), root["title"].asString() };
     else
-      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), std::nullopt }
-    ;
+      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), std::nullopt };
   }
 
   SourceChat sourceChatFromJson(const Json::Value &root)
   {
     static const auto fields = std::tuple{
-      JsonFieldT<int>("peer_id", necessary, std::bind(doIfFieldIncorrect, "peer_id")),
-      JsonFieldT<std::string>("title", !necessary, std::bind(doIfFieldIncorrect, "title")),
+      JsonFieldT< int >("peer_id", necessary, std::bind(doIfFieldIncorrect, "peer_id")),
+      JsonFieldT< std::string >("title", !necessary, std::bind(doIfFieldIncorrect, "title")),
     };
     checkJsonFields(root, fields);
+
     if (root.isMember("title"))
-      return SourceChat{ root["peer_id"].asInt(), root["title"].asString() }
-    ;
+      return SourceChat{ root["peer_id"].asInt(), root["title"].asString() };
     else
-      return SourceChat{ root["peer_id"].asInt(), std::nullopt }
-    ;
+      return SourceChat{ root["peer_id"].asInt(), std::nullopt };
   }
 
   TargetsTable targetChatsFromJson(json_crefwrp root)
@@ -122,9 +118,7 @@ namespace _details
   {
     std::vector< int > nums;
     for (const auto &obj : root.get())
-    {
       nums.push_back(obj.asInt());
-    }
     return nums;
   }
 
@@ -279,7 +273,7 @@ namespace config
   {
     return config.baseUrl.has_value();
   }
-  
+
   const std::string &ConfigHolder::getBaseUrl()
   {
     return config.baseUrl.value();
