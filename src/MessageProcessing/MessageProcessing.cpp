@@ -59,16 +59,29 @@ namespace
     return Tag::NONE;
   }
 
+  std::string extractWord(std::string::const_iterator cbeg, str_cref text)
+  {
+    if (cbeg == text.cend())
+      return "";
+    auto wordBeg = cbeg;
+    auto wordEnd = cbeg;
+    while (wordEnd != text.cend() && !isspace(*wordEnd))
+      ++wordEnd;
+    return text.substr(std::distance(text.cbegin(), wordBeg), std::distance(wordBeg, wordEnd));
+  }
+
   // TODO optimize by searching '/' first
   Command findCommand(str_cref text, size_t &pos)
   {
+    auto cmdBeg = std::find(text.cbegin(), text.cend(), '/');
+    if (cmdBeg == text.cend())
+      return Command::NONE;
+    pos = std::distance(text.cbegin(), cmdBeg);
+    std::string command = extractWord(++cmdBeg, text);
     for (const auto & [cmd, strings_to_find] : commandStrings)
       for (const auto &str : strings_to_find)
-      {
-        pos = text.find(str);
-        if (pos != std::string::npos)
+        if (command == str)
           return cmd;
-      }
     return Command::NONE;
   }
 
@@ -172,6 +185,30 @@ namespace message_processing
       {
         BOOST_LOG_TRIVIAL(info) << "DEL_CHECKER command found";
         delChecker(message);
+        break;
+      }
+      case Command::REG_GODLIKE:
+      {
+        BOOST_LOG_TRIVIAL(info) << "REG_GODLIKE command found";
+        regGodlike(message, pos);
+        break;
+      }
+      case Command::CHANGE_MODE:
+      {
+        BOOST_LOG_TRIVIAL(info) << "CHANGE_MODE command found";
+        changeMode(message);
+        break;
+      }
+      case Command::DEL_TARGET_BY_NUM:
+      {
+        BOOST_LOG_TRIVIAL(info) << "DEL_TARGET_BY_NUM command found";
+        delTargetByNum(message, pos);
+        break;
+      }
+      case Command::STATUS:
+      {
+        BOOST_LOG_TRIVIAL(info) << "STATUS command found";
+        status(message);
         break;
       }
       case Command::NONE:
