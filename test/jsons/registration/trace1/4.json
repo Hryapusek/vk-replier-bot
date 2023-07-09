@@ -1,12 +1,12 @@
 {
   "type": "message_new",
-  "group_id": 1234,
+  "group_id": -100000,
   "object": {
     "message": {
       "id": 2,
-      "text": "/reg_target \"\u0FFF\"",
+      "text": "/del_source",
       "from_id": 2,
-      "peer_id": 2000000005
+      "peer_id": 2000000001
     }
   }
 }

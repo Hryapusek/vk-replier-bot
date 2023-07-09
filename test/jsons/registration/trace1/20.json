@@ -1,0 +1,12 @@
+{
+  "type": "message_new",
+  "group_id": -100000,
+  "object": {
+    "message": {
+      "id": 2,
+      "text": "/reg_checker",
+      "from_id": 3,
+      "peer_id": 3
+    }
+  }
+}
