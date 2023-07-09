@@ -32,13 +32,22 @@ namespace message_processing::commands
     static str_cref commandName = "regSource";
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkMode(Mode::CONFIG, commandName, "Can not perform command")
-        || !checkIfSourceChatNotEmpty(req, commandName, "Delete current sourceChat first")
+    if (!checkMode(Mode::CONFIG, commandName, "Can not perform")
+        || !checkIfSourceChatNotEmpty(req, commandName, "Can not perform. Delete current sourceChat first")
         || !checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat")
-        || !checkIfChatIsNotSource(message.getPeerId(), req, commandName, "This chat is already source")
-        || !checkIfPeerIdNotInTargetsTable(message, req, commandName, "This chat is present somewhere in the table"))
+        || !checkIfChatIsNotSource(message.getPeerId(), req, commandName, "Can not perform. This chat is already source")
+        || !checkIfPeerIdNotInTargetsTable(message, req, commandName, "Can not perform. This chat is present somewhere in the table"))
       return;
-    std::string title = extractTitle(message.getText(), pos);
+    std::string title;
+    try
+    {
+      title = extractTitle(message.getText(), pos);
+    }
+    catch(const std::exception& e)
+    {
+      logAndSendErrorMessage(req, commandName, "Can not perform. Check if title is quoted both sides");
+      return;
+    }
     ConfigHolder::getReadWriteConfig().config.sourceChat = SourceChat{ message.getPeerId(), title };
     BOOST_LOG_TRIVIAL(info) << commandName << ": Successfully registered source " << message.getPeerId();
     req.message("Successfully registered as source!").execute();
