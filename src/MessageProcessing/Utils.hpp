@@ -19,6 +19,10 @@ namespace message_processing::utils
   /// @return extracted quoted string
   std::string extractString(std::string::const_iterator &beg, str_cref text);
 
+  /// @return extracted num
+  /// @throw std::logic_error if num not found or number is bad.
+  int extractNum(str_cref text, size_t pos);
+
   /// @throws \b std::out_of_range, if number is incorrect.
   /// @throws \b std::invalid_argument if number is incorrect.
   /// @throws \b std::exception if after number are unquoted words on the same line.
@@ -59,10 +63,23 @@ namespace message_processing::utils
   bool checkIfChecker(int peerId, vk::requests::messages::MessagesSendRequest &req,
                       str_cref commandName, str_cref errorMessage);
 
+  bool checkIfChecker(int peerId, str_cref commandName, str_cref errorMessage);
+
   bool checkIfNotChecker(int peerId, str_cref commandName, str_cref errorMessage);
 
   bool checkIfNotChecker(int peerId, vk::requests::messages::MessagesSendRequest &req,
                          str_cref commandName, str_cref errorMessage);
+
+  bool checkIfGodlike(int peerId, str_cref commandName, str_cref errorMessage);
+
+  bool checkIfNotGodlike(int peerId, vk::requests::messages::MessagesSendRequest &req,
+                         str_cref commandName, str_cref errorMessage);
+
+  bool checkIfCanChangeModeTo(config::Mode mode, vk::requests::messages::MessagesSendRequest &req,
+                              str_cref commandName, str_cref errorMessage);
+
+  bool checkIfNumInTargetsTable(int num, vk::requests::messages::MessagesSendRequest &req,
+                                str_cref commandName, str_cref errorMessage);
 
   /// @brief if cond is False - logAndSendErrorMessage called.
   /// If True - nothing happens.

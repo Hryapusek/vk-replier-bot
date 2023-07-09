@@ -10,26 +10,47 @@ namespace
 
   bool _checkIfChatIsNotSourceCond(int peerId)
   {
-    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
+    auto sourceChat = ConfigHolder::getReadOnlyConfig().config.sourceChat;
     return !(sourceChat && sourceChat->peer_id == peerId);
   }
 
   bool _checkIfChatIsSourceCond(int peerId)
   {
-    auto sourceChat = config::ConfigHolder::getReadOnlyConfig().config.sourceChat;
+    auto sourceChat = ConfigHolder::getReadOnlyConfig().config.sourceChat;
     return sourceChat && sourceChat->peer_id == peerId;
   }
 
   bool _checkIfCheckerCond(int peerId)
   {
-    const auto &checkers = config::ConfigHolder::getReadOnlyConfig().config.statusCheckersIds;
+    auto configWrap = ConfigHolder::getReadOnlyConfig();
+    const auto &checkers = configWrap.config.statusCheckersIds;
     return std::find(checkers.cbegin(), checkers.cend(), peerId) != checkers.end();
   }
   
   bool _checkIfNotCheckerCond(int peerId)
   {
-    const auto &checkers = config::ConfigHolder::getReadOnlyConfig().config.statusCheckersIds;
+    auto configWrap = ConfigHolder::getReadOnlyConfig();
+    const auto &checkers = configWrap.config.statusCheckersIds;
     return std::find(checkers.cbegin(), checkers.cend(), peerId) == checkers.end();
+  }
+
+  bool _checkIfGodlikeCond(int peerId)
+  {
+    auto configWrap = ConfigHolder::getReadOnlyConfig();
+    const auto &godlikes = configWrap.config.godlikeIds;
+    return std::find(godlikes.cbegin(), godlikes.cend(), peerId) != godlikes.end();
+  }
+
+  bool _checkIfNotGodlikeCond(int peerId)
+  {
+    auto configWrap = ConfigHolder::getReadOnlyConfig();
+    const auto &godlikes = configWrap.config.godlikeIds;
+    return std::find(godlikes.cbegin(), godlikes.cend(), peerId) == godlikes.end();
+  }
+
+  bool _checkIfNumInTargetsTableCond(int num)
+  {
+    return ConfigHolder::getReadOnlyConfig().config.targetsTable.containsNum(num);
   }
 }
 
@@ -59,6 +80,14 @@ namespace message_processing::utils
     if (beg == text.cend())
       throw std::exception();
     return result;
+  }
+
+  int extractNum(str_cref text, size_t pos)
+  {
+    std::string::const_iterator beg(&text[pos]);
+    if (!skipWord(beg, text))
+      throw std::logic_error("");
+    return std::stoi(beg.base());
   }
 
   void extractNumAndTitle(str_cref text, size_t pos, std::optional< int > &num, std::string &title)
@@ -126,7 +155,7 @@ namespace message_processing::utils
 
   bool checkMode(Mode mode, str_cref commandName, str_cref errorMessage)
   {
-    if (ConfigHolder::getMode() != mode)
+    if (ConfigHolder::getReadOnlyConfig().config.mode != mode)
     {
       std::string postfix;
       switch (mode)
@@ -140,7 +169,7 @@ namespace message_processing::utils
           break;
 
         default:
-          postfix = "- CAN NOT CHECK THE MODE. IT'S NOT INITIALIZED!!!";
+          postfix = " - CAN NOT CHECK THE MODE. IT'S NOT INITIALIZED!!!";
       }
       BOOST_LOG_TRIVIAL(warning) << commandName << ": " << errorMessage << postfix;
       return false;
@@ -150,7 +179,7 @@ namespace message_processing::utils
 
   bool checkIfSourceChatPresent(str_cref commandName, str_cref errorMessage)
   {
-    bool cond = config::ConfigHolder::getReadOnlyConfig().config.sourceChat.has_value();
+    bool cond = ConfigHolder::getReadOnlyConfig().config.sourceChat.has_value();
     return checkIf(cond, commandName, errorMessage);
   }
 
@@ -166,7 +195,7 @@ namespace message_processing::utils
     return checkIf(cond, commandName, errorMessage);
   }
 
-  bool checkIfChatIsSource(int peerId, vk::requests::messages::MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
+  bool checkIfChatIsSource(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
     bool cond = _checkIfChatIsSourceCond(peerId);
     return checkIf(cond, req, commandName, errorMessage);
@@ -174,13 +203,13 @@ namespace message_processing::utils
 
   bool checkIfPeerIdInTargetsTable(const Message &message, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
-    bool cond = config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsPeerId(message.getPeerId());
+    bool cond = ConfigHolder::getReadOnlyConfig().config.targetsTable.containsPeerId(message.getPeerId());
     return checkIf(cond, req, commandName, errorMessage);
   }
 
   bool checkIfPeerIdNotInTargetsTable(const Message &message, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
-    bool cond = !config::ConfigHolder::getReadOnlyConfig().config.targetsTable.containsPeerId(message.getPeerId());
+    bool cond = !ConfigHolder::getReadOnlyConfig().config.targetsTable.containsPeerId(message.getPeerId());
     return checkIf(cond, req, commandName, errorMessage);
   }
 
@@ -195,6 +224,12 @@ namespace message_processing::utils
     return checkIf(cond, req, commandName, errorMessage);
   }
 
+  bool checkIfChecker(int peerId, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = _checkIfCheckerCond(peerId);
+    return checkIf(cond, commandName, errorMessage);
+  }
+
   bool checkIfNotChecker(int peerId, str_cref commandName, str_cref errorMessage)
   {
     bool cond = _checkIfNotCheckerCond(peerId);
@@ -204,6 +239,30 @@ namespace message_processing::utils
   bool checkIfNotChecker(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
     bool cond = _checkIfNotCheckerCond(peerId);
+    return checkIf(cond, req, commandName, errorMessage);
+  }
+
+  bool checkIfGodlike(int peerId, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = _checkIfGodlikeCond(peerId);
+    return checkIf(cond, commandName, errorMessage);
+  }
+
+  bool checkIfNotGodlike(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = _checkIfNotGodlikeCond(peerId);
+    return checkIf(cond, req, commandName, errorMessage);
+  }
+
+  bool checkIfCanChangeModeTo(Mode mode, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = ConfigHolder::isModeValid(mode);
+    return checkIf(cond, req, commandName, errorMessage);
+  }
+
+  bool checkIfNumInTargetsTable(int num, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = _checkIfNumInTargetsTableCond(num);
     return checkIf(cond, req, commandName, errorMessage);
   }
 
