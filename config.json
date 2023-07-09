@@ -1,39 +1,41 @@
 {
 	"base_url" : "localhost:8080",
+	"group_id" : -100000,
 	"mode" : "config",
 	"port" : 8081,
 	"secret_string" : "secret",
 	"source_chat" : 
 	{
-		"peer_id" : 1000
+		"peer_id" : 2000000001,
+		"title" : ""
 	},
 	"status_checkers" : 
 	[
-		21,
-		34,
-		140
+		2,
+		3,
+		4
 	],
 	"target_chats" : 
 	[
 		{
 			"num" : -2147483648,
-			"peer_id" : 2000000001,
+			"peer_id" : 2000000101,
 			"title" : ""
 		},
 		{
-			"num" : 2001,
-			"peer_id" : 2000000002,
-			"title" : "title"
-		},
-		{
-			"num" : 2002,
-			"peer_id" : 2000000003,
+			"num" : -2147483647,
+			"peer_id" : 2000000102,
 			"title" : ""
 		},
 		{
-			"num" : 2003,
-			"peer_id" : 2000000004,
-			"title" : "Jeez christ"
+			"num" : -2147483646,
+			"peer_id" : 2000000103,
+			"title" : ""
+		},
+		{
+			"num" : 23,
+			"peer_id" : 2000000100,
+			"title" : "23 \u043a\u0432\u0430\u0440\u0442\u0438\u0440\u0430"
 		}
 	],
 	"token" : "token",
