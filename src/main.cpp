@@ -17,8 +17,7 @@
 #include "MessageProcessing/MessageProcessing.hpp"
 
 // TODO print TimeStamp, LineID, ProcessID, ThreadID
-// TODO add /status command
-// TODO add ability to change mode using command
+// TODO config vectors to sets
 
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
