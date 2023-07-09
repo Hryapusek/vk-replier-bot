@@ -18,8 +18,8 @@ namespace message_processing::commands
       return;
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    str_cref errorMessage = "Current chat is not source. PeerId: " + std::to_string(message.getPeerId()) + "Skipping";
-    if (!checkIfCommandFromChat(message, commandName, "Command not from chat. Skipping message")
+    str_cref errorMessage = "Can not perform. Current chat is not source. PeerId: " + std::to_string(message.getPeerId()) + "Skipping";
+    if (!checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat. Skipping message")
         || !checkIfChatIsSource(message.getPeerId(), req, commandName, errorMessage))
       return;
     ConfigHolder::getReadWriteConfig().config.sourceChat = std::nullopt;
