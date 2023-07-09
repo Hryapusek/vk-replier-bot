@@ -1,1 +1,1 @@
-# dorm-vk-bot
+# vk-replier-bot
