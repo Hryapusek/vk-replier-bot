@@ -31,6 +31,15 @@ bool TargetsTable::removeByPeerID(int peerId)
   return true;
 }
 
+bool TargetsTable::removeByNum(int num)
+{
+  auto it = findByNum(num);
+  if (it == table.end())
+    return false;
+  table.erase(it);
+  return true;
+}
+
 TargetsTable::Map::iterator TargetsTable::findByPeerId(int peerId)
 {
   for (auto beg = table.begin(); beg != table.end(); ++beg)
