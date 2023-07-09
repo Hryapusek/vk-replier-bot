@@ -38,7 +38,7 @@ namespace message_processing::commands
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
     if (!checkMode(Mode::CONFIG, commandName, "Can not perform")
-        || !checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat. Skipping")
+        || !checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat.")
         || !checkIfChatIsNotSource(message.getPeerId(), req, commandName, "Can not perform. This chat is source.")
         || !checkIfPeerIdNotInTargetsTable(message, req, commandName, "Can not perform. This chat is present somewhere in the table"))
       return;

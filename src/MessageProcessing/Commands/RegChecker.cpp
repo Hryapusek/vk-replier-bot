@@ -14,11 +14,11 @@ namespace message_processing::commands
   {
     using namespace config;
     static str_cref commandName = "regChecker";
-    if (!checkMode(config::Mode::CONFIG, commandName, "Can not use this command"))
+    if (!checkMode(config::Mode::CONFIG, commandName, "Can not perform command"))
       return;
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkIfNotChecker(message.getPeerId(), req, commandName, "User is already checker"))
+    if (!checkIfNotChecker(message.getPeerId(), req, commandName, "Can not perform command. User is already checker"))
       return;
     {
       auto configWrap = ConfigHolder::getReadWriteConfig();
