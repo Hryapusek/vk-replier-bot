@@ -1,4 +1,4 @@
-#include "RegSource.hpp"
+#include "DelChecker.hpp"
 #include <boost/log/trivial.hpp>
 #include "../Utils.hpp"
 #include "../../ConfigReader.hpp"
@@ -21,20 +21,20 @@ namespace message_processing::commands
   {
     using namespace config;
     static str_cref commandName = "delChecker";
+    int checkerToDelete = message.getFromId();
     if (!checkMode(config::Mode::CONFIG, commandName, "Can not perform")
-        || !checkIfFromDirect(message, commandName, "Can not perform. Not in direct. Skipping message")
-        || !checkIfNotChecker(message.getPeerId(), commandName, "Can not perform. Not from checker. Skipping message"))
+        || !checkIfChecker(checkerToDelete, commandName, "Can not perform. Not from checker. Skipping message"))
       return;
     
     {
       auto configWrap = ConfigHolder::getReadWriteConfig();
       auto &config = configWrap.config;
       auto &checkers = config.statusCheckersIds;
-      auto it = std::find(checkers.begin(), checkers.end(), message.getPeerId());
+      auto it = std::find(checkers.begin(), checkers.end(), checkerToDelete);
       if (it != checkers.end())
         checkers.erase(it);
     }
-    BOOST_LOG_TRIVIAL(info) << commandName << ": Successfully deleted checker " << message.getPeerId();
+    BOOST_LOG_TRIVIAL(info) << commandName << ": Successfully deleted checker " << checkerToDelete;
     MessagesSendRequest()
     .random_id(0)
     .peer_id(message.getPeerId())

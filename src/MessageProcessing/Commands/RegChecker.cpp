@@ -1,4 +1,4 @@
-#include "RegSource.hpp"
+#include "RegChecker.hpp"
 #include <boost/log/trivial.hpp>
 #include "../Utils.hpp"
 #include "../../ConfigReader.hpp"
@@ -14,8 +14,7 @@ namespace message_processing::commands
   {
     using namespace config;
     static str_cref commandName = "regChecker";
-    if (!checkMode(config::Mode::CONFIG, commandName, "Can not use this command")
-        || !checkIfFromDirect(message, commandName, "Not in direct. Skipping message"))
+    if (!checkMode(config::Mode::CONFIG, commandName, "Can not use this command"))
       return;
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
