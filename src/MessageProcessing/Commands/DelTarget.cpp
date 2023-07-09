@@ -25,8 +25,8 @@ namespace message_processing::commands
       return;
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkIfCommandFromChat(message, commandName, "Command not from chat. Skipping")
-        || !checkIfPeerIdInTargetsTable(message, req, commandName, "Current chat is not target. PeerId: " + message.getPeerId()))
+    if (!checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat. Skipping")
+        || !checkIfPeerIdInTargetsTable(message, req, commandName, "Can not perform. Current chat is not target. PeerId: " + std::to_string(message.getPeerId())))
       return;
     if (!ConfigHolder::getReadWriteConfig().config.targetsTable.removeByPeerID(message.getPeerId()))
     {

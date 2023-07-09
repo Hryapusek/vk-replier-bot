@@ -21,9 +21,9 @@ namespace message_processing::commands
   {
     using namespace config;
     static str_cref commandName = "delChecker";
-    if (!checkMode(config::Mode::CONFIG, commandName, "Can not use this command")
-        || !checkIfFromDirect(message, commandName, "Not in direct. Skipping message")
-        || !checkIfNotChecker(message, commandName, "Not from checker. Skipping message"))
+    if (!checkMode(config::Mode::CONFIG, commandName, "Can not perform")
+        || !checkIfFromDirect(message, commandName, "Can not perform. Not in direct. Skipping message")
+        || !checkIfNotChecker(message.getPeerId(), commandName, "Can not perform. Not from checker. Skipping message"))
       return;
     
     {
