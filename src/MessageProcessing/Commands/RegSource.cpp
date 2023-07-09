@@ -12,7 +12,7 @@ namespace
   using namespace message_processing;
   using namespace message_processing::utils;
   using str_cref = const std::string &;
-  bool checkIfSourceChatNotEmpty(MessagesSendRequest &req, str_cref command, str_cref errorMessage)
+  bool checkIfSourceChatEmpty(MessagesSendRequest &req, str_cref command, str_cref errorMessage)
   {
     if (config::ConfigHolder::getReadOnlyConfig().config.sourceChat)
     {
@@ -33,7 +33,7 @@ namespace message_processing::commands
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
     if (!checkMode(Mode::CONFIG, commandName, "Can not perform")
-        || !checkIfSourceChatNotEmpty(req, commandName, "Can not perform. Delete current sourceChat first")
+        || !checkIfSourceChatEmpty(req, commandName, "Can not perform. Delete current sourceChat first")
         || !checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat")
         || !checkIfChatIsNotSource(message.getPeerId(), req, commandName, "Can not perform. This chat is already source")
         || !checkIfPeerIdNotInTargetsTable(message, req, commandName, "Can not perform. This chat is present somewhere in the table"))
