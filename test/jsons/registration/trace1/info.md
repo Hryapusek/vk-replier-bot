@@ -20,12 +20,6 @@ peer_ids:
  18.1 2000000103 - **Target** chat
  18.2 2000000103 - **Target** chat to check if error
 
-  19. 2 - **Status** checker
-  20. 3 - **Status** checker
-  21. 4 - **Status** checker
-  22. 4 - **Status** checker to check if error
- 22.1 /del_checker 4
-
   23. 999 - **Reg godlike** if already godlike
   24. 999 - **Reg godlike** without **num**
   25. 999 - **Reg godlike** with **bad num**
@@ -37,10 +31,10 @@ peer_ids:
  29.2 998 - **Del target by num** with **num 23**
 
  30.0 998 - **Change mode**
-  30.   2 - **Change mode** - error NOT GODLIKE
+  30.   2 - **Change mode** error NOT GODLIKE
   31. 999 - **Change mode**
   32. /del_source 2000000001
   33. 999 - **Change mode** error expected
 
   34. 2 - **Status**
-  35. 5 - **Status** error expected
+  35. 5 - **Status**
