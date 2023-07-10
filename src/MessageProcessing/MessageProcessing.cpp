@@ -1,6 +1,7 @@
 #include "MessageProcessing.hpp"
 
 #include <boost/log/trivial.hpp>
+#include <regex>
 
 #include "Commands.hpp"
 #include "Tags.hpp"
@@ -52,9 +53,15 @@ namespace
     for (const auto & [tag, strings_to_find] : tagStrings)
       for (const auto &str : strings_to_find)
       {
-        pos = text.find(str);
-        if (pos != std::string::npos)
+        std::string regexText = "(^|[ ]+)" + str + "($|[ ]+)";
+        std::regex regex(regexText);
+        std::smatch res;
+        bool isFound = std::regex_search(text, res, regex);
+        if (isFound)
+        {
+          pos = std::distance(text.cbegin(), res[0].first);
           return tag;
+        }
       }
     return Tag::NONE;
   }
@@ -83,7 +90,6 @@ namespace
           return cmd;
     return Command::NONE;
   }
-
 }
 
 namespace message_processing
