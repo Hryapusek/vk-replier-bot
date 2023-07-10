@@ -13,9 +13,11 @@ namespace message_processing::tags
   void tagAll(const Message &message, size_t pos)
   {
     static const std::string tagName = "TAG:ALL";
-    if (!checkMode(config::Mode::WORK, tagName, "Skipping message")
-        || !checkIfSourceChatPresent(tagName, "Source chat not registered. Skipping message")
-        || !checkIfChatIsSource(message.getPeerId(), tagName, "Tag used outside the source chat. Skipping message"))
+    MessagesSendRequest req;
+    req.random_id(0).peer_id(message.getPeerId());
+    if (!checkIfSourceChatPresent(req, tagName, "Source chat not registered. Skipping message")
+        || !checkIfChatIsSource(message.getPeerId(), tagName, "Tag used outside the source chat. Skipping message")
+        || !checkMode(config::Mode::WORK, req, tagName, "Skipping message"))
       return;
     std::string title;
     try
@@ -25,12 +27,7 @@ namespace message_processing::tags
     }
     catch (const std::exception &e)
     {
-      MessagesSendRequest()
-      .peer_id(message.getPeerId())
-      .random_id(0)
-      .message("Bad title found. After tag should be a new line or a quoted sentence. Make sure that quotes are closed")
-      .execute();
-      return;
+      title = "";
     }
     BOOST_LOG_TRIVIAL(info) << "Forwarding messages";
     sendMessageToAllTargets(std::move(title), message.getId());
