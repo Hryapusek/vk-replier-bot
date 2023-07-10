@@ -50,7 +50,13 @@ namespace message_processing::utils
 
   bool checkMode(config::Mode mode, str_cref commandName, str_cref errorMessage);
 
+  bool checkMode(config::Mode mode, vk::requests::messages::MessagesSendRequest &req,
+                 str_cref commandName, str_cref errorMessage);
+
   bool checkIfSourceChatPresent(str_cref commandName, str_cref errorMessage);
+
+  bool checkIfSourceChatPresent(vk::requests::messages::MessagesSendRequest &req,
+                                str_cref commandName, str_cref errorMessage);
 
   bool checkIfPeerIdInTargetsTable(const vk::objects::Message &message, vk::requests::messages::MessagesSendRequest &req,
                                    str_cref commandName, str_cref errorMessage);
@@ -61,6 +67,9 @@ namespace message_processing::utils
   bool checkIfFromDirect(const vk::objects::Message &message, str_cref commandName, str_cref errorMessage);
 
   bool checkIfGodlike(int peerId, str_cref commandName, str_cref errorMessage);
+
+  bool checkIfGodlike(int peerId, vk::requests::messages::MessagesSendRequest &req,
+                      str_cref commandName, str_cref errorMessage);
 
   bool checkIfNotGodlike(int peerId, vk::requests::messages::MessagesSendRequest &req,
                          str_cref commandName, str_cref errorMessage);
