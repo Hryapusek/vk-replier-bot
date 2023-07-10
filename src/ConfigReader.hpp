@@ -51,41 +51,36 @@ namespace config
     static void updateConfigFile();
     static ReadOnlyConfig getReadOnlyConfig();
     static ReadWriteConfig getReadWriteConfig();
-    /// @return Target ids string from config in format "id1, id2, ..."
-    /// @note String calculated only once on startup.
-    /// It is supposed that target id's are constant after startup.
-    static const std::string &getTargetIds();
     /// @brief Direct access to config field.
-    /// BE CAREFUL, THIS FIELD NO MORE CONSTANT
+    /// NOT thread-safe
     static Mode getMode();
-    /// @brief Direct access to config field since
-    /// it's constant and necessary in config file.
+    /// @brief Direct access to config field.
+    /// NOT thread-safe
     static const std::string &getToken();
-    /// @brief Direct access to config field since
-    /// it's constant and necessary in config file.
+    /// @brief Direct access to config field.
+    /// NOT thread-safe
     static const std::string &getV();
-    /// @brief Direct access to config field since
-    /// it's constant and necessary in config file.
+    /// @brief Direct access to config field.
+    /// NOT thread-safe
     static int getPort();
-    /// @brief Direct access to config field since
-    /// it's constant and necessary in config file.
+    /// @brief Direct access to config field.
+    /// NOT thread-safe
     static int getGroupId();
-    /// @brief Direct access to config field since
-    /// it's constant and necessary in config file.
+    /// @brief Direct access to config field.
+    /// NOT thread-safe
     static const std::string &getSecretString();
     static bool hasBaseUrl();
-    /// @brief Direct access to config field since
-    /// it's constant and necessary in config file.
+    /// @brief Direct access to config field.
+    /// NOT thread-safe
     /// @note Probably you'd like to call hasBaseUrl() before
     static const std::string &getBaseUrl();
     /// @return True if given mode is valid to set now. False otherwise
-    static bool isModeValid(Mode mode);
+    static bool isModeValid(const Config &cfg, Mode mode);
 
   private:
     static Config config;
     static std::shared_mutex mut;
     static std::string configName;
-    static std::string target_ids;
 
     struct ReadOnlyConfig
     {

@@ -41,7 +41,7 @@ namespace _details
 
   void checkConfigValidity(Config &config)
   {
-    if (!ConfigHolder::isModeValid(config.mode))
+    if (!ConfigHolder::isModeValid(config, config.mode))
       logAndThrow("Config mode and fields can not work together");
   }
 
@@ -153,25 +153,12 @@ namespace _details
       config.godlikeIds = intVectorFromJson(root["godlike_ids"]);
     return config;
   }
-
-  std::string getTargetIdsString(Config &config)
-  {
-    std::string target_ids;
-    for (const auto &[unused, target] : config.targetsTable.get())
-    {
-      target_ids += target.peer_id + ',';
-    }
-    if (!target_ids.empty())
-      target_ids.pop_back();
-    return target_ids;
-  }
 }
 
 namespace config
 {
   Config ConfigHolder::config = Config();
   std::shared_mutex ConfigHolder::mut = std::shared_mutex();
-  std::string ConfigHolder::target_ids = std::string();
   std::string ConfigHolder::configName = std::string();
 
   using namespace _details;
@@ -188,7 +175,6 @@ namespace config
       logAndThrow("Error while parsing json file");
     Config tempConfig = parseConfigJson(root);
     checkConfigValidity(tempConfig);
-    target_ids = getTargetIdsString(tempConfig);
     config = std::move(tempConfig);
   }
 
@@ -227,11 +213,6 @@ namespace config
   ConfigHolder::ReadWriteConfig ConfigHolder::getReadWriteConfig()
   {
     return ReadWriteConfig();
-  }
-
-  const std::string &ConfigHolder::getTargetIds()
-  {
-    return target_ids;
   }
 
   Mode ConfigHolder::getMode()
@@ -274,7 +255,7 @@ namespace config
     return config.baseUrl.value();
   }
 
-  bool ConfigHolder::isModeValid(Mode mode)
+  bool ConfigHolder::isModeValid(const Config &cfg, Mode mode)
   {
     switch (mode)
     {
@@ -282,7 +263,7 @@ namespace config
       return true;
     
     case Mode::WORK:
-      return config.sourceChat && !config.targetsTable.empty();
+      return cfg.sourceChat && !cfg.targetsTable.empty();
     
     default:
       return false;
