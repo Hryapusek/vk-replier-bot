@@ -14,7 +14,7 @@ namespace vk::requests::details
     using str_cref = const std::string &;
     BaseRequest(str_cref method);
     BaseRequest(std::string &&method);
-    static void init(str_cref token, str_cref v = "5.131", str_cref baseUrl = "https://api.vk.com/method/");
+    static void init(str_cref token, str_cref v = "5.131", str_cref baseUrl = "https://api.vk.com/method");
     /// @throws Json::Exception - if bad json
     /// @throws RequestException - if failed after retries
     /// @note Does not throw anything if response.text is empty.
