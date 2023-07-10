@@ -32,10 +32,25 @@ peer_ids:
  29.2 998 - **Del target by num** with **num 23**
 
  30.0 998 - **Change mode**
-  30.   2 - **Change mode** error NOT GODLIKE
+ 30.1   2 - **Change mode** error NOT GODLIKE
   31. 999 - **Change mode**
   32. /del_source 2000000001
   33. 999 - **Change mode** error expected
 
   34. 2 - **Status**
   35. 5 - **Status**
+
+  36. 2000000001 - **Source** chat without **title**
+ 36.5 999 - **Change mode** to WORK
+  37. **TAG_ALL**           2000000001 **from source**
+  38. **TAG_ALL_IMPORTANT** 2000000001 **from source**
+  39. **TAG_ALL**           2000000100 **from target**
+  40. **TAG_ALL_IMPORTANT** 2000000100 **from target**
+  41. **TAG_ALL**           2000000001 **in direct**
+  42. **TAG_ALL_IMPORTANT** 2000000001 **in direct**
+ 42.5 999 - **Change mode** to CONFIG
+ 42.6 **Delete source**     2000000001
+  43. **Source**            2 **in direct**
+  44. **Target**            2 **in direct**
+  45. **Del source**        2 **in direct**
+  46. **Del target**        2 **in direct**

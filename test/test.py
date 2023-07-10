@@ -26,7 +26,7 @@ def executeUnit(fileName: str):
         print("Content:", content)
         response = requests.post(url=botUrl, json=json.loads(content))
         print(response.status_code)
-        time.sleep(0.2)
+        time.sleep(0.1)
         print(sep)
 
 if len(sys.argv) <= 1:
@@ -69,6 +69,18 @@ elif sys.argv[1] == "registration/trace1":
         Unit("jsons/registration/trace1/33.json", ""),
         Unit("jsons/registration/trace1/34.json", ""),
         Unit("jsons/registration/trace1/35.json", ""),
+        Unit("jsons/registration/trace1/36.json", ""),
+        Unit("jsons/registration/trace1/36.5.json", ""),
+        Unit("jsons/registration/trace1/37.json", ""),
+        Unit("jsons/registration/trace1/38.json", ""),
+        Unit("jsons/registration/trace1/39.json", ""),
+        Unit("jsons/registration/trace1/40.json", ""),
+        Unit("jsons/registration/trace1/41.json", ""),
+        Unit("jsons/registration/trace1/42.json", ""),
+        Unit("jsons/registration/trace1/43.json", ""),
+        Unit("jsons/registration/trace1/44.json", ""),
+        Unit("jsons/registration/trace1/45.json", ""),
+        Unit("jsons/registration/trace1/46.json", ""),
     ]
     for unit in units:
         executeUnit(unit.fileName)
