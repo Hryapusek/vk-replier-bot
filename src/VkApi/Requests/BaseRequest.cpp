@@ -52,17 +52,17 @@ namespace vk::requests::details
   std::thread BaseRequest::pauseThread = std::thread();
   std::mutex BaseRequest::pauseThreadMutex = std::mutex();
 
-  BaseRequest::BaseRequest(str_cref method):
+  BaseRequest::BaseRequest(str_cref method) :
     method(method),
     params(generalParameters)
-  {}
+  { }
 
-  BaseRequest::BaseRequest(std::string &&method):
+  BaseRequest::BaseRequest(std::string &&method) :
     method(std::move(method)),
     params(generalParameters)
-  {}
+  { }
 
-void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
+  void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
   {
     BaseRequest::baseUrl = baseUrl;
     BaseRequest::generalParameters.Add({ { "access_token", token }, { "v", v } });
@@ -98,7 +98,7 @@ void BaseRequest::init(str_cref token, str_cref v, str_cref baseUrl)
 
   void BaseRequest::waitForPauseBetweenRequests()
   {
-    std::unique_lock<std::mutex> lock(pauseThreadMutex);
+    std::unique_lock< std::mutex > lock(pauseThreadMutex);
     if (pauseThread.joinable())
       pauseThread.join();
     pauseThread = std::thread(pauseBetweenRequests);
