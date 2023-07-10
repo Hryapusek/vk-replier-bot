@@ -30,7 +30,7 @@ namespace message_processing::commands
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
     if (!checkIfGodlike(message.getFromId(), commandName, "Can not perform command. Not from godlike")
-        || !checkIfCanChangeModeTo(newMode, req, commandName, "Can not change mode. Some conditions are false"))
+        || !checkIfCanChangeModeTo(newMode, req, commandName, "Can not change mode to" + modeToString.at(newMode) + ". Some conditions are false"))
       return;
     {
       auto configWrap = ConfigHolder::getReadWriteConfig();

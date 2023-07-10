@@ -55,8 +55,8 @@ namespace config
     /// @note String calculated only once on startup.
     /// It is supposed that target id's are constant after startup.
     static const std::string &getTargetIds();
-    /// @brief Direct access to config field since
-    /// it's constant and necessary in config file.
+    /// @brief Direct access to config field.
+    /// BE CAREFUL, THIS FIELD NO MORE CONSTANT
     static Mode getMode();
     /// @brief Direct access to config field since
     /// it's constant and necessary in config file.
@@ -78,6 +78,7 @@ namespace config
     /// it's constant and necessary in config file.
     /// @note Probably you'd like to call hasBaseUrl() before
     static const std::string &getBaseUrl();
+    /// @return True if given mode is valid to set now. False otherwise
     static bool isModeValid(Mode mode);
 
   private:
