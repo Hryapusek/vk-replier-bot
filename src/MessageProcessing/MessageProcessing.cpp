@@ -70,7 +70,6 @@ namespace
     return text.substr(std::distance(text.cbegin(), wordBeg), std::distance(wordBeg, wordEnd));
   }
 
-  // TODO optimize by searching '/' first
   Command findCommand(str_cref text, size_t &pos)
   {
     auto cmdBeg = std::find(text.cbegin(), text.cend(), '/');
