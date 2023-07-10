@@ -37,10 +37,10 @@ namespace message_processing::commands
     static str_cref commandName = "regTarget";
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkMode(Mode::CONFIG, commandName, "Can not perform")
-        || !checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat.")
-        || !checkIfChatIsNotSource(message.getPeerId(), req, commandName, "Can not perform. This chat is source.")
-        || !checkIfPeerIdNotInTargetsTable(message, req, commandName, "Can not perform. This chat is present somewhere in the table"))
+    if (!checkIfCommandFromChat(message, commandName, "Can not perform command. Command not from chat.")
+        || !checkMode(Mode::CONFIG, req, commandName, "Can not perform command")
+        || !checkIfChatIsNotSource(message.getPeerId(), req, commandName, "Can not perform command. This chat is source.")
+        || !checkIfPeerIdNotInTargetsTable(message, req, commandName, "Can not perform command. This chat is present somewhere in the table"))
       return;
     std::optional< int > numOpt;
     std::string title;
@@ -50,17 +50,17 @@ namespace message_processing::commands
     }
     catch (const std::logic_error &e)
     {
-      logAndSendErrorMessage(req, commandName, "Can not perform. Incorrect number passed");
+      logAndSendErrorMessage(req, commandName, "Can not perform command. Incorrect number passed");
       return;
     }
     catch (const std::exception &e)
     {
-      logAndSendErrorMessage(req, commandName, "Can not perform. Check if title is quoted both sides");
+      logAndSendErrorMessage(req, commandName, "Can not perform command. Check if title is quoted both sides");
       return;
     }
     if (numOpt)
     {
-      if (!checkIfNumberBusy(numOpt.value(), req, commandName, "Can not perform. Given num is already busy"))
+      if (!checkIfNumberBusy(numOpt.value(), req, commandName, "Can not perform command. Given num is already busy"))
         return;
       auto res = ConfigHolder::getReadWriteConfig().config.targetsTable.insert(TargetChat{ numOpt.value(), message.getPeerId(), title });
       if (!res)

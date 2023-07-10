@@ -14,12 +14,11 @@ namespace message_processing::commands
   {
     using namespace config;
     static str_cref commandName = "delSource";
-    if (!checkMode(config::Mode::CONFIG, commandName, "Can not perform this command"))
-      return;
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    str_cref errorMessage = "Can not perform. Current chat is not source. PeerId: " + std::to_string(message.getPeerId()) + "Skipping";
-    if (!checkIfCommandFromChat(message, commandName, "Can not perform. Command not from chat. Skipping message")
+    str_cref errorMessage = "Can not perform command. Current chat is not source. PeerId: " + std::to_string(message.getPeerId()) + "Skipping";
+    if (!checkIfCommandFromChat(message, commandName, "Can not perform command. Command not from chat.")
+        || !checkMode(config::Mode::CONFIG, req, commandName, "Can not perform command")
         || !checkIfChatIsSource(message.getPeerId(), req, commandName, errorMessage))
       return;
     ConfigHolder::getReadWriteConfig().config.sourceChat = std::nullopt;

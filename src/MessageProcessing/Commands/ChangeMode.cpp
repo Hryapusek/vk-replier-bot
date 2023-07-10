@@ -29,7 +29,7 @@ namespace message_processing::commands
       newMode = Mode::CONFIG;
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkIfGodlike(message.getFromId(), commandName, "Can not perform command. Not from godlike")
+    if (!checkIfGodlike(message.getFromId(), req, commandName, "Can not perform command. Not from godlike")
         || !checkIfCanChangeModeTo(newMode, req, commandName, "Can not change mode to" + modeToString.at(newMode) + ". Some conditions are false"))
       return;
     {

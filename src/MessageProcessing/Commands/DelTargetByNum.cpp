@@ -23,7 +23,7 @@ namespace message_processing::commands
     static str_cref commandName = "delTargetByNum";
     MessagesSendRequest req;
     req.random_id(0).peer_id(message.getPeerId());
-    if (!checkIfGodlike(message.getFromId(), commandName, "Can not perform command. Not from godlike"))
+    if (!checkIfGodlike(message.getFromId(), req, commandName, "Can not perform command. Not from godlike"))
       return;
     int targetNumToDelete;
     try
@@ -32,10 +32,10 @@ namespace message_processing::commands
     }
     catch (const std::logic_error &e)
     {
-      logAndSendErrorMessage(req, commandName, "Incorrect number passed!");
+      logAndSendErrorMessage(req, commandName, "Can not perform command. Incorrect number passed");
       return;
     }
-    if (!checkIfNumInTargetsTable(targetNumToDelete, req, commandName, "Given num does not exist"))
+    if (!checkIfNumInTargetsTable(targetNumToDelete, req, commandName, "Can not perform command. Given num does not exist"))
       return;
     {
       auto configWrap = ConfigHolder::getReadWriteConfig();
