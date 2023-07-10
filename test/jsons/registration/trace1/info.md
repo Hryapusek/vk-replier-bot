@@ -22,12 +22,13 @@ peer_ids:
 
   23. 999 - **Reg godlike** if already godlike
   24. 999 - **Reg godlike** without **num**
-  25. 999 - **Reg godlike** with **bad num**
-  26. 999 - **Reg godlike** with **num 998**
+  26. 999 - **Reg godlike** with **bad num**
+ 26.1   2 - **Reg godlike** with **num 998** - error NOT FROM GODLIKE
+ 26.2 999 - **Reg godlike** with **num 998**
 
   27. 998 - **Del target by num** without **num**
   28. 998 - **Del target by num** with bad **num**
- 29.1   2 - **Del target by num** with **num 23** - error NOT GODLIKE
+ 29.1   2 - **Del target by num** with **num 23** - error NOT FROM GODLIKE
  29.2 998 - **Del target by num** with **num 23**
 
  30.0 998 - **Change mode**
