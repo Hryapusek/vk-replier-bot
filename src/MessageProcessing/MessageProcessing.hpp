@@ -17,7 +17,7 @@ namespace message_processing
 
   const std::map< Tag, const std::vector< std::string > > tagStrings = {
     { Tag::ALL,           { "_всем_" } },
-    { Tag::ALL_IMPORTANT, { "_всем_важно" } }
+    { Tag::ALL_IMPORTANT, { "_всем_важно_" } }
   };
 
   enum class Command
