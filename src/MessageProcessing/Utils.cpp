@@ -38,6 +38,28 @@ namespace
   {
     return ConfigHolder::getReadOnlyConfig().config.targetsTable.containsNum(num);
   }
+
+  bool _checkModeCond(Mode mode)
+  {
+    return ConfigHolder::getReadOnlyConfig().config.mode == mode;
+  }
+
+  std::string getCheckModePostfix(Mode mode)
+  {
+    switch (mode)
+    {
+      case Mode::CONFIG:
+        return " - mode is not CONFIG";
+        break;
+
+      case Mode::WORK:
+        return " - mode is not WORK";
+        break;
+
+      default:
+        return " - CAN NOT CHECK THE MODE. IT'S NOT INITIALIZED!!!";
+    }
+  }
 }
 
 namespace message_processing::utils
@@ -73,7 +95,12 @@ namespace message_processing::utils
     std::string::const_iterator beg(&text[pos]);
     if (!skipWord(beg, text))
       throw std::logic_error("");
-    return std::stoi(beg.base());
+    size_t nDigits;
+    int num = std::stoi(beg.base(), &nDigits);
+    size_t endNumPos = std::distance(text.cbegin(), beg) + nDigits;
+    if (endNumPos != text.size() && !isspace(text[endNumPos]))
+      throw std::logic_error("");
+    return num;
   }
 
   void extractNumAndTitle(str_cref text, size_t pos, std::optional< int > &num, std::string &title)
@@ -87,7 +114,11 @@ namespace message_processing::utils
       title = extractString(++beg, text);
       return;
     }
-    num = std::stoi(beg.base());
+    size_t nDigits;
+    num = std::stoi(beg.base(), &nDigits);
+    size_t endNumPos = std::distance(text.cbegin(), beg) + nDigits;
+    if (endNumPos != text.size() && !isspace(text[endNumPos]))
+      throw std::invalid_argument("");
     if (!skipWord(beg, text))
       return;
     if (*beg == '"')
@@ -120,12 +151,14 @@ namespace message_processing::utils
 
   void sendMessageToAllTargets(str_cref text, int fwd_msg_id)
   {
-    MessagesSendRequest()
-    .peer_ids(ConfigHolder::getTargetIds())
+    MessagesSendRequest req;
+    req
+    .peer_ids(ConfigHolder::getReadOnlyConfig().config.targetsTable.getTargetIdsString())
     .random_id(0)
-    .forward_messages(std::to_string(fwd_msg_id))
-    .message(text)
-    .execute();
+    .forward_messages(std::to_string(fwd_msg_id));
+    if (!text.empty())
+      req.message(text);
+    req.execute();
   }
 
   bool checkIfCommandFromChat(const Message &message, str_cref commandName, str_cref errorMessage)
@@ -141,32 +174,26 @@ namespace message_processing::utils
 
   bool checkMode(Mode mode, str_cref commandName, str_cref errorMessage)
   {
-    if (ConfigHolder::getReadOnlyConfig().config.mode != mode)
-    {
-      std::string postfix;
-      switch (mode)
-      {
-        case Mode::CONFIG:
-          postfix = " - mode is not CONFIG";
-          break;
+    bool cond = _checkModeCond(mode);
+    return checkIf(cond, commandName, errorMessage + getCheckModePostfix(mode));
+  }
 
-        case Mode::WORK:
-          postfix = " - mode is not WORK";
-          break;
-
-        default:
-          postfix = " - CAN NOT CHECK THE MODE. IT'S NOT INITIALIZED!!!";
-      }
-      BOOST_LOG_TRIVIAL(warning) << commandName << ": " << errorMessage << postfix;
-      return false;
-    }
-    return true;
+  bool checkMode(config::Mode mode, vk::requests::messages::MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = _checkModeCond(mode);
+    return checkIf(cond, req, commandName, errorMessage + getCheckModePostfix(mode));
   }
 
   bool checkIfSourceChatPresent(str_cref commandName, str_cref errorMessage)
   {
     bool cond = ConfigHolder::getReadOnlyConfig().config.sourceChat.has_value();
     return checkIf(cond, commandName, errorMessage);
+  }
+
+  bool checkIfSourceChatPresent(vk::requests::messages::MessagesSendRequest & req, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = ConfigHolder::getReadOnlyConfig().config.sourceChat.has_value();
+    return checkIf(cond, req, commandName, errorMessage);
   }
 
   bool checkIfChatIsNotSource(int peerId, str_cref commandName, str_cref errorMessage)
@@ -210,6 +237,12 @@ namespace message_processing::utils
     return checkIf(cond, commandName, errorMessage);
   }
 
+  bool checkIfGodlike(int peerId, vk::requests::messages::MessagesSendRequest & req, str_cref commandName, str_cref errorMessage)
+  {
+    bool cond = _checkIfGodlikeCond(peerId);
+    return checkIf(cond, req, commandName, errorMessage);
+  }
+
   bool checkIfNotGodlike(int peerId, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
     bool cond = _checkIfNotGodlikeCond(peerId);
@@ -218,7 +251,8 @@ namespace message_processing::utils
 
   bool checkIfCanChangeModeTo(Mode mode, MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
-    bool cond = ConfigHolder::isModeValid(mode);
+    auto configWrap = ConfigHolder::getReadOnlyConfig();
+    bool cond = ConfigHolder::isModeValid(configWrap.config, mode);
     return checkIf(cond, req, commandName, errorMessage);
   }
 
