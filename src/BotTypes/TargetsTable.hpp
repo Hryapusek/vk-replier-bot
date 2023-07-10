@@ -25,6 +25,7 @@ public:
   bool empty() const;
   const TargetChat &at(int num) const;
   TargetChat &at(int num);
+  std::string getTargetIdsString() const;
   /// @return Underlying map
   std::map<int, TargetChat> &get() { return table; };
 

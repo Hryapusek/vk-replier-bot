@@ -94,3 +94,13 @@ TargetChat &TargetsTable::at(int num)
 {
   return table.at(num);
 }
+
+std::string TargetsTable::getTargetIdsString() const
+{
+  std::string result;
+  for (auto beg = table.cbegin(); beg != table.cend(); ++beg)
+    result += std::to_string(beg->second.peer_id) + ',';
+  if (!result.empty())
+    result.pop_back();
+  return result;
+}
