@@ -8,7 +8,7 @@ class TargetsTable
 {
   using Map = std::map<int, TargetChat>;
 public:
-  /// @param[in] chat Chat to insert. Chat.num will be used ad a key
+  /// @param[in] chat Chat to insert. Chat.num will be used as a key
   /// @return True if inserted successfully. False otherwise.
   bool insert(TargetChat chat);
   bool generateNumAndInsert(TargetChat chat);
