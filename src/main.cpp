@@ -16,8 +16,9 @@
 #include "VkApi/Requests/BaseRequest.hpp"
 #include "MessageProcessing/MessageProcessing.hpp"
 
-// TODO print TimeStamp, LineID, ProcessID, ThreadID
-// TODO config vectors to sets
+// FIX - print TimeStamp, LineID, ProcessID, ThreadID
+// OPTIMIZATION - config vectors to sets
+// TODO - NAMESPACE REPLIER
 
 std::vector< std::thread > threads;
 std::mutex threadsMutex;
@@ -151,12 +152,12 @@ std::shared_ptr< httpserver::http_response > HttpHandler::render(const httpserve
   } catch (const Json::Exception &e)
   {
     logSkipEvent("Bad json in request body", "Content:", req.get_content());
-    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
+    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("ok", 200));
   }
   if (!root.isMember("type"))
   {
     logSkipEvent("\"type\" field was not found", "Json:", root);
-    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
+    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("ok", 200));
   }
   EventType eventType;
   try
@@ -166,7 +167,7 @@ std::shared_ptr< httpserver::http_response > HttpHandler::render(const httpserve
   catch (const Json::Exception &e)
   {
     logSkipEvent("Incorrect \"type\" field type", "Json:", root);
-    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
+    return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("ok", 200));
   }
   switch (eventType)
   {
@@ -178,6 +179,8 @@ std::shared_ptr< httpserver::http_response > HttpHandler::render(const httpserve
     case EventType::MESSAGE_NEW:
     {
       BOOST_LOG_TRIVIAL(info) << "Event type is MESSAGE_NEW. Starting eventProcess thread";
+      //обработку сообщения отправляем в поток, и отправляем серверу ответ что всё чики пуки
+      //ВК перестанет отправлять уведомления если не получит ответ ОК
       threads.emplace_back(processEvent, std::move(root));
       break;
     }
