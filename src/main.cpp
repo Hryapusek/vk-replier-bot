@@ -195,7 +195,7 @@ std::shared_ptr< httpserver::http_response > HttpHandler::render(const httpserve
       break;
     }
   }
-  return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("", 200));
+  return std::shared_ptr< httpserver::http_response >(new httpserver::string_response("ok", 200));
 }
 
 int main() {
