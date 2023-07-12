@@ -5,6 +5,14 @@
 
 namespace vk::requests::messages
 {
+  struct ForwardParam
+  {
+    std::optional<int> owner_id;
+    std::optional<int> peer_id;
+    std::vector<int> conversation_message_ids;
+    std::vector<int> message_ids;
+  };
+
   class MessagesSendRequest : protected details::BaseRequest
   { 
     template < class T > using vec_cref = const std::vector<T> &;
@@ -20,6 +28,7 @@ namespace vk::requests::messages
       MessagesSendRequest &message(str_cref message);
       MessagesSendRequest &forward_messages(vec_cref<int> forward_messages);
       MessagesSendRequest &forward_messages(str_cref forward_messages);
+      MessagesSendRequest &forward(ForwardParam fwdStruct);
       /// @throw Json::Exception
       /// @throw RequestException
       void execute();
