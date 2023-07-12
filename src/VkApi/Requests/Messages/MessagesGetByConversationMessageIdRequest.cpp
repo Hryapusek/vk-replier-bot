@@ -7,7 +7,7 @@ namespace vk::requests::messages
   using Response = ::vk::responses::messages::MessagesGetByConversationMessageIdResponse;
 
   Request::MessagesGetByConversationMessageIdRequest() :
-    BaseRequest("messages.send")
+    BaseRequest("messages.getByConversationMessageId")
   {  }
 
   Request & Request::peer_id(int peerId)
@@ -16,15 +16,15 @@ namespace vk::requests::messages
     return *this;
   }
 
-  Request & Request::conversation_message_ids(vec_cref<int> peerIds)
+  Request & Request::conversation_message_ids(vec_cref<int> conversation_message_ids)
   {
-    params.Add({{"peer_ids", details::vectorToString(peerIds)}});
+    params.Add({{"conversation_message_ids", details::vectorToString(conversation_message_ids)}});
     return *this;
   }
 
-  Request & Request::conversation_message_ids(str_cref peerIds)
+  Request & Request::conversation_message_ids(str_cref conversation_message_ids)
   {
-    params.Add({{"peer_ids", peerIds}});
+    params.Add({{"conversation_message_ids", conversation_message_ids}});
     return *this;
   }
 
