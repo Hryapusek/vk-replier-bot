@@ -31,6 +31,6 @@ namespace vk::requests::messages
   Response Request::execute()
   {
     send();
-    return Response::fromJson(responseJson);
+    return Response::fromJson(responseJson["response"]);
   }
 }
