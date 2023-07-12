@@ -149,13 +149,20 @@ namespace message_processing::utils
     req.message(errorMessage).execute();
   }
 
-  void sendMessageToAllTargets(str_cref text, int fwd_msg_id)
+  void sendMessageToAllTargets(str_cref text, int fwd_conv_msg_id)
   {
     MessagesSendRequest req;
-    req
-    .peer_ids(ConfigHolder::getReadOnlyConfig().config.targetsTable.getTargetIdsString())
-    .random_id(0)
-    .forward_messages(std::to_string(fwd_msg_id));
+    {
+      auto configWrap = ConfigHolder::getReadOnlyConfig();
+      auto &config = configWrap.config;
+      ForwardParam fwdParam;
+      fwdParam.conversation_message_ids = {fwd_conv_msg_id};
+      fwdParam.peer_id = config.sourceChat->peer_id;
+      req
+      .peer_ids(ConfigHolder::getReadOnlyConfig().config.targetsTable.getTargetIdsString())
+      .random_id(0)
+      .forward(fwdParam);
+    }
     if (!text.empty())
       req.message(text);
     req.execute();
@@ -190,7 +197,7 @@ namespace message_processing::utils
     return checkIf(cond, commandName, errorMessage);
   }
 
-  bool checkIfSourceChatPresent(vk::requests::messages::MessagesSendRequest & req, str_cref commandName, str_cref errorMessage)
+  bool checkIfSourceChatPresent(vk::requests::messages::MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
     bool cond = ConfigHolder::getReadOnlyConfig().config.sourceChat.has_value();
     return checkIf(cond, req, commandName, errorMessage);
@@ -237,7 +244,7 @@ namespace message_processing::utils
     return checkIf(cond, commandName, errorMessage);
   }
 
-  bool checkIfGodlike(int peerId, vk::requests::messages::MessagesSendRequest & req, str_cref commandName, str_cref errorMessage)
+  bool checkIfGodlike(int peerId, vk::requests::messages::MessagesSendRequest &req, str_cref commandName, str_cref errorMessage)
   {
     bool cond = _checkIfGodlikeCond(peerId);
     return checkIf(cond, req, commandName, errorMessage);

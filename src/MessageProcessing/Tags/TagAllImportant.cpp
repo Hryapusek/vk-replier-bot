@@ -30,6 +30,6 @@ namespace message_processing::tags
       title = "@all";
     }
     BOOST_LOG_TRIVIAL(info) << "Forwarding messages";
-    sendMessageToAllTargets(std::move(title), message.getId());
+    sendMessageToAllTargets(std::move(title), message.getConversationMessageId());
   }
 }

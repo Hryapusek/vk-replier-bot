@@ -32,9 +32,10 @@ namespace message_processing::utils
   /// Quoted title otherwise.
   /// @throw \b std::exception if string is not closed with -> "
   std::string extractTitle(str_cref text, size_t pos);
+  
   void logAndSendErrorMessage(vk::requests::messages::MessagesSendRequest &req, str_cref commandName, str_cref errorMessage);
 
-  void sendMessageToAllTargets(str_cref text, int fwd_msg_id);
+  void sendMessageToAllTargets(str_cref text, int fwd_conv_msg_id);
 
   bool checkIfCommandFromChat(const vk::objects::Message &message, str_cref commandName, str_cref errorMessage);
 
