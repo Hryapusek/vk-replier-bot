@@ -49,6 +49,8 @@ set(SOURCE_FILES_LIST
   VkApi/Callback/Event/Utils.cpp
   VkApi/Objects/Message.cpp
   VkApi/Requests/Messages/MessagesSendRequest.cpp
+  VkApi/Requests/Messages/MessagesGetByConversationMessageIdRequest.cpp
+  VkApi/Responses/Messages/MessagesGetByConversationMessageIdResponse.cpp
   VkApi/Requests/BaseRequest.cpp
   VkApi/Exceptions.cpp
   MessageProcessing/MessageProcessing.cpp
