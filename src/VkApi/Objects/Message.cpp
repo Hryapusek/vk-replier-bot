@@ -28,6 +28,7 @@ namespace vk::objects
       JsonFieldT< int >("peer_id",      !necessary),
       JsonFieldT< int >("from_id",      !necessary),
       JsonFieldT< std::string >("text", !necessary),
+      JsonFieldT< int >("conversation_message_id",      !necessary),
     };
     checkJsonFields(root, fields);
     Message msg;
@@ -39,6 +40,8 @@ namespace vk::objects
       msg.from_id = root["from_id"].asInt();
     if (root.isMember("text"))
       msg.text = root["text"].asString();
+    if (root.isMember("conversation_message_id"))
+      msg.conversation_message_id = root["conversation_message_id"].asInt();
     return msg;
   }
 }

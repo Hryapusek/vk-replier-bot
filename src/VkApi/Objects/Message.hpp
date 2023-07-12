@@ -16,6 +16,7 @@ namespace vk::objects
     bool hasPeerId() const { return peer_id.has_value(); }
     bool hasFromId() const { return from_id.has_value(); }
     bool hasText() const { return text.has_value(); }
+    bool hasConversationMessageId() { return conversation_message_id.has_value(); }
 
     /// @throw std::bad_optional_access
     int getId() const { return *id; }
@@ -34,6 +35,9 @@ namespace vk::objects
     const std::string &getText() const { return *text; }
 
     /// @throw std::bad_optional_access
+    int getConversationMessageId() const { return *conversation_message_id; }
+
+    /// @throw std::bad_optional_access
     bool fromDirect() const;
 
     /// @throw std::bad_optional_access
@@ -50,6 +54,7 @@ namespace vk::objects
     std::optional< int > peer_id;
     std::optional< int > from_id;
     std::optional< std::string > text;
+    std::optional< int > conversation_message_id;
   };
 }
 
