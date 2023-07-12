@@ -7,6 +7,7 @@
 #include "Tags.hpp"
 #include "../ConfigReader.hpp"
 #include "../VkApi/Requests/Messages/MessagesSendRequest.hpp"
+#include "../VkApi/Requests/Messages/MessagesGetByConversationMessageIdRequest.hpp"
 #include "../VkApi/Exceptions.hpp"
 
 // TODO shorten title
@@ -90,65 +91,12 @@ namespace
           return cmd;
     return Command::NONE;
   }
-}
 
-namespace message_processing
-{
-  void processMessageWithCommand(const Message &message, Command cmd, size_t pos);
-
-  void processMessageWithTag(const Message &message, Tag tag, size_t pos);
-
-  void processMessage(std::shared_ptr< NewMessage > newMessage)
-  {
-    using namespace config;
-    if (!hasMessageNecessaryFields(newMessage->getMessage()))
-    {
-      BOOST_LOG_TRIVIAL(info) << "Message does not contain necessary fields. Skipping";
-      return;
-    }
-    if (newMessage->getMessage().getFromId() == config::ConfigHolder::getGroupId())
-    {
-      BOOST_LOG_TRIVIAL(info) << "Message from bot. Skipping";
-      return;
-    }
-    logMessage(newMessage->getMessage());
-    try
-    {
-      size_t pos;
-      Tag tag = findTag(newMessage->getMessage().getText(), pos);
-      if (tag != Tag::NONE)
-      {
-        BOOST_LOG_TRIVIAL(info) << "Message with tag";
-        processMessageWithTag(newMessage->getMessage(), tag, pos);
-        BOOST_LOG_TRIVIAL(info) << "Message tag processing finished successfully";
-        return;
-      }
-      Command cmd = findCommand(newMessage->getMessage().getText(), pos);
-      if (cmd != Command::NONE)
-      {
-        BOOST_LOG_TRIVIAL(info) << "Message with command";
-        processMessageWithCommand(newMessage->getMessage(), cmd, pos);
-        BOOST_LOG_TRIVIAL(info) << "Message command processing finished successfully";
-        return;
-      }
-      BOOST_LOG_TRIVIAL(info) << "Neither a command nor a tag were found. Skipping";
-    }
-    catch (const Json::Exception &e)
-    {
-      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "Json exception");
-    }
-    catch (const std::logic_error &e)
-    {
-      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "std::logic_error");
-    }
-    catch (const vk::exceptions::RequestException &e)
-    {
-      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "RequestException");
-    }
-    catch (const std::exception &e)
-    {
-      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "std::excepiton");
-    }
+  Message getFullMessage(int peer_id, int conv_msg_id)
+  { 
+    MessagesGetByConversationMessageIdRequest req;
+    auto resp = req.peer_id(peer_id).conversation_message_ids(std::to_string(conv_msg_id)).execute();
+    return resp.getMessages()[0];
   }
 
   void processMessageWithCommand(const Message &message, Command cmd, size_t pos)
@@ -245,5 +193,65 @@ namespace message_processing
       }
     }
   }
+}
+
+namespace message_processing
+{
+  void processMessage(std::shared_ptr< NewMessage > newMessage)
+  {
+    // TODO get same message using messages.getByCoversationMessageId
+    using namespace config;
+    if (!hasMessageNecessaryFields(newMessage->getMessage()))
+    {
+      BOOST_LOG_TRIVIAL(info) << "Message does not contain necessary fields. Skipping";
+      return;
+    }
+    if (newMessage->getMessage().getFromId() == config::ConfigHolder::getGroupId())
+    {
+      BOOST_LOG_TRIVIAL(info) << "Message from bot. Skipping";
+      return;
+    }
+    logMessage(newMessage->getMessage());
+    try
+    {
+      BOOST_LOG_TRIVIAL(info) << "Getting full message";
+      auto message = getFullMessage(newMessage->getMessage().getPeerId(), newMessage->getMessage().getConversationMessageId());
+      size_t pos;
+      Tag tag = findTag(message.getText(), pos);
+      if (tag != Tag::NONE)
+      {
+        BOOST_LOG_TRIVIAL(info) << "Message with tag";
+        processMessageWithTag(message, tag, pos);
+        BOOST_LOG_TRIVIAL(info) << "Message tag processing finished successfully";
+        return;
+      }
+      Command cmd = findCommand(message.getText(), pos);
+      if (cmd != Command::NONE)
+      {
+        BOOST_LOG_TRIVIAL(info) << "Message with command";
+        processMessageWithCommand(message, cmd, pos);
+        BOOST_LOG_TRIVIAL(info) << "Message command processing finished successfully";
+        return;
+      }
+      BOOST_LOG_TRIVIAL(info) << "Neither a command nor a tag were found. Skipping";
+    }
+    catch (const Json::Exception &e)
+    {
+      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "Json exception");
+    }
+    catch (const std::logic_error &e)
+    {
+      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "std::logic_error");
+    }
+    catch (const vk::exceptions::RequestException &e)
+    {
+      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "RequestException");
+    }
+    catch (const std::exception &e)
+    {
+      logAndSendErrorMessage(e, newMessage->getMessage().getPeerId(), "std::excepiton");
+    }
+  }
+
 
 }
