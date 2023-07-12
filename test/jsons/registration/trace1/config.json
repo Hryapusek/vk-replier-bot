@@ -5,7 +5,7 @@
 		999
 	],
 	"group_id" : -100000,
-	"mode" : "work",
+	"mode" : "config",
 	"port" : 8081,
 	"secret_string" : "secret",
 	"token" : "token",
