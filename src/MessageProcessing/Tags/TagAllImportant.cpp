@@ -31,6 +31,6 @@ namespace message_processing::tags
     }
     BOOST_LOG_TRIVIAL(info) << "Forwarding messages";
     sendMessageToAllTargets(std::move(title), message.getConversationMessageId());
-    req.message("Successfully forwarded!");
+    req.message("Successfully forwarded!").execute();
   }
 }
