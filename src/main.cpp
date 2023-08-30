@@ -8,6 +8,7 @@
 // 2. Incapsulate logger
 // 3. Put error messages in separate class
 // 4. Parse Event NOT EventType
+// TODO fix regex, add \n to whitespaces
 
 // FIX - print TimeStamp, LineID, ProcessID, ThreadID
 // OPTIMIZATION - config vectors to sets
