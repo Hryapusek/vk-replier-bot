@@ -157,49 +157,49 @@ namespace _details
 
 namespace config
 {
-  Config ConfigHolder::config = Config();
-  std::shared_mutex ConfigHolder::mut = std::shared_mutex();
-  std::string ConfigHolder::configName = std::string();
+  Config ConfigHolder::config_ = Config();
+  std::shared_mutex ConfigHolder::mut_ = std::shared_mutex();
+  std::string ConfigHolder::configPath_ = std::string();
 
   using namespace _details;
 
-  void ConfigHolder::readConfigFromFile(const std::string &configName)
+  void ConfigHolder::init(const std::string &configPath)
   {
-    std::ifstream configFile(configName);
+    std::ifstream configFile(configPath);
     if (!configFile.is_open())
-      logAndThrow("Can not open config file " + configName);
-    ConfigHolder::configName = configName;
+      logAndThrow("Can not open config file " + configPath);
+    ConfigHolder::configPath_ = configPath;
     Json::Value root;
     Json::CharReaderBuilder builder;
     if (!parseFromStream(builder, configFile, &root, nullptr))
       logAndThrow("Error while parsing json file");
     Config tempConfig = parseConfigJson(root);
     checkConfigValidity(tempConfig);
-    config = std::move(tempConfig);
+    config_ = std::move(tempConfig);
   }
 
   void ConfigHolder::updateConfigFile()
   {
-    std::ofstream out(configName);
+    std::ofstream out(configPath_);
     if (!out.is_open())
       return;
     Json::Value configJson;
-    if (config.mode == Mode::CONFIG)
+    if (config_.mode == Mode::CONFIG)
       configJson["mode"] = "config";
-    else if (config.mode == Mode::WORK)
+    else if (config_.mode == Mode::WORK)
       configJson["mode"] = "work";
-    configJson["token"] = config.token;
-    configJson["v"] = config.v;
-    configJson["secret_string"] = config.secret_string;
-    configJson["port"] = config.port;
-    configJson["group_id"] = config.groupID;
-    configJson["target_chats"] = targetChatsToJson(config);
-    if (config.sourceChat)
-      configJson["source_chat"] = sourceChatToJson(config.sourceChat.value());
-    if (config.baseUrl)
-      configJson["base_url"] = config.baseUrl.value();
-    if (!config.godlikeIds.empty())
-      configJson["godlike_ids"] = intVectorToJson(config.godlikeIds);
+    configJson["token"] = config_.token;
+    configJson["v"] = config_.v;
+    configJson["secret_string"] = config_.secret_string;
+    configJson["port"] = config_.port;
+    configJson["group_id"] = config_.groupID;
+    configJson["target_chats"] = targetChatsToJson(config_);
+    if (config_.sourceChat)
+      configJson["source_chat"] = sourceChatToJson(config_.sourceChat.value());
+    if (config_.baseUrl)
+      configJson["base_url"] = config_.baseUrl.value();
+    if (!config_.godlikeIds.empty())
+      configJson["godlike_ids"] = intVectorToJson(config_.godlikeIds);
     Json::StreamWriterBuilder builder;
     const std::unique_ptr< Json::StreamWriter > writer(builder.newStreamWriter());
     writer->write(configJson, &out);
@@ -217,42 +217,42 @@ namespace config
 
   Mode ConfigHolder::getMode()
   {
-    return config.mode;
+    return config_.mode;
   }
 
   const std::string &ConfigHolder::getToken()
   {
-    return config.token;
+    return config_.token;
   }
 
   const std::string &ConfigHolder::getV()
   {
-    return config.v;
+    return config_.v;
   }
 
   int ConfigHolder::getPort()
   {
-    return config.port;
+    return config_.port;
   }
 
   int ConfigHolder::getGroupId()
   {
-    return config.groupID;
+    return config_.groupID;
   }
 
   const std::string &ConfigHolder::getSecretString()
   {
-    return config.secret_string;
+    return config_.secret_string;
   }
 
   bool ConfigHolder::hasBaseUrl()
   {
-    return config.baseUrl.has_value();
+    return config_.baseUrl.has_value();
   }
 
   const std::string &ConfigHolder::getBaseUrl()
   {
-    return config.baseUrl.value();
+    return config_.baseUrl.value();
   }
 
   bool ConfigHolder::isModeValid(const Config &cfg, Mode mode)

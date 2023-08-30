@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <shared_mutex>
+#include <mutex>
 #include <jsoncpp/json/json.h>
 #include "BotTypes/TargetsTable.hpp"
 #include "JsonUtils.hpp"
@@ -47,7 +48,7 @@ namespace config
     /// @brief Init function
     /// @throws std::logic_error - Fatal error occured
     /// @throws Json::Exception - Fatal error occured
-    static void readConfigFromFile(const std::string &configName);
+    static void init(const std::string &configPath);
     static void updateConfigFile();
     static ReadOnlyConfig getReadOnlyConfig();
     static ReadWriteConfig getReadWriteConfig();
@@ -78,13 +79,13 @@ namespace config
     static bool isModeValid(const Config &cfg, Mode mode);
 
   private:
-    static Config config;
-    static std::shared_mutex mut;
-    static std::string configName;
+    static Config config_;
+    static std::shared_mutex mut_;
+    static std::string configPath_;
 
     struct ReadOnlyConfig
     {
-      ReadOnlyConfig() : config(ConfigHolder::config), lock(mut) { }
+      ReadOnlyConfig() : config(ConfigHolder::config_), lock(mut_) { }
       ReadOnlyConfig(const ReadOnlyConfig &) = delete;
       ReadOnlyConfig(ReadOnlyConfig &&) = delete;
       ReadOnlyConfig &operator=(const ReadOnlyConfig &) = delete;
@@ -96,7 +97,7 @@ namespace config
 
     struct ReadWriteConfig
     {
-      ReadWriteConfig() : config(ConfigHolder::config), lock(mut) { }
+      ReadWriteConfig() : config(ConfigHolder::config_), lock(mut_) { }
       ReadWriteConfig(const ReadWriteConfig &) = delete;
       ReadWriteConfig(ReadWriteConfig &&) = delete;
       ReadWriteConfig &operator=(const ReadWriteConfig &) = delete;
