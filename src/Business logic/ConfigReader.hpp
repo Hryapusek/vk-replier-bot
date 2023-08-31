@@ -8,8 +8,8 @@
 #include <shared_mutex>
 #include <mutex>
 #include <jsoncpp/json/json.h>
-#include "BotTypes/TargetsTable.hpp"
-#include "JsonUtils.hpp"
+#include "../BotTypes/TargetsTable.hpp"
+#include "../JsonUtils.hpp"
 
 namespace config
 {

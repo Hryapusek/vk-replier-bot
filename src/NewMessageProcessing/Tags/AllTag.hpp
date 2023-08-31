@@ -4,11 +4,13 @@
 #include "../../VkApi/Objects/Message.hpp"
 #include "../TagI.hpp"
 
-class AllTag : public TagI
+namespace tags
 {
-public:
-  virtual void execute(const Message_t &msg);
-  virtual bool isThisTextTrigger(const Message_t &msg);
-};
-
+  class AllTag : public TagI
+  {
+  public:
+    virtual void execute(const Message_t &msg);
+    virtual bool isThisTextTrigger(const Message_t &msg);
+  };
+}
 #endif

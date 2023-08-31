@@ -1,13 +1,13 @@
 #include "AllTag.hpp"
 #include <boost/log/trivial.hpp>
 #include "../Utils.hpp"
-#include "../../ConfigReader.hpp"
+#include "../../Business logic/BusinessLogic.hpp"
 
 using namespace message_processing;
 using namespace vk::requests::messages;
 using namespace vk::objects;
 
-namespace message_processing::tags
+namespace tags
 {
   using namespace utils;
   void tagAll(const Message &message, size_t pos)
@@ -32,5 +32,16 @@ namespace message_processing::tags
     BOOST_LOG_TRIVIAL(info) << "Forwarding messages";
     sendMessageToAllTargets(std::move(title), message.getConversationMessageId());
     req.message("Successfully forwarded!").execute();
+  }
+
+
+  void tags::AllTag::execute(const Message_t &msg)
+  { 
+    auto res = BusinessLogic::getTagAllString(msg.getFromId(), msg.getPeerId());
+    if (!res)
+    {
+      // TODO send error message
+    }
+    auto targetsStr = std::move(res.getObject());
   }
 }

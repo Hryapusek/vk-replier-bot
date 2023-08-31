@@ -3,11 +3,11 @@
 
 #include <vector>
 #include <memory>
-#include "TextTriggerI.hpp"
+#include "CommandI.hpp"
 
 class CommandsPool
 {
-  static const std::vector<std::shared_ptr<TextTriggerI>> vec;
+  static const std::vector<std::shared_ptr<CommandI>> vec;
 };
 
 #endif

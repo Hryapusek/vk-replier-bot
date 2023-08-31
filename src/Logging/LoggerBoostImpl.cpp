@@ -1,5 +1,7 @@
 #include "LoggerBoostImpl.hpp"
 
+#define BOOST_LOG_DYN_LINK 1
+
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>
