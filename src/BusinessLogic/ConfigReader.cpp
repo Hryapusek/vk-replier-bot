@@ -141,7 +141,7 @@ namespace _details
       logAndThrow("Incorrect mode found in config");
     config.token = root["token"].asString();
     config.v = root["v"].asString();
-    config.secret_string = root["secret_string"].asString();
+    config.secretString = root["secret_string"].asString();
     config.port = root["port"].asInt();
     config.groupID = root["group_id"].asInt();
     config.targetsTable = targetChatsFromJson(root["target_chats"]);
@@ -190,7 +190,7 @@ namespace config
       configJson["mode"] = "work";
     configJson["token"] = config_.token;
     configJson["v"] = config_.v;
-    configJson["secret_string"] = config_.secret_string;
+    configJson["secret_string"] = config_.secretString;
     configJson["port"] = config_.port;
     configJson["group_id"] = config_.groupID;
     configJson["target_chats"] = targetChatsToJson(config_);
@@ -242,7 +242,7 @@ namespace config
 
   const std::string &ConfigHolder::getSecretString()
   {
-    return config_.secret_string;
+    return config_.secretString;
   }
 
   bool ConfigHolder::hasBaseUrl()

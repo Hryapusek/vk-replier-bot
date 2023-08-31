@@ -30,7 +30,7 @@ namespace config
     Mode mode;
     std::string token;
     std::string v;
-    std::string secret_string;
+    std::string secretString;
     int port;
     int groupID;
     std::optional< std::string > baseUrl;

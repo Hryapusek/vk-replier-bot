@@ -2,7 +2,7 @@
 #define BUSINESS_LOGIC_HPP
 
 #include <string>
-#include "Result.hpp"
+#include "../GeneralUtils/Result.hpp"
 #include "../VkApi/GeneralTypes.hpp"
 
 class BusinessLogic

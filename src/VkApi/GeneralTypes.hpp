@@ -5,6 +5,7 @@ namespace vk
 {
   using UserId_t = int;
   using ChatId_t = int;
+  using Peer_Id_t = int;
 }
 
 #endif

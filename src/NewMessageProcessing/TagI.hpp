@@ -4,6 +4,8 @@
 #include "TextTriggerI.hpp"
 
 class TagI : public TextTriggerI
-{};
+{
+  using TextTriggerI::TextTriggerI;
+};
 
 #endif
