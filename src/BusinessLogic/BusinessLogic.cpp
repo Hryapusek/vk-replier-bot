@@ -1,8 +1,10 @@
 #include "BusinessLogic.hpp"
 #include "../Logging/Logger.hpp"
-#include "ConfigReader.hpp"
+#include "ConfigHolder.hpp"
 #include "../VkApi/Requests/Init.hpp"
 #include "Conditions.hpp"
+#include "ConfigTypes/Chats.hpp"
+#include "ConfigOperations.hpp"
 
 const std::string BusinessLogic::configPath = "config.json";
 const std::string BusinessLogic::logFilePath = "logfile.log";
@@ -28,16 +30,45 @@ void BusinessLogic::init()
   initVkRequests();
 }
 
-Result<std::string> BusinessLogic::getTagAllString(UserId_t callerId, ChatId_t callerChatId)
+Result<std::string> BusinessLogic::getTagAllString(VkChatId_t callerChatId)
 {
   using namespace conditions;
   auto configWrapper = ConfigHolder::getReadOnlyConfig();
   auto &config = configWrapper.config;
   if (!isModeWork(config))
-    return make_error_result<std::string>("Mode is not work");
+    return make_error_result("Mode is not work");
   if (!isChatSource(config, callerChatId))
-    return make_error_result<std::string>("Chat is not source");
+    return make_error_result("Chat is not source");
   if (!isAnyTargetChatPresent(config))
-    return make_error_result<std::string>("No target chats were found");
-  return config.targetsTable.getTargetIdsString();
+    return make_error_result("No target chats were found");
+  return ConfigOperations::getTargetsString(config);
+}
+
+Result<void> BusinessLogic::addChatToTaget(Chat_t chatToAdd)
+{
+  using namespace conditions;
+  auto configWrapper = ConfigHolder::getReadWriteConfig();
+  auto &config = configWrapper.config;
+  if (!isModeConfig(config))
+    return make_error_result("Mode is not config");
+  if (isChatSource(config, chatToAdd.vkChatId))
+    return make_error_result("Chat is source");
+  if (isChatInTargets(config, chatToAdd.vkChatId))
+    return make_error_result("Chat is already target");
+  if (chatToAdd.chatId && isChatIdBusy(config, *chatToAdd.chatId))
+    return make_error_result("Requested id is already busy");
+  ConfigOperations::addTargetChat(config, chatToAdd.toTargetChatT());
+  return make_success_result();
+}
+
+BusinessLogic::SourceChat_t BusinessLogic::Chat_t::toSourceChatT()
+{
+  // TODO make realization
+  return SourceChat_t();
+}
+
+BusinessLogic::TargetChat_t BusinessLogic::Chat_t::toTargetChatT()
+{
+  // TODO make realization
+  return TargetChat_t();
 }

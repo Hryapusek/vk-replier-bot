@@ -6,13 +6,22 @@
 
 //TODO possibly specialization for Obj_t = void?
 
+namespace details_
+{
+  struct ErrorResult_t {
+    using ErrorMessage_t = std::string;
+    ErrorMessage_t errMsg;
+  };
+}
+
 template < class Obj_t >
 class Result
 {
+  using ErrorResult_t = details_::ErrorResult_t;
 public:
   using ErrorMessage_t = std::string;
-  Result();
   Result(Obj_t);
+  Result(ErrorResult_t);
   void setObject(Obj_t &&object);
   void setObject(const Obj_t &object);
   void setError(ErrorMessage_t msg);
@@ -27,16 +36,28 @@ private:
   std::optional< ErrorMessage_t > errorMessage_;
 };
 
-template < class Obj_t >
-Result< Obj_t > make_error_result(Result< Obj_t >::ErrorMessage_t);
-
-
-template< class Obj_t >
-inline Result< Obj_t > make_error_result(std::string errMsg)
+template<>
+class Result<void>
 {
-  Result< Obj_t > result;
-  result.setError(std::move(errMsg));
-  return result;
-}
+  using ErrorResult_t = details_::ErrorResult_t;
+public:
+  using ErrorMessage_t = std::string;
+  Result();
+  Result(ErrorResult_t);
+  void setError(ErrorMessage_t msg);
+  ErrorMessage_t getErrorMessage();
+
+  operator bool();
+
+private:
+  std::optional< ErrorMessage_t > errorMessage_;
+};
+
+details_::ErrorResult_t make_error_result(std::string errMsg);
+
+template < class Obj_t >
+Result< Obj_t > make_success_result(Obj_t &&obj);
+
+Result< void > make_success_result();
 
 #endif

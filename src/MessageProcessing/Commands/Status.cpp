@@ -1,18 +1,11 @@
 #include "Status.hpp"
 #include <boost/log/trivial.hpp>
-#include "../Utils.hpp"
+#include "../NewUtils.hpp"
 #include "../../ConfigReader.hpp"
 
 using namespace message_processing;
 using namespace vk::requests::messages;
 using namespace vk::objects;
-
-namespace
-{
-  using namespace message_processing;
-  using namespace message_processing::utils;
-  using str_cref = const std::string &;
-}
 
 namespace message_processing::commands
 {
@@ -32,3 +25,15 @@ namespace message_processing::commands
     return;
   }
 }
+
+namespace msg_proc::commands
+{
+  void StatusCommand::execute(const Message_t &msg)
+  {
+    static const std::string commandName = "status";
+    static const std::string text = "Bot made by Абраамян Александр, студент программной инженерии, 3 курс.\n\
+                            Если есть какие-то вопросы, писать сюда - vk.com/ezhiklisiy";
+    utils::
+  }
+}
+

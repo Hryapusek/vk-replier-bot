@@ -1,4 +1,4 @@
-#include "Business logic/BusinessLogic.hpp"
+#include "BusinessLogic/BusinessLogic.hpp"
 #include "Server/Server.hpp"
 
 // 1. Put server in separate file
@@ -10,6 +10,8 @@
 // FIX - print TimeStamp, LineID, ProcessID, ThreadID
 // OPTIMIZATION - config vectors to sets
 // TODO - NAMESPACE REPLIER
+
+// TODO replace logger in VkApi module
 
 int main() {
   BusinessLogic::init();

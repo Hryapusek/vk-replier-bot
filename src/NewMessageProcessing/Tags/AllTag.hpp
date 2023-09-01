@@ -2,18 +2,15 @@
 #define TAG_ALL_HPP
 
 #include "../../VkApi/Objects/Message.hpp"
-#include "../TagI.hpp"
+#include "../Interfaces/TagI.hpp"
 
-namespace tags
+namespace msg_proc::tags
 {
   class AllTag : public TagI
   {
+    using TagI::TagI;
   public:
-    AllTag();
     virtual void execute(const Message_t &msg);
-
-  private:
-    static const std::vector<std::string> triggers_;
   };
 }
 #endif

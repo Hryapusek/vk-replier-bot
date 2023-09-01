@@ -1,7 +1,8 @@
-#include "ConfigReader.hpp"
+#include "ConfigHolder.hpp"
 #include <fstream>
 #include <boost/log/trivial.hpp>
 #include <jsoncpp/json/json.h>
+#include "ConfigTypes/Chats.hpp"
 #include <functional>
 
 namespace _details
@@ -45,7 +46,7 @@ namespace _details
       logAndThrow("Config mode and fields can not work together");
   }
 
-  Json::Value targetChatToJson(const TargetChat &chat)
+  Json::Value targetChatToJson(const TargetChat_t &chat)
   {
     Json::Value chatJson;
     chatJson["num"] = chat.num;
@@ -72,7 +73,7 @@ namespace _details
     return targetChats;
   }
 
-  TargetChat targetChatFromJson(const Json::Value &root)
+  TargetChat_t targetChatFromJson(const Json::Value &root)
   {
     static const auto fields = std::tuple{
       JsonFieldT< int >("num", true, std::bind(doIfFieldIncorrect, "num")),
@@ -81,9 +82,9 @@ namespace _details
     };
     checkJsonFields(root, fields);
     if (root.isMember("title"))
-      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), root["title"].asString() };
+      return TargetChat_t{ root["num"].asInt(), root["peer_id"].asInt(), root["title"].asString() };
     else
-      return TargetChat{ root["num"].asInt(), root["peer_id"].asInt(), std::nullopt };
+      return TargetChat_t{ root["num"].asInt(), root["peer_id"].asInt(), std::nullopt };
   }
 
   SourceChat sourceChatFromJson(const Json::Value &root)
@@ -107,7 +108,7 @@ namespace _details
     TargetsTable table;
     for (const auto &obj : root.get())
     {
-      TargetChat target = targetChatFromJson(obj);
+      TargetChat_t target = targetChatFromJson(obj);
       table.insert(target);
     }
     return table;
@@ -162,6 +163,7 @@ namespace config
   std::string ConfigHolder::configPath_ = std::string();
 
   using namespace _details;
+  using namespace types;
 
   void ConfigHolder::init(const std::string &configPath)
   {

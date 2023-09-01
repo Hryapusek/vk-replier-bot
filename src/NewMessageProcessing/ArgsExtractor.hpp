@@ -13,6 +13,7 @@ public:
   bool hasQuotedString();
   Result<int> extractInt();
   bool hasInt();
+  bool eol();
 };
 
 #endif

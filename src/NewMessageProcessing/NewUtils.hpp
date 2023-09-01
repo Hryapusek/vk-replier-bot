@@ -10,10 +10,11 @@ namespace
   using Message_t = vk::objects::Message;
 }
 
-namespace msg_utils
+namespace msg_proc::utils
 {
   Iterator_t findWord(Iterator_t begin, Iterator_t end, std::string wordToFind);
-  void sendSimpleMessage(vk::Peer_Id_t destPeerId, str_cref text);
+  void sendSimpleMessage(vk::types::Peer_Id_t destPeerId, str_cref text);
   void sendMessageToAllTargets(str_cref text, int fwd_conv_msg_id);
-  void sendResponseMessage(vk::Peer_Id_t destPeerId, const std::string &text);
+  void sendResponseMessage(vk::types::Peer_Id_t destPeerId, str_cref text);
+  void sendErrorResponseMessage(vk::types::Peer_Id_t destPeerId, str_cref errorText);
 }

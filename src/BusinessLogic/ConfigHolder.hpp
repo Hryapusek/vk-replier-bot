@@ -8,7 +8,7 @@
 #include <shared_mutex>
 #include <mutex>
 #include <jsoncpp/json/json.h>
-#include "../BotTypes/TargetsTable.hpp"
+#include "ConfigTypes/TargetsTable.hpp"
 #include "../JsonUtils.hpp"
 
 namespace config
@@ -25,8 +25,10 @@ namespace config
     { Mode::CONFIG, "CONFIG" },
   };
 
-  struct Config
+  class Config
   {
+    friend class ConfigHolder;
+  private:
     Mode mode;
     std::string token;
     std::string v;
@@ -35,14 +37,20 @@ namespace config
     int groupID;
     std::optional< std::string > baseUrl;
     TargetsTable targetsTable;
-    std::optional< SourceChat > sourceChat;
+    std::optional< types::SourceChat_t > sourceChat;
     std::vector< int > godlikeIds;
   };
 
+  /**
+   * @note Init should be called before usage!
+   */
   class ConfigHolder
   {
     struct ReadOnlyConfig;
     struct ReadWriteConfig;
+    friend struct ReadOnlyConfig;
+    friend struct ReadWriteConfig;
+    friend class ConfigOperations;
 
   public:
     /// @brief Init function
@@ -85,7 +93,6 @@ namespace config
 
     struct ReadOnlyConfig
     {
-      ReadOnlyConfig() : config(ConfigHolder::config_), lock(mut_) { }
       ReadOnlyConfig(const ReadOnlyConfig &) = delete;
       ReadOnlyConfig(ReadOnlyConfig &&) = delete;
       ReadOnlyConfig &operator=(const ReadOnlyConfig &) = delete;
@@ -93,11 +100,11 @@ namespace config
       const Config &config;
     private:
       std::shared_lock< std::shared_mutex > lock;
+      ReadOnlyConfig() : config(ConfigHolder::config_), lock(mut_) { }
     };
 
     struct ReadWriteConfig
     {
-      ReadWriteConfig() : config(ConfigHolder::config_), lock(mut_) { }
       ReadWriteConfig(const ReadWriteConfig &) = delete;
       ReadWriteConfig(ReadWriteConfig &&) = delete;
       ReadWriteConfig &operator=(const ReadWriteConfig &) = delete;
@@ -106,6 +113,7 @@ namespace config
       Config &config;
     private:
       std::unique_lock< std::shared_mutex > lock;
+      ReadWriteConfig() : config(ConfigHolder::config_), lock(mut_) { }
     };
   };
 }
