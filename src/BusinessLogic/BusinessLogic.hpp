@@ -28,6 +28,12 @@ public:
   static void init();
   static Result<std::string> getTagAllString(VkChatId_t callerChatId);
   static Result<void> addChatToTaget(Chat_t chatToAdd);
+  static Result<void> addChatToSource(Chat_t chatToAdd);
+  static Result<void> addGodlike(VkUserId_t callerId, VkUserId_t newGodlike);
+  static Result<void> removeTargetChatById(VkUserId_t callerId, ChatId_t chatId);
+  static Result<void> removeTargetChatByVkChatId(VkChatId_t chatId);
+  static Result<void> removeSourceChat(VkUserId_t callerId);
+  static Result<void> changeMode(VkUserId_t callerId);
 
 private:
   static const std::string configPath;

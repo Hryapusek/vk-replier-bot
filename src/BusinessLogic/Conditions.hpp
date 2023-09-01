@@ -10,7 +10,10 @@ namespace conditions
   bool isModeWork(const config::Config &);
   bool isModeConfig(const config::Config &);
   bool isAnyTargetChatPresent(const config::Config &);
-  bool isChatInTargets(const config::Config &, types::VkChatId_t);
-  bool isChatIdBusy(const config::Config &, types::ChatId_t);
+  bool isVkChatIdInTargets(const config::Config &, types::VkChatId_t);
+  bool isChatIdInTargets(const config::Config &, types::ChatId_t);
+  bool isSourceChatSet(const config::Config &);
+  bool isUserGodlike(const config::Config &, types::VkUserId_t);
+  bool canChangeMode(const config::Config &);
 }
 #endif
