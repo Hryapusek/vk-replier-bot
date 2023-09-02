@@ -29,8 +29,6 @@ namespace config::types
     WORK,
     CONFIG
   };
-
-  std::string modeToStr(Mode mode);
 }
 
 #endif

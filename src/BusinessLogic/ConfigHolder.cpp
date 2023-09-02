@@ -8,8 +8,10 @@
 
 namespace
 {
-
   using namespace config;
+  using TargetChat_t = types::TargetChat_t;
+  using SourceChat_t = types::SourceChat_t;
+  using TargetsContainer = types::TargetsContainer;
 
   void doIfFieldIncorrect(std::string fieldName);
   void logAndThrow(const std::string &message);
@@ -167,7 +169,7 @@ namespace config
     configJson["secretString"] = config_.secretString;
     configJson["port"] = config_.port;
     configJson["groupId"] = config_.groupID;
-    configJson["targetChats"] = targetChatsToJsonArray(config_.targetsTable);
+    configJson["targetChats"] = targetChatsToJsonArray(config_.targetChats);
     if (config_.sourceChat)
       configJson["sourceChat"] = sourceChatToJson(config_.sourceChat.value());
     if (!config_.baseUrl.empty())
@@ -239,7 +241,7 @@ namespace config
     config.secretString = root["secretString"].asString();
     config.port = root["port"].asInt();
     config.groupID = root["groupId"].asInt();
-    config.targetsTable = targetChatsFromJson(root["targetChats"]);
+    config.targetChats = targetChatsFromJson(root["targetChats"]);
     if (root.isMember("sourceChat"))
       config.sourceChat = sourceChatFromJson(root["sourceChat"]);
     if (root.isMember("baseUrl"))

@@ -11,26 +11,20 @@ namespace msg_proc::tags
   {
     using namespace std::literals;
     static const std::string commandErrorText = "Error while forwarding messages. "s;
-    auto res = BusinessLogic::getTagAllString(msg.getFromId(), msg.getPeerId());
+    auto res = BusinessLogic::getTagAllString(msg.getPeerId());
     if (!res)
-    {
-      utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
-      return;
-    }
+      return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
     auto targetsStr = std::move(res.getObject());
-    ArgsExtractor argsExtractor(findTriggerBegin(msg.getText(), triggerWords_), msg.getText().end(), true);
+    ArgsExtractor argsExtractor(findTriggerBegin(msg.getText()), msg.getText().end(), true);
     std::string title = "";
     if (argsExtractor.hasQuotedString())
     {
       auto res = argsExtractor.extractQuotedString();
       if (!res)
-      {
-        utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
-        return;
-      }
+        return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
       title = std::move(res.getObject());
     }
-    utils::sendMessageToAllTargets("@all, "s + title, msg.getConversationMessageId());
-    utils::sendResponseMessage(msg.getPeerId(), "Successfully forwarded!"s);
+    MsgUtils::sendMessageToAllTargets(title, msg.getConversationMessageId(), targetsStr, msg.getPeerId());
+    MsgUtils::sendResponseMessage(msg.getPeerId(), "Successfully forwarded!"s);
   }
 }

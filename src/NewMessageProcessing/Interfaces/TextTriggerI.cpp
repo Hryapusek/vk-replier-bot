@@ -1,17 +1,28 @@
 #include "TextTriggerI.hpp"
+#include "../NewUtils.hpp"
 
-TextTriggerI::TextTriggerI(WordsContainer_t triggerWords) :
-  triggerWords_(std::move(triggerWords))
-{  }
-
-bool TextTriggerI::isThisTextTrigger(const Message_t & msg)
+namespace msg_proc
 {
-  //TODO make realization
-return false;
-}
+  TextTriggerI::TextTriggerI(WordsContainer_t triggerWords) :
+    triggerWords_(std::move(triggerWords))
+  {  }
 
-std::string::iterator TextTriggerI::findTriggerBegin(const std::string & text, const std::vector<std::string> wordsToFind)
-{
-  //TODO make realization
-return std::string::iterator();
+  bool TextTriggerI::isThisTrigger(const Message_t &msg)
+  {
+    for (const auto &wordToFind : triggerWords_)
+      if (MsgUtils::findWord(msg.getText(), wordToFind) != msg.getText().cend())
+        return true;
+    return false;
+  }
+
+  std::string::const_iterator TextTriggerI::findTriggerBegin(const std::string &text)
+  {
+    for (const auto &wordToFind : triggerWords_)
+    {
+      auto it = MsgUtils::findWord(text, wordToFind);
+      if (it != text.cend())
+        return it;
+    }
+    return text.cend();
+  }
 }

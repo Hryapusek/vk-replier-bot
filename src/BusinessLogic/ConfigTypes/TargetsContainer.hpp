@@ -14,13 +14,9 @@ namespace config::types
   public:
     /// @param[in] chat Chat to insert. Chat.num will be used as a key
     /// @return True if inserted successfully. False otherwise.
-    bool insert(TargetChat_t chat);
+    void insert(TargetChat_t chat);
     bool removeByVkChatId(VkChatId_t);
     bool removeByChatId(ChatId_t);
-    Container_t::iterator findByVkChatId(VkChatId_t);
-    Container_t::iterator findByChatId(ChatId_t);
-    Container_t::const_iterator findByVkChatId(VkChatId_t) const;
-    Container_t::const_iterator findByChatId(ChatId_t) const;
     bool containsVkChatId(VkChatId_t) const;
     bool containsChatId(ChatId_t) const;
     bool empty() const;
@@ -34,6 +30,11 @@ namespace config::types
 
   private:
     Container_t table_;
+    ChatId_t generateChatId() const;
+    Iterator_t findByVkChatId(VkChatId_t);
+    Iterator_t findByChatId(ChatId_t);
+    CIterator_t findByVkChatId(VkChatId_t) const;
+    CIterator_t findByChatId(ChatId_t) const;
   };
 }
 

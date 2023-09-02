@@ -7,13 +7,25 @@
 class ArgsExtractor
 {
 public:
-  using Iterator_t = std::string::const_iterator;
-  ArgsExtractor(Iterator_t begin, Iterator_t end, bool skipFirstWord);
+  using CIterator_t = std::string::const_iterator;
+  ArgsExtractor(CIterator_t begin, CIterator_t end, bool skipFirstWord);
   Result<std::string> extractQuotedString();
   bool hasQuotedString();
   Result<int> extractInt();
-  bool hasInt();
+  Result<std::string> extractWord();
+  bool hasWord();
+  bool hasNum();
   bool eol();
+  void skipWord();
+  void skipWs();
+  /// @brief You'd probably want to check for eol before usage
+  bool isSpace();
+
+private:
+  CIterator_t cur_;
+  CIterator_t end_;
+  /// @param it must be between cur_ and end_
+  bool eol(CIterator_t it);
 };
 
 #endif

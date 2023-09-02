@@ -1,6 +1,6 @@
 #include "MessagesGetByConversationMessageIdResponse.hpp"
 
-#include "../../../JsonUtils.hpp"
+#include "GeneralUtils/JsonUtils.hpp"
 
 namespace vk::responses::messages
 {

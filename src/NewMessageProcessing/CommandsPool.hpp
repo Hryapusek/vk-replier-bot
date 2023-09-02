@@ -3,11 +3,13 @@
 
 #include <vector>
 #include <memory>
-#include "CommandI.hpp"
+#include "Interfaces/CommandI.hpp"
 
-class CommandsPool
+namespace msg_proc::commands
 {
-  static const std::vector<std::shared_ptr<CommandI>> vec;
-};
-
+  class CommandsPool
+  {
+    static const std::vector< std::shared_ptr< CommandI > > vec;
+  };
+}
 #endif

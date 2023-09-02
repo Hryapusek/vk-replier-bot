@@ -3,7 +3,12 @@
 
 #include "TextTriggerI.hpp"
 
-class CommandI : public TextTriggerI
-{};
+namespace msg_proc
+{
+  class CommandI: public TextTriggerI
+  { 
+    using TextTriggerI::TextTriggerI;
+  };
+}
 
 #endif

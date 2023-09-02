@@ -1,7 +1,7 @@
 #include "BaseRequest.hpp"
-#include <boost/log/trivial.hpp>
+#include "Logging/Logger.hpp"
 #include "Exceptions.hpp"
-#include "../../JsonUtils.hpp"
+#include "GeneralUtils/JsonUtils.hpp"
 
 namespace
 {

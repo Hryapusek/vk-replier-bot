@@ -122,7 +122,7 @@ Result< void > BusinessLogic::removeSourceChat(VkUserId_t callerId)
   return make_success_result();
 }
 
-Result< void > BusinessLogic::changeMode(VkUserId_t callerId)
+Result< std::string > BusinessLogic::changeMode(VkUserId_t callerId)
 {
   auto configWrapper = ConfigHolder::getReadWriteConfig();
   auto &config = configWrapper.config;
@@ -131,7 +131,7 @@ Result< void > BusinessLogic::changeMode(VkUserId_t callerId)
   if (!CfgConds::canChangeMode(config))
     return make_error_result("Some requirements were not met");
   ConfigOperations::changeMode(config);
-  return make_success_result();
+  return make_success_result(ConfigOperations::getModeName(config));
 }
 
 BusinessLogic::SourceChat_t BusinessLogic::Chat_t::toSourceChatT()

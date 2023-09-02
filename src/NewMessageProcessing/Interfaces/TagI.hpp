@@ -3,9 +3,12 @@
 
 #include "TextTriggerI.hpp"
 
-class TagI : public TextTriggerI
+namespace msg_proc
 {
-  using TextTriggerI::TextTriggerI;
-};
+  class TagI: public TextTriggerI
+  {
+    using TextTriggerI::TextTriggerI;
+  };
+}
 
 #endif

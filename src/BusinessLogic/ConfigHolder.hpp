@@ -8,9 +8,9 @@
 #include <shared_mutex>
 #include <mutex>
 #include <jsoncpp/json/json.h>
-#include "ConfigTypes/TargetsTable.hpp"
+#include "ConfigTypes/TargetsContainer.hpp"
 #include "ConfigTypes/SimpleTypes.hpp"
-#include "../JsonUtils.hpp"
+#include "../GeneralUtils/JsonUtils.hpp"
 
 namespace config
 {
@@ -19,17 +19,17 @@ namespace config
     friend class ConfigOperations;
     friend class ConfigHolder;
     friend class ConfigConditions;
-    using TargetsTable = types::TargetsContainer;
+    using TargetsContainer = types::TargetsContainer;
 
   private:
-    Mode mode;
+    types::Mode mode;
     std::string token;
     std::string v;
     std::string secretString;
     int port;
     int groupID;
     std::string baseUrl;
-    TargetsTable targetsTable;
+    TargetsContainer targetChats;
     std::optional< types::SourceChat_t > sourceChat;
     std::vector< int > godlikeIds;
   };

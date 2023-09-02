@@ -1,5 +1,5 @@
 #include "Message.hpp"
-#include "../../JsonUtils.hpp"
+#include "GeneralUtils/JsonUtils.hpp"
 
 namespace vk::objects
 {

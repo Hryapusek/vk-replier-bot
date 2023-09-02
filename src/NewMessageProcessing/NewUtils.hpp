@@ -1,21 +1,23 @@
-// TODO add header guards
-// TODO add realization
+#ifndef MSG_UTILS_HPP
+#define MSG_UTILS_HPP
+
 #include <string>
 #include "../VkApi/GeneralTypes.hpp"
-#include "../VkApi/Objects/Message.hpp"
 
-namespace
+namespace msg_proc
 {
-  using Iterator_t = std::string::iterator;
-  using str_cref = const std::string &;
-  using Message_t = vk::objects::Message;
+  class MsgUtils
+  {
+  public:
+    using CIterator_t = std::string::const_iterator;
+    using str_cref = const std::string &;
+
+    static CIterator_t findWord(str_cref text, str_cref wordToFind);
+    static void sendSimpleMessage(vk::types::PeerId_t destPeerId, str_cref text);
+    static void sendMessageToAllTargets(str_cref text, int fwd_conv_msg_id, str_cref targetChatsString, vk::types::ChatId_t sourceChatVkId);
+    static void sendResponseMessage(vk::types::PeerId_t destPeerId, str_cref text);
+    static void sendErrorResponseMessage(vk::types::PeerId_t destPeerId, str_cref errorText);
+  };
 }
 
-namespace msg_proc::utils
-{
-  Iterator_t findWord(Iterator_t begin, Iterator_t end, std::string wordToFind);
-  void sendSimpleMessage(vk::types::Peer_Id_t destPeerId, str_cref text);
-  void sendMessageToAllTargets(str_cref text, int fwd_conv_msg_id);
-  void sendResponseMessage(vk::types::Peer_Id_t destPeerId, str_cref text);
-  void sendErrorResponseMessage(vk::types::Peer_Id_t destPeerId, str_cref errorText);
-}
+#endif

@@ -33,7 +33,7 @@ public:
   static Result<void> removeTargetChatById(VkUserId_t callerId, ChatId_t chatId);
   static Result<void> removeTargetChatByVkChatId(VkChatId_t chatId);
   static Result<void> removeSourceChat(VkUserId_t callerId);
-  static Result<void> changeMode(VkUserId_t callerId);
+  static Result<std::string> changeMode(VkUserId_t callerId);
 
 private:
   static const std::string configPath;

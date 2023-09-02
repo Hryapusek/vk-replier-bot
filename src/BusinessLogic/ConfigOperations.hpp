@@ -17,6 +17,7 @@ namespace config
     static void removeTargetChatByVkChatId(Config&, types::VkChatId_t);
     static void removeSourceChat(Config&);
     static void changeMode(Config&);
+    static std::string getModeName(Config&);
   };
 }
 

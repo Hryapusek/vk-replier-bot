@@ -10,30 +10,29 @@ namespace msg_proc::commands
     using namespace std::literals;
     static const std::string commandErrorText = "Can not add target chat. "s;
     if (!msg.fromChat())
-      return utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + "Command not from chat");
+      return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + "Command not from chat");
     BusinessLogic::Chat_t chatToAdd;
-    ArgsExtractor argsExtractor(findTriggerBegin(msg.getText(), triggerWords_), msg.getText().end(), true);
-    if (argsExtractor.hasInt())
+    ArgsExtractor argsExtractor(findTriggerBegin(msg.getText()), msg.getText().end(), true);
+    if (argsExtractor.hasNum())
     {
       auto res = argsExtractor.extractInt();
       if (!res)
-        return utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
+        return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
       chatToAdd.chatId = res.getObject();
     }
     if (argsExtractor.hasQuotedString())
     {
       auto res = argsExtractor.extractQuotedString();
       if (!res)
-        return utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
+        return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
       chatToAdd.title = res.getObject();
     }
     if (!argsExtractor.eol())
-      return utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + "Trash was found in command arguments");
+      return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + "Trash was found in command arguments");
     auto res = BusinessLogic::addChatToTaget(std::move(chatToAdd));
     if (!res)
-    {
-      utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
-      return;
-    }
+      return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
+    else
+      return MsgUtils::sendResponseMessage(msg.getPeerId(), "Successfully registered this chat as target!");
   }
 }

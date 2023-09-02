@@ -10,15 +10,14 @@ namespace msg_proc::commands
     using namespace std::literals;
     static const std::string commandErrorText = "Can not delete this chat from targets. "s;
     if (!msg.fromChat())
-      return utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + "Command not from chat");
-    ArgsExtractor argsExtractor(findTriggerBegin(msg.getText(), triggerWords_), msg.getText().end(), true);
+      return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + "Command not from chat");
+    ArgsExtractor argsExtractor(findTriggerBegin(msg.getText()), msg.getText().end(), true);
     if (!argsExtractor.eol())
-      return utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + "Trash was found in command arguments");
+      return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + "Trash was found in command arguments");
     auto res = BusinessLogic::removeTargetChatByVkChatId(msg.getPeerId());
     if (!res)
-    {
-      utils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
-      return;
-    }
+      return MsgUtils::sendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
+    else
+      return MsgUtils::sendResponseMessage(msg.getPeerId(), "Successfully deleted this chat from target!");
   }
 }

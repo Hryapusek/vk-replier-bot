@@ -5,7 +5,7 @@ namespace vk::types
 {
   using UserId_t = int;
   using ChatId_t = int;
-  using Peer_Id_t = int;
+  using PeerId_t = int;
 }
 
 #endif

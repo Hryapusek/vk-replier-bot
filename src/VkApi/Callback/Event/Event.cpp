@@ -2,7 +2,7 @@
 
 #include "EventObjects/NewMessage.hpp"
 #include "Utils.hpp"
-#include "../../../JsonUtils.hpp"
+#include "GeneralUtils/JsonUtils.hpp"
 
 namespace vk::callback::event
 {

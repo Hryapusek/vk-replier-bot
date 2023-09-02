@@ -4,21 +4,25 @@
 #include <vector>
 #include "../VkApi/Objects/Message.hpp"
 
-class TextTriggerI
+namespace msg_proc
 {
-protected:
-  using Message_t = vk::objects::Message;
-  using WordsContainer_t = std::vector<std::string>;
+  class TextTriggerI
+  {
+  protected:
+    using Message_t = vk::objects::Message;
+    using Words_t = std::string;
+    using WordsContainer_t = std::vector< Words_t >;
 
-public:
-  TextTriggerI(WordsContainer_t triggerWords);
-  virtual void execute(const Message_t &msg) = 0;
-  virtual bool isThisTextTrigger(const Message_t &msg);
-  std::string::iterator findTriggerBegin(const std::string &text, const std::vector<std::string> wordsToFind);
+  public:
+    TextTriggerI(WordsContainer_t triggerWords);
+    /// @note if isThisTextTrigger not true - undefined behaviour
+    virtual void execute(const Message_t &msg) = 0;
+    virtual bool isThisTrigger(const Message_t &msg);
+    Words_t::const_iterator findTriggerBegin(const std::string &text);
 
-protected:
-  WordsContainer_t triggerWords_;
-
-};
+  protected:
+    WordsContainer_t triggerWords_;
+  };
+}
 
 #endif
