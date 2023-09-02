@@ -1,5 +1,5 @@
-#ifndef CHATS_HPP
-#define CHATS_HPP
+#ifndef SIMPLE_TYPES_HPP
+#define SIMPLE_TYPES_HPP
 
 #include <string>
 #include <optional>
@@ -13,16 +13,24 @@ namespace config::types
 
   struct TargetChat_t
   {
-    std::optional<ChatId_t> num;
-    VkChatId_t peer_id;
-    std::optional< std::string > title;
+    std::optional< ChatId_t > chatId;
+    VkChatId_t vkChatId;
+    std::string title;
   };
 
   struct SourceChat_t
   {
-    VkChatId_t peer_id;
-    std::optional< std::string > title;
+    VkChatId_t vkChatId;
+    std::string title;
   };
+
+  enum Mode
+  {
+    WORK,
+    CONFIG
+  };
+
+  std::string modeToStr(Mode mode);
 }
 
 #endif

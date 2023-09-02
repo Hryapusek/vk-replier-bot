@@ -2,7 +2,7 @@
 #define CONFIG_OPERATIONS_HPP
 
 #include "ConfigHolder.hpp"
-#include "ConfigTypes/Chats.hpp"
+#include "ConfigTypes/SimpleTypes.hpp"
 
 namespace config
 {

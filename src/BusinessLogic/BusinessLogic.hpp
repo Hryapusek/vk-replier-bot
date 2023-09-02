@@ -5,7 +5,7 @@
 #include <optional>
 #include "../GeneralUtils/Result.hpp"
 #include "../VkApi/GeneralTypes.hpp"
-#include "ConfigTypes/Chats.hpp"
+#include "ConfigTypes/SimpleTypes.hpp"
 
 class BusinessLogic
 {

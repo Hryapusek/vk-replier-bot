@@ -4,7 +4,7 @@
 #include <optional>
 #include <string>
 
-//TODO possibly specialization for Obj_t = void?
+//TODO make realization
 
 namespace details_
 {

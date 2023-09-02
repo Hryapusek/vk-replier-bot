@@ -9,25 +9,18 @@
 #include <mutex>
 #include <jsoncpp/json/json.h>
 #include "ConfigTypes/TargetsTable.hpp"
+#include "ConfigTypes/SimpleTypes.hpp"
 #include "../JsonUtils.hpp"
 
 namespace config
 {
-  enum Mode
-  {
-    WORK,
-    CONFIG
-  };
-
-  const std::map<Mode, std::string> modeToString
-  {
-    { Mode::WORK, "WORK" },
-    { Mode::CONFIG, "CONFIG" },
-  };
-
   class Config
   {
+    friend class ConfigOperations;
     friend class ConfigHolder;
+    friend class ConfigConditions;
+    using TargetsTable = types::TargetsContainer;
+
   private:
     Mode mode;
     std::string token;
@@ -35,7 +28,7 @@ namespace config
     std::string secretString;
     int port;
     int groupID;
-    std::optional< std::string > baseUrl;
+    std::string baseUrl;
     TargetsTable targetsTable;
     std::optional< types::SourceChat_t > sourceChat;
     std::vector< int > godlikeIds;
@@ -51,6 +44,8 @@ namespace config
     friend struct ReadOnlyConfig;
     friend struct ReadWriteConfig;
     friend class ConfigOperations;
+    using json_cref = const Json::Value &;
+    using json_crefwrp = std::reference_wrapper< const Json::Value >;
 
   public:
     /// @brief Init function
@@ -60,9 +55,6 @@ namespace config
     static void updateConfigFile();
     static ReadOnlyConfig getReadOnlyConfig();
     static ReadWriteConfig getReadWriteConfig();
-    /// @brief Direct access to config field.
-    /// NOT thread-safe
-    static Mode getMode();
     /// @brief Direct access to config field.
     /// NOT thread-safe
     static const std::string &getToken();
@@ -83,8 +75,6 @@ namespace config
     /// NOT thread-safe
     /// @note Probably you'd like to call hasBaseUrl() before
     static const std::string &getBaseUrl();
-    /// @return True if given mode is valid to set now. False otherwise
-    static bool isModeValid(const Config &cfg, Mode mode);
 
   private:
     static Config config_;
@@ -93,6 +83,7 @@ namespace config
 
     struct ReadOnlyConfig
     {
+      friend class ConfigHolder;
       ReadOnlyConfig(const ReadOnlyConfig &) = delete;
       ReadOnlyConfig(ReadOnlyConfig &&) = delete;
       ReadOnlyConfig &operator=(const ReadOnlyConfig &) = delete;
@@ -105,16 +96,22 @@ namespace config
 
     struct ReadWriteConfig
     {
+      friend class ConfigHolder;
       ReadWriteConfig(const ReadWriteConfig &) = delete;
       ReadWriteConfig(ReadWriteConfig &&) = delete;
       ReadWriteConfig &operator=(const ReadWriteConfig &) = delete;
       ReadWriteConfig &operator=(ReadWriteConfig &&) = delete;
-      ~ReadWriteConfig() { updateConfigFile(); };
+      ~ReadWriteConfig() {
+        updateConfigFile();
+      };
       Config &config;
     private:
       std::unique_lock< std::shared_mutex > lock;
       ReadWriteConfig() : config(ConfigHolder::config_), lock(mut_) { }
     };
+
+    static Config parseConfigJson(json_cref root);
+    static void checkConfigValidity(Config &config);
   };
 }
 

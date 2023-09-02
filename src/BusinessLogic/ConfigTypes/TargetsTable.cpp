@@ -2,6 +2,8 @@
 #include <limits>
 #include <stdexcept>
 
+// TODO update realizations
+
 bool TargetsTable::insert(TargetChat chat)
 {
   if (containsNum(chat.num))
