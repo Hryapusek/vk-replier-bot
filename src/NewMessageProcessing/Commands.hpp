@@ -1,8 +1,0 @@
-#include "Commands/ChangeModeCommand.hpp"
-#include "Commands/DelSourceCommand.hpp"
-#include "Commands/DelTargetByNumCommand.hpp"
-#include "Commands/DelTargetCommand.hpp"
-#include "Commands/RegGodlikeCommand.hpp"
-#include "Commands/RegSourceCommand.hpp"
-#include "Commands/RegTargetCommand.hpp"
-#include "Commands/StatusCommand.hpp"

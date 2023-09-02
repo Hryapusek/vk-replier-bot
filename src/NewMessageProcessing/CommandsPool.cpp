@@ -1,5 +1,5 @@
 #include "CommandsPool.hpp"
-#include "Commands.hpp"
+#include "Commands/Commands.hpp"
 
 namespace msg_proc::commands
 {

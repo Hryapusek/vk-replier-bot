@@ -1,5 +1,5 @@
 #include "TagsPool.hpp"
-#include "Tags.hpp"
+#include "Tags/Tags.hpp"
 
 namespace msg_proc::tags
 {
