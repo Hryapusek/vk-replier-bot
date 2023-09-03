@@ -7,14 +7,6 @@ INITIALIZE_EASYLOGGINGPP
 
 #include "Logging/Logger.hpp"
 
-// 1. Put server in separate file
-// 2. Incapsulate logger
-// 3. Put error messages in separate class
-// 4. Parse Event NOT EventType
-
-// FIX - print TimeStamp, LineID, ProcessID, ThreadID
-// OPTIMIZATION - config vectors to sets
-
 void startServer()
 {
   auto port = BusinessLogic::getPort();
