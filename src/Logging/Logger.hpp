@@ -31,7 +31,6 @@ private:
   static std::shared_ptr< details_::LoggerEasyLogImpl > theLogger;
 };
 
-#define BOOST_LOG_DYN_LINK 1
 #include "easylogging++.h"
 
 namespace details_
