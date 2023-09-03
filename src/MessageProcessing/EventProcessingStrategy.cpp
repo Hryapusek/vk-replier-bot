@@ -21,7 +21,7 @@ namespace msg_proc
       if (cmdPtr->isThisTrigger(eventObject->getMessage()))
         cmdPtr->execute(eventObject->getMessage());
     }
-    for (const auto &tagPtr : commands::CommandsPool::commands)
+    for (const auto &tagPtr : tags::TagsPool::tags)
     {
       if (tagPtr->isThisTrigger(eventObject->getMessage()))
         tagPtr->execute(eventObject->getMessage());

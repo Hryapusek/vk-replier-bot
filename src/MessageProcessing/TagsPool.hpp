@@ -9,7 +9,7 @@ namespace msg_proc::tags
   class TagsPool
   {
   public:
-    static const std::vector< std::shared_ptr< TagI > > vec;
+    static const std::vector< std::shared_ptr< TagI > > tags;
   };
 }
 

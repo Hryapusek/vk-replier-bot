@@ -3,7 +3,7 @@
 
 namespace msg_proc::tags
 {
-  const std::vector< std::shared_ptr< TagI > > TagsPool::vec = {
+  const std::vector< std::shared_ptr< TagI > > TagsPool::tags = {
     std::make_shared< AllTag >(std::vector<std::string>{"_всем_"}),
     std::make_shared< AllImportantTag >(std::vector<std::string>{"_всем_важно_"})
   };
