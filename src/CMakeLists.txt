@@ -14,18 +14,6 @@ set(CMAKE_USE_WIN32_THREADS_INIT 0)
 set(CMAKE_USE_PTHREADS_INIT 1)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-if(NOT JSONCPP)
-    message(FATAL_ERROR "JSONCPP not found!!!")
-endif()
-
-if(NOT CPR)
-    message(FATAL_ERROR "CPR not found!!!")
-endif()
-
-if(NOT CURL)
-    message(FATAL_ERROR "CURL not found!!!")
-endif()
-
 set(TARGET vk-bot)
 add_executable(${TARGET})
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
