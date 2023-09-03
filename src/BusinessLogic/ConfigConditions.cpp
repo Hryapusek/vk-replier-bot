@@ -1,5 +1,5 @@
 #include "ConfigConditions.hpp"
-#include "../Logging/Logger.hpp"
+#include "Logging/Logger.hpp"
 
 bool config::ConfigConditions::isChatSource(const config::Config &config, types::VkChatId_t vkChatId)
 {

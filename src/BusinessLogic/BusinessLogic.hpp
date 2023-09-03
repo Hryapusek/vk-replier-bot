@@ -3,8 +3,8 @@
 
 #include <string>
 #include <optional>
-#include "../GeneralUtils/Result.hpp"
-#include "../VkApi/GeneralTypes.hpp"
+#include "GeneralUtils/Result.hpp"
+#include "VkApi/GeneralTypes.hpp"
 #include "ConfigTypes/SimpleTypes.hpp"
 
 class BusinessLogic
@@ -34,6 +34,9 @@ public:
   static Result<void> removeTargetChatByVkChatId(VkChatId_t chatId);
   static Result<void> removeSourceChat(VkUserId_t callerId);
   static Result<std::string> changeMode(VkUserId_t callerId);
+  /// @note Direct access to config field. NOT THREAD-SAFE.
+  static int getPort();
+  static std::string getSecretString();
 
 private:
   static const std::string configPath;

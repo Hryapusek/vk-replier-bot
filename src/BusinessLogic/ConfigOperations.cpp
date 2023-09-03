@@ -1,5 +1,5 @@
 #include "ConfigOperations.hpp"
-#include "../Logging/Logger.hpp"
+#include "Logging/Logger.hpp"
 
 void config::ConfigOperations::addTargetChat(Config &config, types::TargetChat_t chatToAdd)
 {

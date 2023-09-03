@@ -12,12 +12,12 @@ namespace
 
   void logHttpError(long status_code)
   {
-    BOOST_LOG_TRIVIAL(warning) << "Http error occured sending request. Code " << status_code;
+    Logger::log(Logger::WARNING, "Http error occured sending request. Code " + std::to_string(status_code));
   }
 
   void logVkApiError(const Json::Value &responseJson)
   {
-    BOOST_LOG_TRIVIAL(warning) << "VK API error occured sending request.\n" << responseJson;
+    Logger::log(Logger::WARNING, "VK API error occured sending request.\n", responseJson);
   }
 
   bool isVkError(const Json::Value &responseJson)
@@ -70,7 +70,7 @@ namespace vk::requests::details
 
   void BaseRequest::send()
   {
-    BOOST_LOG_TRIVIAL(info) << "Sending request.";
+    Logger::log(Logger::INFO, "Sending request.");
     auto response = performRequest();
     if (isHttpError(response))
     {
@@ -85,7 +85,7 @@ namespace vk::requests::details
       retrySending();
       return;
     }
-    BOOST_LOG_TRIVIAL(info) << "Sending request completed successfully.";
+    Logger::log(Logger::INFO, "Sending request completed successfully.");
     return;
   }
 
@@ -110,10 +110,10 @@ namespace vk::requests::details
     int nTry = 0;
     for (auto breakTime : breakTimes)
     {
-      BOOST_LOG_TRIVIAL(warning) << "Sleeping before retry...";
+      Logger::log(Logger::WARNING, "Sleeping before retry...");
       std::this_thread::sleep_for(breakTime);
       ++nTry;
-      BOOST_LOG_TRIVIAL(warning) << "Retry number " << nTry << " to send request.";
+      Logger::log(Logger::WARNING, "Retry number ", std::to_string(nTry), " to send request.");
       response = performRequest();
       if (isHttpError(response))
       {
@@ -128,7 +128,7 @@ namespace vk::requests::details
       }
       return;
     }
-    BOOST_LOG_TRIVIAL(error) << "Out of retry sendings. Throwing RequestException.";
+    Logger::log(Logger::ERROR, "Out of retry sendings. Throwing RequestException.");
     throw exceptions::RequestException("Failed after retries");
   }
 }

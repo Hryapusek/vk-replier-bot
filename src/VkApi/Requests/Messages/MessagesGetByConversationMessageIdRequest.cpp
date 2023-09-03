@@ -1,5 +1,5 @@
 #include "MessagesGetByConversationMessageIdRequest.hpp"
-#include "../Utils.hpp"
+#include "VkApi/Requests/Utils.hpp"
 
 namespace vk::requests::messages
 {

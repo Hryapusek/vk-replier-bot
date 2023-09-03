@@ -8,9 +8,10 @@
 #include <shared_mutex>
 #include <mutex>
 #include <jsoncpp/json/json.h>
+
 #include "ConfigTypes/TargetsContainer.hpp"
 #include "ConfigTypes/SimpleTypes.hpp"
-#include "../GeneralUtils/JsonUtils.hpp"
+#include "GeneralUtils/JsonUtils.hpp"
 
 namespace config
 {
@@ -69,7 +70,7 @@ namespace config
     static int getGroupId();
     /// @brief Direct access to config field.
     /// NOT thread-safe
-    static const std::string &getSecretString();
+    static std::string getSecretString();
     static bool hasBaseUrl();
     /// @brief Direct access to config field.
     /// NOT thread-safe

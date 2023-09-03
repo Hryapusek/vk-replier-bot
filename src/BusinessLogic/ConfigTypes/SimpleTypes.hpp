@@ -3,7 +3,7 @@
 
 #include <string>
 #include <optional>
-#include "../../VkApi/GeneralTypes.hpp"
+#include "VkApi/GeneralTypes.hpp"
 
 namespace config::types
 {

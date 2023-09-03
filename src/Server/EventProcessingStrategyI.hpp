@@ -1,7 +1,7 @@
 #ifndef EVENT_PROCESSING_STRATEGY_HPP
 #define EVENT_PROCESSING_STRATEGY_HPP
 
-#include "../VkApi/Callback/Event/Event.hpp"
+#include "VkApi/Callback/Event/Event.hpp"
 
 class EventProcessingStrategyI
 {

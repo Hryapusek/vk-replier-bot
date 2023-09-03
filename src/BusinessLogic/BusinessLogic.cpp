@@ -1,7 +1,6 @@
 #include "BusinessLogic.hpp"
-#include "../Logging/Logger.hpp"
-#include "ConfigHolder.hpp"
-#include "../VkApi/Requests/Init.hpp"
+#include "Logging/Logger.hpp"
+#include "VkApi/Requests/Init.hpp"
 #include "ConfigConditions.hpp"
 #include "ConfigTypes/SimpleTypes.hpp"
 #include "ConfigOperations.hpp"
@@ -132,6 +131,16 @@ Result< std::string > BusinessLogic::changeMode(VkUserId_t callerId)
     return make_error_result("Some requirements were not met");
   ConfigOperations::changeMode(config);
   return make_success_result(ConfigOperations::getModeName(config));
+}
+
+int BusinessLogic::getPort()
+{
+  return ConfigHolder::getPort();
+}
+
+std::string BusinessLogic::getSecretString()
+{
+  return ConfigHolder::getSecretString();
 }
 
 BusinessLogic::SourceChat_t BusinessLogic::Chat_t::toSourceChatT()

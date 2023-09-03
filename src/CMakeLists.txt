@@ -44,29 +44,42 @@ set(SOURCE_FILES_LIST
   JsonUtils.cpp
   ConfigReader.cpp
   VkApi/Exceptions.cpp
-  VkApi/Callback/Event/EventObjects/NewMessage.cpp
-  VkApi/Callback/Event/Event.cpp
-  VkApi/Callback/Event/Utils.cpp
-  VkApi/Objects/Message.cpp
+  VkApi/Responses/Messages/MessagesGetByConversationMessageIdResponse.cpp
+  VkApi/Requests/Init.cpp
+  VkApi/Requests/BaseRequest.cpp
   VkApi/Requests/Messages/MessagesSendRequest.cpp
   VkApi/Requests/Messages/MessagesGetByConversationMessageIdRequest.cpp
-  VkApi/Responses/Messages/MessagesGetByConversationMessageIdResponse.cpp
-  VkApi/Requests/BaseRequest.cpp
-  VkApi/Exceptions.cpp
-  MessageProcessing/MessageProcessing.cpp
-  BotTypes/TargetsTable.cpp
-  MessageProcessing/Commands/RegSource.cpp
-  MessageProcessing/Commands/RegTarget.cpp
-  MessageProcessing/Commands/DelSource.cpp
-  MessageProcessing/Commands/DelTarget.cpp
-  MessageProcessing/Commands/DelTargetByNum.cpp
-  MessageProcessing/Commands/RegGodlike.cpp
-  MessageProcessing/Commands/ChangeMode.cpp
-  MessageProcessing/Commands/Status.cpp
-  MessageProcessing/Tags/TagAll.cpp
-  MessageProcessing/Tags/TagAllImportant.cpp
-  MessageProcessing/Utils.cpp
-)
+  VkApi/Objects/Message.cpp
+  VkApi/Callback/Event/Utils.cpp
+  VkApi/Callback/Event/Event.cpp
+  VkApi/Callback/Event/EventObjects/NewMessage.cpp
+  Server/Server.cpp
+  MessageProcessing/TagsPool.cpp
+  MessageProcessing/MsgUtils.cpp
+  MessageProcessing/EventProcessingStrategy.cpp
+  MessageProcessing/CommandsPool.cpp
+  MessageProcessing/ArgsExtractor.cpp
+  MessageProcessing/Tags/AllTag.cpp
+  MessageProcessing/Tags/AllImportantTag.cpp
+  MessageProcessing/Interfaces/TextTriggerI.cpp
+  MessageProcessing/Commands/StatusCommand.cpp
+  MessageProcessing/Commands/RegTargetCommand.cpp
+  MessageProcessing/Commands/RegSourceCommand.cpp
+  MessageProcessing/Commands/RegGodlikeCommand.cpp
+  MessageProcessing/Commands/DelTargetCommand.cpp
+  MessageProcessing/Commands/DelTargetByNumCommand.cpp
+  MessageProcessing/Commands/DelSourceCommand.cpp
+  MessageProcessing/Commands/ChangeModeCommand.cpp
+  Logging/Logger.cpp
+  Logging/LoggerBoostImpl.cpp
+  GeneralUtils/Result.cpp
+  GeneralUtils/JsonUtils.cpp
+  BusinessLogic/ConfigOperations.cpp
+  BusinessLogic/ConfigHolder.cpp
+  BusinessLogic/ConfigConditions.cpp
+  BusinessLogic/BusinessLogic.cpp
+  BusinessLogic/ConfigTypes/TargetsContainer.cpp
+  )
 target_sources(${TARGET} PRIVATE ${SOURCE_FILES_LIST})
 target_include_directories(${TARGET} PRIVATE BotTypes MessageProcessing VkApi)
 include_directories(${Boost_INCLUDE_DIRS}) 

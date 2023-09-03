@@ -1,5 +1,6 @@
 #include "BusinessLogic/BusinessLogic.hpp"
 #include "Server/Server.hpp"
+#include "MessageProcessing/EventProcessingStrategy.hpp"
 
 // 1. Put server in separate file
 // 2. Incapsulate logger
@@ -13,7 +14,17 @@
 
 // TODO replace logger in VkApi module
 
+void startServer()
+{
+  auto port = BusinessLogic::getPort();
+  auto secretString = BusinessLogic::getSecretString();
+  auto strategy = msg_proc::EventProcessingStrategy::make_strategy();
+  auto server = server::Server::make_server(port, secretString, std::move(strategy));
+  server->startServer();
+}
+
 int main() {
   BusinessLogic::init();
+  startServer();
   return 0;
 }

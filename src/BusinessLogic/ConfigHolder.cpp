@@ -2,9 +2,10 @@
 #include <fstream>
 #include <jsoncpp/json/json.h>
 #include <functional>
+
+#include "Logging/Logger.hpp"
 #include "ConfigConditions.hpp"
 #include "ConfigTypes/SimpleTypes.hpp"
-#include "../Logging/Logger.hpp"
 
 namespace
 {
@@ -211,7 +212,7 @@ namespace config
     return config_.groupID;
   }
 
-  const std::string &ConfigHolder::getSecretString()
+  std::string ConfigHolder::getSecretString()
   {
     return config_.secretString;
   }
