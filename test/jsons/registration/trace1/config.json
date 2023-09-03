@@ -1,13 +1,13 @@
 {
-	"base_url" : "localhost:8080",
-	"godlike_ids" : 
+	"baseUrl" : "localhost:8080",
+	"godlikeIds" : 
 	[
 		999
 	],
-	"group_id" : -100000,
+	"groupId" : -100000,
 	"mode" : "config",
 	"port" : 8081,
-	"secret_string" : "secret",
+	"secretString" : "secret",
 	"token" : "token",
 	"v" : "5.151"
 }

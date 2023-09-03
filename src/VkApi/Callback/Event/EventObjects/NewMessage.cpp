@@ -1,5 +1,5 @@
 #include "NewMessage.hpp"
-#include "../../../../JsonUtils.hpp"
+#include "GeneralUtils/JsonUtils.hpp"
 
 namespace vk::callback::event::objects
 {

@@ -1,0 +1,1 @@
+cd .. && make -j12 && cd src && cp ../../test/jsons/registration/trace1/config.json .

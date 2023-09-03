@@ -1,8 +1,8 @@
 #ifndef MESSAGES_GET_BY_CONVERSATION_MESSAGE_ID_REQUEST_HPP
 #define MESSAGES_GET_BY_CONVERSATION_MESSAGE_ID_REQUEST_HPP
 
-#include "../BaseRequest.hpp"
-#include "../../Responses/Messages/MessagesGetByConversationMessageIdResponse.hpp"
+#include "VkApi/Requests/BaseRequest.hpp"
+#include "VkApi/Responses/Messages/MessagesGetByConversationMessageIdResponse.hpp"
 
 namespace vk::requests::messages
 {

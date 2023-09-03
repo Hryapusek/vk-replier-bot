@@ -10,7 +10,7 @@ namespace vk::callback::event::details
  * @return EventType or UNKNOWN if value of field "type"
  *  is not supported.
  * 
- * @throw Json::Exception
+ * @throw Json::Exception if "type" field not found
  */
   EventType parseEventType(const Json::Value &);
 }

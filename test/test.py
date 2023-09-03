@@ -26,7 +26,7 @@ def executeUnit(fileName: str):
         print("Content:", content)
         response = requests.post(url=botUrl, json=json.loads(content))
         print(response.status_code)
-        time.sleep(0.1)
+        time.sleep(0.25)
         print(sep)
 
 if len(sys.argv) <= 1:
@@ -88,4 +88,4 @@ elif sys.argv[1] == "registration/trace1":
 else:
     executeUnit(sys.argv[1])
 
-# time.sleep(1000)
+time.sleep(3)

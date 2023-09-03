@@ -6,7 +6,8 @@
       "id": 2,
       "text": "/del_target_by_num",
       "from_id": 998,
-      "peer_id": 4
+      "peer_id": 4,
+      "conversation_message_id": 2
     }
   }
 }

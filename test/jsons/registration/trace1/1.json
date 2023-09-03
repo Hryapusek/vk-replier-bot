@@ -6,7 +6,8 @@
       "id": 2,
       "text": "/reg_source \"25 квартира",
       "from_id": 2,
-      "peer_id": 2000000001
+      "peer_id": 2000000001,
+      "conversation_message_id": 2
     }
   }
 }

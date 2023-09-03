@@ -1,7 +1,7 @@
 #ifndef MESSAGES_SEND_REQUEST_HPP
 #define MESSAGES_SEND_REQUEST_HPP
 
-#include "../BaseRequest.hpp"
+#include "VkApi/Requests/BaseRequest.hpp"
 
 namespace vk::requests::messages
 {

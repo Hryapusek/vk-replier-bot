@@ -4,7 +4,7 @@
 #include "EventObject.hpp"
 
 #include <string>
-#include "../../../Objects/Message.hpp"
+#include "VkApi/Objects/Message.hpp"
 #include <jsoncpp/json/json.h>
 
 namespace vk::callback::event::objects

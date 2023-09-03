@@ -6,7 +6,8 @@
       "id": 2,
       "text": "/reg_godlike sus",
       "from_id": 999,
-      "peer_id": 4
+      "peer_id": 4,
+      "conversation_message_id": 2
     }
   }
 }
