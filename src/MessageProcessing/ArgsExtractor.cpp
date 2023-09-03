@@ -44,7 +44,6 @@ Result<int> ArgsExtractor::extractInt()
   {
     return make_error_result("Bad number found");
   }
-  
 }
 
 Result<std::string> ArgsExtractor::extractWord()
@@ -52,7 +51,7 @@ Result<std::string> ArgsExtractor::extractWord()
   if (!hasWord())
     return make_error_result("No words were found");
   std::string word;
-  while (!eol() && !isSpace)
+  while (!eol() && !(isSpace()))
     word += *cur_++;
   return word;
 }

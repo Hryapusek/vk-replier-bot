@@ -15,6 +15,7 @@ namespace msg_proc
       Logger::log(Logger::ERROR, "EventProcessingStrategy - Precondition failed. Can not cast event object to NewMessage. Skipping event");
       return;
     }
+    // TODO try catch?????
     for (const auto &cmdPtr : commands::CommandsPool::commands)
     {
       if (cmdPtr->isThisTrigger(eventObject->getMessage()))
@@ -29,6 +30,6 @@ namespace msg_proc
   
   std::shared_ptr<EventProcessingStrategy> EventProcessingStrategy::make_strategy()
   {
-    return std::shared_ptr<EventProcessingStrategy>();
+    return std::make_shared<EventProcessingStrategy>();
   }
 }

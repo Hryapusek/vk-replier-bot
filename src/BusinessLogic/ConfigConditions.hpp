@@ -8,7 +8,7 @@ namespace config
 {
   class ConfigConditions
   {
-  public: // TODO fix includes because JsonUtils.hpp was moved
+  public:
     static bool isChatSource(const config::Config &, types::VkChatId_t);
     static bool isModeWork(const config::Config &);
     static bool isModeConfig(const config::Config &);

@@ -1,6 +1,6 @@
 #include "BaseRequest.hpp"
 #include "Logging/Logger.hpp"
-#include "Exceptions.hpp"
+#include "VkApi/Exceptions.hpp"
 #include "GeneralUtils/JsonUtils.hpp"
 
 namespace

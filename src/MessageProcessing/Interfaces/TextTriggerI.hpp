@@ -2,7 +2,7 @@
 #define TEXT_TRIGGERI_HPP
 
 #include <vector>
-#include "../VkApi/Objects/Message.hpp"
+#include "VkApi/Objects/Message.hpp"
 
 namespace msg_proc
 {

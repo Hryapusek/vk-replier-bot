@@ -2,8 +2,6 @@
 #include <limits>
 #include <stdexcept>
 
-// TODO update realizations
-
 namespace config::types
 {
   void TargetsContainer::insert(TargetChat_t chat)

@@ -9,7 +9,7 @@ protected:
   using Event_t = vk::callback::event::Event;
   
 public:
-  virtual void processNewMessageEvent(Event_t event) {};
+  virtual void processNewMessageEvent([[maybe_unused]] Event_t event) {};
 };
 
 #endif

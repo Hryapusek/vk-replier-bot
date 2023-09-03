@@ -102,12 +102,12 @@ namespace server
     theEventProcessingStrategy_(std::move(theStrategy))
   { }
 
-  void Server::startServer()
+  void Server::startServer(std::shared_ptr<Server> servPtr)
   {
     httpserver::webserver ws = httpserver::create_webserver(port_);
-    HttpHandler handler(shared_from_this());
+    HttpHandler handler(servPtr);
     ws.register_resource("/notification", &handler, true);
-    std::thread cleanerTh(threadsCleanerDaemon, shared_from_this());
+    std::thread cleanerTh(threadsCleanerDaemon, servPtr);
     cleanerTh.detach();
     bool blocking = true;
     ws.start(blocking);
@@ -115,7 +115,7 @@ namespace server
 
   std::shared_ptr< Server > Server::make_server(int port, std::string secretString, std::shared_ptr< EventProcessingStrategyI > theStrategy)
   {
-    return std::make_shared< Server >(port, std::move(secretString), std::move(theStrategy));
+    return std::shared_ptr<Server>(new Server(port, std::move(secretString), std::move(theStrategy)));
   }
 
 //erases finished threads time to time
@@ -125,15 +125,15 @@ namespace server
     while (server.use_count() > 1)
     {
       std::this_thread::sleep_for(breakBetweenCleanings);
-      std::lock_guard< std::mutex > lock(threadsMutex_);
-      threads_.erase(
+      std::lock_guard< std::mutex > lock(server->threadsMutex_);
+      server->threads_.erase(
         std::remove_if(
-          threads_.begin(),
-          threads_.end(),
+          server->threads_.begin(),
+          server->threads_.end(),
           [](std::thread &th) {
         return !th.joinable();
       }),
-        threads_.end());
+        server->threads_.end());
     }
   }
 }

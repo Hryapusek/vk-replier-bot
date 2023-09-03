@@ -51,7 +51,7 @@ void config::ConfigOperations::changeMode(Config &config)
 
 std::string config::ConfigOperations::getModeName(Config &config)
 {
-  static const const std::map< types::Mode, std::string > modeToString
+  static const std::map< types::Mode, std::string > modeToString
   {
     { types::Mode::WORK, "WORK" },
     { types::Mode::CONFIG, "CONFIG" },

@@ -9,7 +9,7 @@
 namespace server
 {
 //Patter Facade
-  class Server: std::enable_shared_from_this< Server >
+  class Server
   {
     friend class HttpHandler;
   public:
@@ -18,7 +18,7 @@ namespace server
     Server &operator=(const Server &) = delete;
     Server &operator=(Server &&) = delete;
     static std::shared_ptr< Server > make_server(int port, std::string secretString, std::shared_ptr< EventProcessingStrategyI > theStrategy);
-    void startServer();
+    void startServer(std::shared_ptr<Server> servPtr);
 
   protected:
     int port_;
@@ -29,7 +29,7 @@ namespace server
     std::vector< std::thread > threads_;
     std::mutex threadsMutex_;
     std::shared_ptr< EventProcessingStrategyI > theEventProcessingStrategy_;
-    void threadsCleanerDaemon(std::shared_ptr< Server >);
+    static void threadsCleanerDaemon(std::shared_ptr< Server >);
   };
 }
 

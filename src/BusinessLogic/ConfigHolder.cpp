@@ -40,7 +40,7 @@ namespace
 
   void logAndThrow(const std::string &message)
   {
-    Logger::log(Logger::FATAL, message);
+    Logger::log(Logger::ERROR, message);
     throw std::logic_error(message);
   }
 

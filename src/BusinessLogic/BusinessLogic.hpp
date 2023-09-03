@@ -17,7 +17,7 @@ public:
   using VkUserId_t = config::types::VkUserId_t;
   using VkChatId_t = config::types::VkChatId_t;
   using ChatId_t = config::types::ChatId_t;
-  struct Chat_t
+  struct Chat_t // TODO separate target and source chat types
   {
     std::optional<ChatId_t> chatId;
     VkChatId_t vkChatId;

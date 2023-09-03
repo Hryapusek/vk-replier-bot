@@ -5,7 +5,6 @@
 
 namespace msg_proc::tags
 {
-  // TODO add logging
   void AllImportantTag::execute(const Message_t &msg)
   {
     using namespace std::literals;
