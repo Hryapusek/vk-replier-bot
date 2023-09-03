@@ -18,6 +18,8 @@ void LoggerEasyLogImpl::init(std::string fileName)
   defaultConf.set(el::Level::Global,
     el::ConfigurationType::Format, "%datetime %level %thread %msg");
   defaultConf.set(el::Level::Global, el::ConfigurationType::Filename, fileName);
+  defaultConf.set(el::Level::Global, el::ConfigurationType::MaxLogFileSize, "10485760");
+  el::Loggers::reconfigureLogger("default", defaultConf);
 }
 
 el::Level LoggerEasyLogImpl::enumLvlToInnerLvl(Level_t lvl)

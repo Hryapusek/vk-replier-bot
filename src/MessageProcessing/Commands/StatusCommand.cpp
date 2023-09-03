@@ -9,7 +9,9 @@ namespace msg_proc::commands
     static const std::string text = 
     "Bot made by Абраамян Александр, студент программной инженерии, 3 курс.\n\
     Если есть какие-то вопросы, писать сюда - vk.com/ezhiklisiy";
-    MsgUtils::sendResponseMessage(msg.getPeerId(), text);
+    static const std::string textTriggerName = "Status";
+    MsgUtils::logTextTriggerName(textTriggerName);
+    MsgUtils::logAndSendResponseMessage(msg.getPeerId(), text);
     return;
   }
 }

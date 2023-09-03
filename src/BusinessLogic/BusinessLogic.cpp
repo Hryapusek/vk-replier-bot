@@ -109,14 +109,14 @@ Result< void > BusinessLogic::removeTargetChatByVkChatId(VkChatId_t vkChatId)
   return make_success_result();
 }
 
-Result< void > BusinessLogic::removeSourceChat(VkUserId_t callerId)
+Result< void > BusinessLogic::removeSourceChat(VkChatId_t callerVkChatId)
 {
   auto configWrapper = ConfigHolder::getReadWriteConfig();
   auto &config = configWrapper.config;
-  if (!CfgConds::isUserGodlike(config, callerId))
-    return make_error_result("Only godlike user can use this command");
   if (!CfgConds::isSourceChatSet(config))
     return make_error_result("Source chat does not exist yet");
+  if (!CfgConds::isChatSource(config, callerVkChatId))
+    return make_error_result("Command not from source chat");
   ConfigOperations::removeSourceChat(config);
   return make_success_result();
 }
@@ -145,12 +145,17 @@ std::string BusinessLogic::getSecretString()
 
 BusinessLogic::SourceChat_t BusinessLogic::Chat_t::toSourceChatT()
 {
-  // TODO make realization
-  return SourceChat_t();
+  SourceChat_t chat;
+  chat.title = this->title;
+  chat.vkChatId = this->vkChatId;
+  return chat;
 }
 
 BusinessLogic::TargetChat_t BusinessLogic::Chat_t::toTargetChatT()
 {
-  // TODO make realization
-  return TargetChat_t();
+  TargetChat_t chat;
+  chat.title = this->title;
+  chat.vkChatId = this->vkChatId;
+  chat.chatId = this->chatId;
+  return chat;
 }

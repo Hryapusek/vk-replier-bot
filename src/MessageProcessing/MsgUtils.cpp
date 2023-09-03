@@ -1,5 +1,6 @@
 #include "MsgUtils.hpp"
 #include <regex>
+#include "Logging/Logger.hpp"
 #include "VkApi/Requests/Messages/MessagesSendRequest.hpp"
 
 namespace msg_proc
@@ -44,8 +45,25 @@ namespace msg_proc
     sendSimpleMessage(destPeerId, text);
   }
 
+  void MsgUtils::logAndSendResponseMessage(vk::types::PeerId_t destPeerId, str_cref text)
+  {
+    Logger::log(Logger::INFO, text);
+    sendSimpleMessage(destPeerId, text);
+  }
+
   void MsgUtils::sendErrorResponseMessage(vk::types::PeerId_t destPeerId, str_cref errorText)
   {
     sendSimpleMessage(destPeerId, errorText);
+  }
+
+  void MsgUtils::logAndSendErrorResponseMessage(vk::types::PeerId_t destPeerId, str_cref errorText)
+  {
+    Logger::log(Logger::INFO, errorText);
+    sendSimpleMessage(destPeerId, errorText);
+  }
+
+  void MsgUtils::logTextTriggerName(str_cref textTriggerName)
+  {
+    Logger::log(Logger::INFO, "In TextTrigger execution with name ", textTriggerName);
   }
 }

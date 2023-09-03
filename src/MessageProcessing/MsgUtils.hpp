@@ -16,7 +16,10 @@ namespace msg_proc
     static void sendSimpleMessage(vk::types::PeerId_t destPeerId, str_cref text);
     static void sendMessageToAllTargets(str_cref text, int fwd_conv_msg_id, str_cref targetChatsString, vk::types::ChatId_t sourceChatVkId);
     static void sendResponseMessage(vk::types::PeerId_t destPeerId, str_cref text);
+    static void logAndSendResponseMessage(vk::types::PeerId_t destPeerId, str_cref text);
     static void sendErrorResponseMessage(vk::types::PeerId_t destPeerId, str_cref errorText);
+    static void logAndSendErrorResponseMessage(vk::types::PeerId_t destPeerId, str_cref errorText);
+    static void logTextTriggerName(str_cref textTriggerName);
   };
 }
 

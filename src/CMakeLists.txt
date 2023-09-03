@@ -59,8 +59,8 @@ set(SOURCE_FILES_LIST
   MessageProcessing/TagsPool.cpp
   MessageProcessing/MsgUtils.hpp
   MessageProcessing/MsgUtils.cpp
-  MessageProcessing/EventProcessingStrategy.hpp
-  MessageProcessing/EventProcessingStrategy.cpp
+  MessageProcessing/TagsCmdsProcessingStrategy.hpp
+  MessageProcessing/TagsCmdsProcessingStrategy.cpp
   MessageProcessing/CommandsPool.hpp
   MessageProcessing/CommandsPool.cpp
   MessageProcessing/ArgsExtractor.hpp
@@ -109,3 +109,4 @@ set(SOURCE_FILES_LIST
 target_include_directories(${TARGET} PRIVATE . )
 target_sources(${TARGET} PUBLIC ${SOURCE_FILES_LIST})
 target_link_libraries(${TARGET} ${JSONCPP} ${CPR} ${CURL} ${HTTPSERVER})
+target_compile_definitions(${TARGET} PUBLIC ELPP_THREAD_SAFE)

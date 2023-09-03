@@ -17,7 +17,7 @@ public:
   using VkUserId_t = config::types::VkUserId_t;
   using VkChatId_t = config::types::VkChatId_t;
   using ChatId_t = config::types::ChatId_t;
-  struct Chat_t // TODO separate target and source chat types
+  struct Chat_t // OPT separate target and source chat types
   {
     std::optional<ChatId_t> chatId;
     VkChatId_t vkChatId;
@@ -32,7 +32,7 @@ public:
   static Result<void> addGodlike(VkUserId_t callerId, VkUserId_t newGodlike);
   static Result<void> removeTargetChatById(VkUserId_t callerId, ChatId_t chatId);
   static Result<void> removeTargetChatByVkChatId(VkChatId_t chatId);
-  static Result<void> removeSourceChat(VkUserId_t callerId);
+  static Result<void> removeSourceChat(VkChatId_t callerVkChatId);
   static Result<std::string> changeMode(VkUserId_t callerId);
   /// @note Direct access to config field. NOT THREAD-SAFE.
   static int getPort();

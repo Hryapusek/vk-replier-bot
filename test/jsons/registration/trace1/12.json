@@ -6,7 +6,8 @@
       "id": 2,
       "text": "/reg_target 23",
       "from_id": 2,
-      "peer_id": 2000000100
+      "peer_id": 2000000100,
+      "conversation_message_id": 2
     }
   }
 }

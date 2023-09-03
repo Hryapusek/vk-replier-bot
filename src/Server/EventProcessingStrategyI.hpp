@@ -5,11 +5,9 @@
 
 class EventProcessingStrategyI
 {
-protected:
-  using Event_t = vk::callback::event::Event;
-  
 public:
-  virtual void processNewMessageEvent([[maybe_unused]] Event_t event) {};
+  using Event_t = vk::callback::event::Event;
+  virtual bool processNewMessageEvent([[maybe_unused]] Event_t event) { return false; };
 };
 
 #endif

@@ -16,7 +16,7 @@ namespace vk::objects
     bool hasPeerId() const { return peer_id.has_value(); }
     bool hasFromId() const { return from_id.has_value(); }
     bool hasText() const { return text.has_value(); }
-    bool hasConversationMessageId() { return conversation_message_id.has_value(); }
+    bool hasConversationMessageId() const { return conversation_message_id.has_value(); }
 
     /// @throw std::bad_optional_access
     int getId() const { return *id; }

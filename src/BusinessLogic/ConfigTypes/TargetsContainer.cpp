@@ -6,8 +6,11 @@ namespace config::types
 {
   void TargetsContainer::insert(TargetChat_t chat)
   {
-    if (chat.chatId && containsChatId(*chat.chatId))
-      throw std::logic_error("Precondition failed - given id is already busy. Id is " + std::to_string(*chat.chatId));
+    if (chat.chatId)
+    {
+      if (containsChatId(*chat.chatId))
+        throw std::logic_error("Precondition failed - given id is already busy. Id is " + std::to_string(*chat.chatId));
+    }
     else
       chat.chatId = generateChatId();
     table_[*chat.chatId] = chat;

@@ -5,12 +5,12 @@
 ArgsExtractor::ArgsExtractor(CIterator_t begin, CIterator_t end, bool skipFirstWord) :
   cur_(begin),
   end_(end)
-{ 
+{
   if (skipFirstWord)
     skipWord();
 }
 
-Result<std::string> ArgsExtractor::extractQuotedString()
+Result< std::string > ArgsExtractor::extractQuotedString()
 {
   if (!hasQuotedString())
     return make_error_result("Quoted string was not found");
@@ -30,23 +30,29 @@ bool ArgsExtractor::hasQuotedString()
   return !eol() && *cur_ == '"';
 }
 
-Result<int> ArgsExtractor::extractInt()
+Result< int > ArgsExtractor::extractInt()
 {
   if (!hasNum())
     return make_error_result("Num is not found");
-  std::string numWord = std::move(extractWord().getObject());
+  std::string numWord;
+  if (*cur_ == '-' || *cur_ == '+')
+    numWord += *cur_++;
+  while (!eol() && isdigit(*cur_))
+    numWord += *cur_++;
+  if (!eol() && !isSpace())
+    return make_error_result("Bad number found");
   try
   {
     auto num = std::stoi(numWord);
     return make_success_result(num);
   }
-  catch(const std::exception& e)
+  catch (const std::exception &e)
   {
     return make_error_result("Bad number found");
   }
 }
 
-Result<std::string> ArgsExtractor::extractWord()
+Result< std::string > ArgsExtractor::extractWord()
 {
   if (!hasWord())
     return make_error_result("No words were found");
