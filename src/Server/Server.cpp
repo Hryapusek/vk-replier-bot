@@ -46,7 +46,7 @@ namespace server
   void HttpHandler::processEvent(const httpserver::http_request &req, std::shared_ptr< httpserver::http_response > &resp)
   {
     using namespace vk::callback::event;
-    Logger::log(Logger::TRACE, "Got new request");
+    Logger::log(Logger::INFO, "Got new request");
     if (server_->theEventProcessingStrategy_ == nullptr)
     {
       Logger::log(Logger::WARNING, "Strategy is not set. Skipping event.");
@@ -66,13 +66,13 @@ namespace server
     {
       case EventType::CONFIRMATION:
       {
-        Logger::log(Logger::TRACE, "Event type is CONFIRMATION. Sending secret_string");
+        Logger::log(Logger::INFO, "Event type is CONFIRMATION. Sending secret_string");
         resp = std::shared_ptr< httpserver::http_response >(new httpserver::string_response(server_->secretString_, 200));
         return;
       }
       case EventType::MESSAGE_NEW:
       {
-        Logger::log(Logger::TRACE, "Event type is MESSAGE_NEW. Starting eventProcess thread");
+        Logger::log(Logger::INFO, "Event type is MESSAGE_NEW. Starting eventProcess thread");
         server_->theEventProcessingStrategy_->processNewMessageEvent(std::move(event));
         return;
       }
