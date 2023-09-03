@@ -7,17 +7,12 @@ find_library(CPR cpr REQUIRED)
 find_library(CURL curl REQUIRED)
 find_library(HTTPSERVER httpserver REQUIRED)
 
-if(NOT JSONCPP)
-    message(FATAL_ERROR "JSONCPP not found!!!")
-endif()
-
-if(NOT CPR)
-    message(FATAL_ERROR "CPR not found!!!")
-endif()
-
-if(NOT CURL)
-    message(FATAL_ERROR "CURL not found!!!")
-endif()
+set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+set(CMAKE_HAVE_THREADS_LIBRARY 1)
+set(CMAKE_USE_WIN32_THREADS_INIT 0)
+set(CMAKE_USE_PTHREADS_INIT 1)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 set(TARGET vk-bot)
 add_executable(${TARGET})
