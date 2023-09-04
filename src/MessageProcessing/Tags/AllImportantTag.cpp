@@ -16,13 +16,13 @@ namespace msg_proc::tags
       return MsgUtils::logAndSendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
     auto targetsStr = std::move(res.getObject());
     ArgsExtractor argsExtractor(findTriggerBegin(msg.getText()), msg.getText().end(), true);
-    std::string title = "";
+    std::string title = "@all";
     if (argsExtractor.hasQuotedString())
     {
       auto res = argsExtractor.extractQuotedString();
       if (!res)
         return MsgUtils::logAndSendErrorResponseMessage(msg.getPeerId(), commandErrorText + res.getErrorMessage());
-      title = std::move(res.getObject());
+      title += ", " + std::move(res.getObject());
     }
     MsgUtils::sendMessageToAllTargets(title, msg.getConversationMessageId(), targetsStr, msg.getPeerId());
     MsgUtils::logAndSendResponseMessage(msg.getPeerId(), "Successfully forwarded!"s);
