@@ -52,7 +52,7 @@ namespace vk::callback::event
   {
     static const auto fields = std::tuple{
       JsonFieldT<std::string>("type"),
-      JsonFieldVT("object", Json::ValueType::objectValue),
+      JsonFieldVT("object", Json::ValueType::objectValue, false),
       JsonFieldT<int>("group_id")
     };
     checkJsonFields(root, fields);
