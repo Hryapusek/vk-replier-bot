@@ -78,6 +78,7 @@ namespace msg_proc
         return true;
       }
     }
+    Logger::log(Logger::INFO, "No command or tag were found. Skipping message");
     return false;
   }
 
