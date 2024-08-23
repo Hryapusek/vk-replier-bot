@@ -1,6 +1,5 @@
 import asyncio
 import threading
-import vk_api
 import settings.constants
 import traceback
 
@@ -8,10 +7,12 @@ from vk_api.bot_longpoll import VkBotEventType, VkBotLongPoll
 from messageprocessing.message_dispatcher import MessageDispatcher
 from loguru import logger
 from settings.bot_settings import BotSettings
+from vk_session import get_session
 
 def main():
     # Initialize config file
     BotSettings(settings.constants.SETTINGS_FILE_NAME)
+
     dispatcher = MessageDispatcher()
 
     # Creating loop to put tasks in here
@@ -19,7 +20,7 @@ def main():
     thread = threading.Thread(target=loop.run_forever)
     thread.start()
     while True:
-        vk_session = vk_api.VkApi(token=BotSettings().get_token(), api_version=BotSettings().get_api_version())
+        vk_session = get_session()
         longpoll = VkBotLongPoll(vk_session, BotSettings().get_group_id())
         try:
             for event in longpoll.listen():
