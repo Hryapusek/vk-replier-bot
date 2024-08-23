@@ -19,10 +19,23 @@ class __ConfigValues(pydantic.BaseModel):
     godlike_ids: list[int]
 
 class BotSettings:
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            with cls._lock:
+                if not cls._instance:  # Double-checked locking
+                    cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self, file_path):
-        self.file_path = file_path
-        self._lock = threading.Lock()
-        self._config: __ConfigValues = self._load_config()
+        # Prevent reinitialization during multiple instantiations
+        if not hasattr(self, "_initialized"):
+            self.file_path = file_path
+            self._lock = threading.Lock()
+            self._config: __ConfigValues = self._load_config()
+            self._initialized = True  # Mark the instance as initialized
 
     def _load_config(self) -> __ConfigValues:
         with open(self.file_path, 'r') as f:

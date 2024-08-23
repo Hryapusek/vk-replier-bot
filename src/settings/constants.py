@@ -2,6 +2,8 @@ from typing import Literal
 import pydantic
 import enum
 
+SETTINGS_FILE_NAME = "config.json"
+
 class Mode(enum.Enum):
     WORK = "work"
     CONFIGURATION = "configuration"
