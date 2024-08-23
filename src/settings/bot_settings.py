@@ -4,16 +4,16 @@ import json
 import threading
 
 from settings.constants import ConfigKeys, Mode
-from types.types import *
+from bot_types.types import Chat
 
-class __ConfigValues(pydantic.BaseModel):
+
+class _ConfigValues(pydantic.BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
     mode: Mode
     token: str
     api_version: str
-    secret_string: str
-    port: int
     group_id: int
-    base_url: str
     target_chats: list[Chat]
     source_chat: Optional[Chat]
     godlike_ids: list[int]
@@ -29,30 +29,27 @@ class BotSettings:
                     cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, file_path):
+    def __init__(self, file_path=None):
         # Prevent reinitialization during multiple instantiations
         if not hasattr(self, "_initialized"):
             self.file_path = file_path
             self._lock = threading.Lock()
-            self._config: __ConfigValues = self._load_config()
+            self._config: _ConfigValues = self._load_config()
             self._initialized = True  # Mark the instance as initialized
 
-    def _load_config(self) -> __ConfigValues:
+    def _load_config(self) -> _ConfigValues:
         with open(self.file_path, 'r') as f:
             raw_json = json.load(f)
-        target_chats = [Chat(**chat) for chat in raw_json[ConfigKeys.target_chats]]
-        source_chat = Chat(**raw_json[ConfigKeys.source_caht]) if raw_json[ConfigKeys.source_caht] else None
-        return __ConfigValues(
-            mode=Mode(raw_json[ConfigKeys.mode]),
-            token=raw_json[ConfigKeys.token],
-            api_version=raw_json[ConfigKeys.api_version],
-            secret_string=raw_json[ConfigKeys.secret_string],
-            port=raw_json[ConfigKeys.port],
-            group_id=raw_json[ConfigKeys.group_id],
-            base_url=raw_json[ConfigKeys.base_url],
+        target_chats = [Chat(**chat) for chat in raw_json[ConfigKeys().target_chats]]
+        source_chat = Chat(**raw_json[ConfigKeys().source_caht]) if raw_json[ConfigKeys().source_caht] else None
+        return _ConfigValues(
+            mode=Mode(raw_json[ConfigKeys().mode]),
+            token=raw_json[ConfigKeys().token],
+            group_id=raw_json[ConfigKeys().group_id],
             target_chats=target_chats,
+            api_version=raw_json[ConfigKeys().api_version],
             source_chat=source_chat,
-            godlike_ids=raw_json[ConfigKeys.godlike_ids]
+            godlike_ids=raw_json[ConfigKeys().godlike_ids]
         )
 
     def _save_config(self):
@@ -86,24 +83,6 @@ class BotSettings:
             self._config.api_version = api_version
             self._save_config()
 
-    def get_secret_string(self) -> str:
-        with self._lock:
-            return self._config.secret_string
-
-    def set_secret_string(self, secret_string: str) -> None:
-        with self._lock:
-            self._config.secret_string = secret_string
-            self._save_config()
-
-    def get_port(self) -> int:
-        with self._lock:
-            return self._config.port
-
-    def set_port(self, port: int) -> None:
-        with self._lock:
-            self._config.port = port
-            self._save_config()
-
     def get_group_id(self) -> int:
         with self._lock:
             return self._config.group_id
@@ -111,15 +90,6 @@ class BotSettings:
     def set_group_id(self, group_id: int) -> None:
         with self._lock:
             self._config.group_id = group_id
-            self._save_config()
-
-    def get_base_url(self) -> str:
-        with self._lock:
-            return self._config.base_url
-
-    def set_base_url(self, base_url: str) -> None:
-        with self._lock:
-            self._config.base_url = base_url
             self._save_config()
 
     def get_target_chats(self) -> list[Chat]:

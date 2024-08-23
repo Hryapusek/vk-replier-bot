@@ -39,4 +39,4 @@ build
 __pycache__
 old_src
 env
-
+.venv

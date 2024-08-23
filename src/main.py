@@ -1,32 +1,32 @@
 import asyncio
+import threading
 import vk_api
 import settings.constants
-import loguru
 import traceback
-from vk_api.bot_longpoll import VkBotEventType
 
-_logger = loguru.Logger(__name__)
-
+from vk_api.bot_longpoll import VkBotEventType, VkBotLongPoll
+from messageprocessing.message_dispatcher import MessageDispatcher
+from loguru import logger
 from settings.bot_settings import BotSettings
 
 def main():
     # Initialize config file
     BotSettings(settings.constants.SETTINGS_FILE_NAME)
+    dispatcher = MessageDispatcher()
 
     # Creating loop to put tasks in here
     loop = asyncio.new_event_loop()
-
+    thread = threading.Thread(target=loop.run_forever)
+    thread.start()
     while True:
-        vk_session = vk_api.VkApi(token=BotSettings().get_token())
-        vk = vk_session.get_api()
-        longpoll = vk_api.VkBotLongPoll(vk_session, BotSettings().get_group_id())
+        vk_session = vk_api.VkApi(token=BotSettings().get_token(), api_version=BotSettings().get_api_version())
+        longpoll = VkBotLongPoll(vk_session, BotSettings().get_group_id())
         try:
             for event in longpoll.listen():
-                if event.type == VkBotEventType.MESSAGE_NEW and event.from_user:
-                    # TODO: loop.create_task()
-                    pass
+                if event.type == VkBotEventType.MESSAGE_NEW:
+                    loop.call_soon_threadsafe(loop.create_task, dispatcher.handle(event))
         except Exception as e:
-            _logger.warning("Exception while polling messages: \n%s", traceback.format_exc())
+            logger.warning("Exception while polling messages: \n%s", traceback.format_exc())
 
 
 if __name__ == "__main__":
