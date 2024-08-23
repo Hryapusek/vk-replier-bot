@@ -12,7 +12,6 @@ from vk_session import get_session
 def main():
     # Initialize config file
     BotSettings(settings.constants.SETTINGS_FILE_NAME)
-
     dispatcher = MessageDispatcher()
 
     # Creating loop to put tasks in here

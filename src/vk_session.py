@@ -1,4 +1,4 @@
-from vk_api import VkApi
+from vk_api.vk_api import VkApi
 
 from settings.bot_settings import BotSettings
 

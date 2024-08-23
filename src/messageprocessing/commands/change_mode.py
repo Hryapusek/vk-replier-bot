@@ -1,7 +1,7 @@
 
 from .i_command import ICommand
-from vk_api.bot_longpoll import VkBotEvent
+from vk_api.bot_longpoll import VkBotMessageEvent
 
 class ChangeModeCommand(ICommand):
-    def handle(self, event: VkBotEvent) -> None:
-        return None
+    def handle(self, event: VkBotMessageEvent) -> None:
+        pass
