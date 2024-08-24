@@ -1,5 +1,8 @@
 
 from typing import Optional
+
+from loguru import logger
+from bottypes.types import Chat
 from vk_session import get_session
 from .constants import CHAT_ID_START
 
@@ -41,3 +44,18 @@ def get_user_id_by_user_argument(user_argument: str) -> int:
     vk_session = get_session()
     result = vk_session.get_api().users.get(user_ids=[user_argument])
     return result[0].get('id')
+
+def forward_message_to_chats(chats: list[Chat], message: str, forward_message_conversation_id: int, forward_message_peer_id: int) -> None:
+    chat_packets: list[list[Chat]] = [chats[i:i+100] for i in range(0, len(chats), 100)]
+    vk_session = get_session()
+    for chat_packet in chat_packets:
+        result = vk_session.get_api().messages.send(peer_ids=[x.vk_chat_peer_id for x in chat_packet], 
+                                                    message=message, 
+                                                    random_id=0,
+                                                    forward={
+                                                        'conversation_message_ids': [forward_message_conversation_id],
+                                                        'peer_id': forward_message_peer_id
+                                                    })
+        for failed_chat in [x for x in result if 'error' in x]:
+            logger.warning("Failed to forward message to chat {}".format(failed_chat))
+    

@@ -2,13 +2,17 @@
 from result import *
 
 from bottypes.types import Chat
-from messageprocessing.commands.utils import extract_string_argument
+from messageprocessing.commands.utils import extract_string_argument, is_user_blocked
 from settings.bot_settings import BotSettings
 from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 from vkservice.vk_service import is_user_admin, send_reply_message
 
 def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
+    result = is_user_blocked(event.message.from_id)
+    if result.is_err():
+        return Err(result.err())
+    
     if event.message.from_id in BotSettings().get_godlike_ids():
         return Ok(None)
     
@@ -20,7 +24,7 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
 
     return Err("Вы должны быть main_godlike")
 
-class RegisterTargetChatCommand(ICommand):
+class RegisterChatCommand(ICommand):
     USAGE_STRING = 'Использование: /register_target_chat {id} ["title"]'
     def handle(self, event: VkBotMessageEvent) -> None:
         result = check_if_user_allowed(event)

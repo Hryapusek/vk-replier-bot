@@ -1,4 +1,5 @@
 
+from messageprocessing.commands.utils import is_user_blocked
 from settings.bot_settings import BotSettings
 from settings.constants import Mode
 from vk_session import get_session
@@ -9,6 +10,10 @@ from result import *
 from loguru import logger
 
 def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
+    result = is_user_blocked(event.message.from_id)
+    if result.is_err():
+        return Err(result.err())
+    
     if event.message.from_id in BotSettings().get_godlike_ids():
         return Ok(None)
 

@@ -14,11 +14,11 @@ class _ConfigValues(pydantic.BaseModel):
     token: str
     api_version: str
     group_id: int
-    target_chats: list[Chat]
-    source_chat: Optional[Chat]
+    chats: list[Chat]
     moderator_ids: list[int]
     blocked_user_ids: list[int]
     godlike_ids: list[int]
+    sender_ids: list[int]
     main_godlike_id: int
 
 class BotSettings:
@@ -42,18 +42,17 @@ class BotSettings:
     def _load_config(self) -> _ConfigValues:
         with open(self.file_path, 'r') as f:
             raw_json = json.load(f)
-        target_chats = [Chat(**chat) for chat in raw_json[ConfigKeys().target_chats]]
-        source_chat = Chat(**raw_json[ConfigKeys().source_chat]) if raw_json[ConfigKeys().source_chat] else None
+        chats = [Chat(**chat) for chat in raw_json[ConfigKeys().chats]]
         result_config = _ConfigValues(
             token=raw_json[ConfigKeys().token],
             group_id=raw_json[ConfigKeys().group_id],
-            target_chats=target_chats,
+            chats=chats,
             api_version=raw_json[ConfigKeys().api_version],
-            source_chat=source_chat,
             godlike_ids=raw_json[ConfigKeys().godlike_ids],
             moderator_ids=raw_json[ConfigKeys().moderator_ids],
             blocked_user_ids=raw_json[ConfigKeys().blocked_user_ids],
-            main_godlike_id=raw_json[ConfigKeys().main_godlike_id]
+            main_godlike_id=raw_json[ConfigKeys().main_godlike_id],
+            sender_ids=raw_json[ConfigKeys().sender_ids],
         )
         if result_config.main_godlike_id not in result_config.godlike_ids:
             result_config.godlike_ids.append(result_config.main_godlike_id)
@@ -90,22 +89,13 @@ class BotSettings:
             self._config.group_id = group_id
             self._save_config()
 
-    def get_target_chats(self) -> list[Chat]:
+    def get_chats(self) -> list[Chat]:
         with self._lock:
             return self._config.target_chats
 
-    def set_target_chats(self, target_chats: list[Chat]) -> None:
+    def set_chats(self, chats: list[Chat]) -> None:
         with self._lock:
-            self._config.target_chats = target_chats
-            self._save_config()
-
-    def get_source_chat(self) -> Optional[Chat]:
-        with self._lock:
-            return self._config.source_chat
-
-    def set_source_chat(self, source_chat: Chat) -> None:
-        with self._lock:
-            self._config.source_chat = source_chat
+            self._config.chats = chats
             self._save_config()
 
     def get_godlike_ids(self) -> list[int]:
@@ -138,3 +128,12 @@ class BotSettings:
     def get_main_godlike_id(self) -> int:
         with self._lock:
             return self._config.main_godlike_id
+
+    def get_sender_ids(self) -> list[int]:
+        with self._lock:
+            return self._config.sender_ids
+        
+    def set_sender_ids(self, sender_ids: list[int]) -> None:
+        with self._lock:
+            self._config.sender_ids = sender_ids
+            self._save_config()

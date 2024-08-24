@@ -1,6 +1,8 @@
 
 from result import *
 
+from settings.bot_settings import BotSettings
+
 def extract_string_argument(text: str) -> Result[str, str]:
     if len(text) < 2:
         return Err("Неправильный аргумент")
@@ -10,3 +12,8 @@ def extract_string_argument(text: str) -> Result[str, str]:
     if right == -1:
         return Err("Текст должен быть в кавычках")
     return Ok(text[1:right])
+
+def is_user_blocked(user_id: int) -> Result[None, str]:
+    if user_id in BotSettings().get_blocked_user_ids():
+        return Err("Пользователь заблокирован")
+    return Ok(None)

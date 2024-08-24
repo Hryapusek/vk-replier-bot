@@ -2,6 +2,7 @@
 from loguru import logger
 from result import *
 
+from messageprocessing.commands.utils import is_user_blocked
 from settings.bot_settings import BotSettings
 from vk_session import get_session
 from vkservice.vk_service import get_user_id_by_user_argument, is_user_admin, is_user_admin_in_any_chat, send_reply_message
@@ -9,6 +10,10 @@ from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 
 def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
+    result = is_user_blocked(event.message.from_id)
+    if result.is_err():
+        return Err(result.err())
+
     if event.message.from_id in BotSettings().get_godlike_ids():
         return Ok(None)
 

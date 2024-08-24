@@ -1,13 +1,17 @@
 
 from result import *
 from bottypes.types import Chat
-from messageprocessing.commands.utils import extract_string_argument
+from messageprocessing.commands.utils import extract_string_argument, is_user_blocked
 from settings.bot_settings import BotSettings
 from vkservice.vk_service import send_reply_message
 from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 
 def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
+    result = is_user_blocked(event.message.from_id)
+    if result.is_err():
+        return Err(result.err())
+    
     if event.message.from_id in BotSettings().get_godlike_ids():
         return Ok(None)
     

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from messageprocessing.commands.i_undoable import IUndoable
+from messageprocessing.commands.utils import is_user_blocked
 from vk_session import get_session
 from vkservice.vk_service import is_user_admin, send_reply_message
 from .i_command import ICommand
@@ -21,6 +22,11 @@ _всем_ - рассылка сообщений (anybody)
 _всем_важно_ - рассылка сообщений с all (anybody)
 """
     def handle(self, event: VkBotMessageEvent) -> HelpCommandUndoable:
+        result = is_user_blocked(event.message.from_id)
+        if result.is_err():
+            send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
+            return
+        
         result = send_reply_message(event.message.peer_id, self.HELP_TEXT, event.message.conversation_message_id)
         return HelpCommandUndoable(event.message.peer_id, result[0].get('conversation_message_id'))
     

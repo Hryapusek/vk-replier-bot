@@ -53,14 +53,14 @@ class MessageDispatcher:
             self._initialized = True
             self.lock = threading.RLock()
             self.change_mode_command = ChangeModeCommand()
-            self.delete_source_command = DeleteSourceCommand()
-            self.delete_target_command = DeleteTargetCommand()
-            self.delete_target_by_id_command = DeleteTargetByIdCommand()
+            self.delete_source_command = DeleteSourceChatCommand()
+            self.delete_target_command = DeleteCurrentChatCommand()
+            self.delete_target_by_id_command = DeleteChatByIdCommand()
             self.exit_command = ExitCommand()
             self.info_command = InfoCommand()
             self.register_godlike_command = RegisterGodlikeCommand()
             self.register_source_command = RegisterSourceChatCommand()
-            self.register_target_command = RegisterTargetChatCommand()
+            self.register_target_command = RegisterChatCommand()
             self.reload_settings_command = ReloadSettingsCommand()
             self.help_command = HelpCommand()
             self.send_command = SendCommand()
@@ -68,26 +68,36 @@ class MessageDispatcher:
             self.send_with_all_command = SendWithAllCommand()
 
             self.commands_dispatchering = {
-                "sus": self.change_mode_command,
+                "change_mode": self.change_mode_command,
+                "cm": self.change_mode_command,
+
                 "delete_source": self.delete_source_command,
+                "ds": self.delete_source_command,
+
                 "delete_target": self.delete_target_by_id_command,
+                "dt": self.delete_target_command,
+
                 "delete_target_by_id": self.delete_target_by_id_command,
+                "dtbi": self.delete_target_by_id_command,
+
                 "exit": self.exit_command,
                 "info": self.info_command,
                 "undo": self.undo_command,
+
                 "register_godlike": self.register_godlike_command,
+                "rgg": self.register_godlike_command,
+
                 "register_source": self.register_source_command,
-                "register_target": self.register_target_command,
-                "reload_settings": self.reload_settings_command,
-                "help": self.help_command,
-                "cm": self.change_mode_command,
-                "ds": self.delete_source_command,
-                "dt": self.delete_target_command,
-                "dtbi": self.delete_target_by_id_command,
-                "i": self.info_command,
-                "rg": self.register_godlike_command,
                 "rs": self.register_source_command,
+
+                "register_target": self.register_target_command,
                 "rt": self.register_target_command,
+
+                "reload_settings": self.reload_settings_command,
+
+                "help": self.help_command,
+
+                "i": self.info_command,
                 "h": self.help_command,
                 "всем": self.send_command,
                 "всем_важно": self.send_with_all_command

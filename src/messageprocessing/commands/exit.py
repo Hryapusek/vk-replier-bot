@@ -7,7 +7,7 @@ from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 
 def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
-    if event.message.from_id in BotSettings().get_godlike_ids():
+    if event.message.from_id == BotSettings().get_main_godlike_id():
         return Ok(None)
     
     return Err("Вы должны быть main_godlike")
