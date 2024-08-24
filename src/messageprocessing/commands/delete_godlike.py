@@ -14,14 +14,14 @@ def check_if_user_allowed(event: VkBotMessageEvent, godlike_to_delete: int) -> R
     if result.is_err():
         return Err(result.err())
     
+    if event.message.from_id == BotSettings().get_main_godlike_id():
+        return Err("Вы не можете удалить main_godlike")
+
     if event.message.from_id == godlike_to_delete:
         if godlike_to_delete in BotSettings().get_godlike_ids():
             return Ok(None)
         else:
             return Err("godlike не найден")
-    
-    if event.message.from_id == BotSettings().get_main_godlike_id():
-        return Ok(None)
     
     return Err("Вы должны быть main_godlike")
 
