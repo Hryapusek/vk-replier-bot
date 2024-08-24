@@ -21,6 +21,7 @@ from .register_sender import RegisterSenderCommand
 from .reload_settings import ReloadSettingsCommand
 from .send_with_all import SendWithAllCommand
 from .send import SendCommand
+from .set_info import SetInfoCommand
 
 ALL_COMMANDS = [
     AddModeratorCommand(
@@ -220,6 +221,15 @@ ALL_COMMANDS = [
         '"текст"\n',
         ["всемважно"]
     ),
+
+    SetInfoCommand(
+        "set_info",
+        "Сохранить информацию о боте",
+        "Доступно только для создателя и только в лс",
+        "Использование: /set_info\n"
+        '"текст"\n',
+        ["si"]
+    )
 ]
 
 def get_help_text(ALL_COMMANDS: list[ICommand]) -> str:
