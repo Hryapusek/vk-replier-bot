@@ -21,7 +21,7 @@ from .reload_settings import ReloadSettingsCommand
 from .send_with_all import SendWithAllCommand
 from .send import SendCommand
 
-ALL_COMMANDS: list[ICommand] = [
+ALL_COMMANDS = [
     AddModeratorCommand(
         "add_moderator",
 """Добавить модератора. Примеры: 
@@ -213,10 +213,10 @@ ALL_COMMANDS: list[ICommand] = [
     ),
 ]
 
-def get_help_text() -> str:
+def get_help_text(ALL_COMMANDS: list[ICommand]) -> str:
     help_text = ""
     for command in ALL_COMMANDS:
-        help_text += f"{command.command_name}\n"
+        help_text += f"/{command.command_name}\n"
         help_text += f"{command.description}\n"
         help_text += f"{command.roles}\n"
         help_text += f"{command.usage}\n"
@@ -224,14 +224,13 @@ def get_help_text() -> str:
 
     return help_text
 
-ALL_COMMANDS.append
-(
+ALL_COMMANDS.append(
     HelpCommand(
         "help",
         "Справка по командам",
         "Доступно для всех",
         "Использование: /help",
         [],
-        get_help_text()
+        get_help_text(ALL_COMMANDS)
     )
 )

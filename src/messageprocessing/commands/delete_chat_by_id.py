@@ -23,7 +23,7 @@ class DeleteChatByIdCommand(ICommand):
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
         
-        args = event.message.text.strip().splitline()[0].split()
+        args = event.message.text.strip().splitlines()[0].split()
         if len(args) < 2:
             send_reply_message(event.message.peer_id, self.usage, event.message.conversation_message_id)
             return
@@ -38,7 +38,7 @@ class DeleteChatByIdCommand(ICommand):
             send_reply_message(event.message.peer_id, "Целевой чат не найден", event.message.conversation_message_id)
             return
 
-        chat_to_remove = [target_chat for target_chat in chats if target_chat.id == new_chat_id][0]
+        chat_to_remove = [chat for chat in chats if chat.id == new_chat_id][0]
         chats.remove(chat_to_remove)
         BotSettings().set_chats(chats)
         send_reply_message(event.message.peer_id, "Целевой чат удален", event.message.conversation_message_id)

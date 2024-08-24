@@ -3,7 +3,7 @@ import pydantic
 import json
 import threading
 
-from settings.constants import ConfigKeys, Mode
+from settings.constants import ConfigKeys
 from bottypes.types import Chat
 from settings.json_encoder import ExtendedJSONEncoder
 
@@ -91,7 +91,7 @@ class BotSettings:
 
     def get_chats(self) -> list[Chat]:
         with self._lock:
-            return self._config.target_chats
+            return self._config.chats
 
     def set_chats(self, chats: list[Chat]) -> None:
         with self._lock:
@@ -107,11 +107,11 @@ class BotSettings:
             self._config.godlike_ids = godlike_ids
             self._save_config()
 
-    def get_moderators_ids(self) -> list[int]:
+    def get_moderator_ids(self) -> list[int]:
         with self._lock:
             return self._config.moderator_ids
         
-    def set_moderators_ids(self, moderators_ids: list[int]) -> None:
+    def set_moderator_ids(self, moderators_ids: list[int]) -> None:
         with self._lock:
             self._config.moderator_ids = moderators_ids
             self._save_config()

@@ -31,7 +31,7 @@ class RegisterSenderCommand(ICommand):
             )
             return
 
-        args = event.message.text.strip().splitline()[0].split()
+        args = event.message.text.strip().splitlines()[0].split()
 
         if len(args) < 2:
             send_reply_message(

@@ -11,7 +11,7 @@ class ListChatsCommand(ICommand):
         if result.is_err():
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
-        response_message = ""
+        response_message = "Все чаты:\n"
         for chat in BotSettings().get_chats():
             response_message += f"ID: {chat.id}\n"
             response_message += f"VkId: {chat.vk_chat_peer_id}\n"

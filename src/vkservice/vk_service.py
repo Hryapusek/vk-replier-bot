@@ -1,4 +1,5 @@
 
+import json
 from typing import Optional
 
 from loguru import logger
@@ -27,11 +28,10 @@ def send_reply_message(peer_id: int, message: str, reply_to_conversation_message
         result = vk_session.get_api().messages.send(peer_id=peer_id, 
                                                     message=message, 
                                                     random_id=0,
-                                                    forward={
+                                                    forward=json.dumps({
+                                                        'peer_id': peer_id,
                                                         'conversation_message_ids': [reply_to_conversation_message_id],
-                                                        'is_reply': 1,
-                                                        'peer_id': peer_id
-                                                    })
+                                                    }))
     else:
         result = vk_session.get_api().messages.send(peer_id=peer_id, message=message, random_id=0)
     return result
@@ -39,6 +39,12 @@ def send_reply_message(peer_id: int, message: str, reply_to_conversation_message
 def get_user_id_by_user_argument(user_argument: str) -> int:
     if user_argument.isdigit():
         return int(user_argument)
+    
+    if user_argument.startswith('[') and '|' in user_argument:
+        start = user_argument.find('|') + 1
+        end = user_argument.find(']')
+        return int(user_argument[3:start - 1])
+    
     if user_argument.startswith('@'):
         user_argument = user_argument[1:]
     vk_session = get_session()
@@ -52,10 +58,10 @@ def forward_message_to_chats(chats: list[Chat], message: str, forward_message_co
         result = vk_session.get_api().messages.send(peer_ids=[x.vk_chat_peer_id for x in chat_packet], 
                                                     message=message, 
                                                     random_id=0,
-                                                    forward={
+                                                    forward=json.dumps({
                                                         'conversation_message_ids': [forward_message_conversation_id],
-                                                        'peer_id': forward_message_peer_id
-                                                    })
+                                                        'peer_id': forward_message_peer_id,
+                                                    }))
         for failed_chat in [x for x in result if 'error' in x]:
             logger.warning("Failed to forward message to chat {}".format(failed_chat))
     

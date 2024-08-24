@@ -1,6 +1,5 @@
 
 from result import Err, Ok, Result
-from exceptions import ExitException
 from settings.bot_settings import BotSettings
 from vkservice.vk_service import send_reply_message
 from .i_command import ICommand
@@ -18,4 +17,3 @@ class ExitCommand(ICommand):
         if result.is_err():
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
-        raise ExitException()

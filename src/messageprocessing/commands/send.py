@@ -34,12 +34,12 @@ class SendCommand(ICommand):
             )
             return
 
-        args = event.message.text.strip().splitline()[0].split()
+        args = event.message.text.strip().splitlines()[0].split()
 
         title = ""
 
         if len(args) > 1:
-            title_result = extract_string_argument(" ".join(args[2:]))
+            title_result = extract_string_argument(" ".join(args[1:]))
             if not title_result.is_ok():
                 send_reply_message(
                     event.message.peer_id,
@@ -56,6 +56,6 @@ class SendCommand(ICommand):
                 if chat.vk_chat_peer_id != event.message.peer_id
             ],
             title,
-            event.message.peer_id,
             event.message.conversation_message_id,
+            event.message.peer_id,
         )

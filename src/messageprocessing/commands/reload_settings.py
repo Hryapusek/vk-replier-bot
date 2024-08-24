@@ -1,7 +1,8 @@
 
 from result import Err, Ok, Result
-from exceptions import ExitException, ReloadException
+from exceptions import ReloadException
 from messageprocessing.commands.utils import is_user_blocked
+from settings.constants import SETTINGS_FILE_NAME
 from settings.bot_settings import BotSettings
 from vkservice.vk_service import send_reply_message
 from .i_command import ICommand
@@ -23,4 +24,4 @@ class ReloadSettingsCommand(ICommand):
         if result.is_err():
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
-        raise ReloadException
+        BotSettings(SETTINGS_FILE_NAME)

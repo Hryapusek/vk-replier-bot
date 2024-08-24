@@ -16,7 +16,7 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
     if event.message.from_id in BotSettings().get_godlike_ids():
         return Ok(None)
     
-    if event.message.from_id in BotSettings().get_moderators_ids():
+    if event.message.from_id in BotSettings().get_moderator_ids():
         return Ok(None)
     
     if is_user_admin(event.message.from_id, event.message.peer_id):
@@ -31,18 +31,18 @@ class RegisterCurrentChatCommand(ICommand):
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
 
-        args = event.message.text.strip().splitline()[0].split()
+        args = event.message.text.strip().splitlines()[0].split()
         if len(args) < 2:
             send_reply_message(event.message.peer_id, self.usage, event.message.conversation_message_id)
             return
         
         try:
-            new_target_id = int(args[1])
+            new_chat_id = int(args[1])
         except Exception:
             send_reply_message(event.message.peer_id, "Неправильный ID", event.message.conversation_message_id)
             return
         
-        if new_target_id in [x.vk_chat_peer_id for x in BotSettings().get_target_chats()]:
+        if new_chat_id in [x.vk_chat_peer_id for x in BotSettings().get_chats()]:
             send_reply_message(event.message.peer_id, "Такой целевой чат уже есть", event.message.conversation_message_id)
             return
 
@@ -55,9 +55,9 @@ class RegisterCurrentChatCommand(ICommand):
             title = extracted_title.ok_value
         
         
-        target_chats = BotSettings().get_target_chats()
-        target_chats.append(Chat(id=new_target_id, title=title, vk_chat_peer_id=event.message.peer_id))
-        BotSettings().set_target_chats(target_chats)
+        chats = BotSettings().get_chats()
+        chats.append(Chat(id=new_chat_id, title=title, vk_chat_peer_id=event.message.peer_id))
+        BotSettings().set_chats(chats)
         if not title:
             send_reply_message(event.message.peer_id, "Целевой чат добавлен", event.message.conversation_message_id)
         else:

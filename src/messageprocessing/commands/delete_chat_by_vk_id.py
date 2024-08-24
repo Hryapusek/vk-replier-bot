@@ -23,7 +23,7 @@ class DeleteChatByVkIdCommand(ICommand):
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
         
-        args = event.message.text.strip().splitline()[0].split()
+        args = event.message.text.strip().splitlines()[0].split()
         if len(args) < 2:
             send_reply_message(event.message.peer_id, self.usage, event.message.conversation_message_id)
             return

@@ -1,6 +1,5 @@
 
 from settings.bot_settings import BotSettings
-from settings.constants import Mode
 from vk_session import get_session
 from vkservice.vk_service import is_user_admin, is_user_admin_in_any_chat, send_reply_message
 from .i_command import ICommand
