@@ -16,7 +16,7 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
 
     return Err("Вы должны быть godlike")
 
-class DeleteChatByIdCommand(ICommand):
+class DeleteChatByVkIdCommand(ICommand):
     def handle(self, event: VkBotMessageEvent) -> None:
         result = check_if_user_allowed(event)
         if result.is_err():
@@ -28,18 +28,17 @@ class DeleteChatByIdCommand(ICommand):
             send_reply_message(event.message.peer_id, self.usage, event.message.conversation_message_id)
             return
         try:
-            new_chat_id = int(args[1])
+            chat_to_delete_id = int(args[1])
         except Exception:
             send_reply_message(event.message.peer_id, "Неправильный ID", event.message.conversation_message_id)
             return
         
         chats = BotSettings().get_chats()
-        if new_chat_id not in [chat.id for chat in chats]:
+        if chat_to_delete_id not in [chat.vk_chat_peer_id for chat in chats]:
             send_reply_message(event.message.peer_id, "Целевой чат не найден", event.message.conversation_message_id)
             return
 
-        chat_to_remove = [target_chat for target_chat in chats if target_chat.id == new_chat_id][0]
+        chat_to_remove = [chat for chat in chats if chat.vk_chat_peer_id == chat_to_delete_id][0]
         chats.remove(chat_to_remove)
         BotSettings().set_chats(chats)
         send_reply_message(event.message.peer_id, "Целевой чат удален", event.message.conversation_message_id)
-

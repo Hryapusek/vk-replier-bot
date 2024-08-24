@@ -52,19 +52,25 @@ class MessageDispatcher:
         if not hasattr(self, "_initialized"):
             self._initialized = True
             self.lock = threading.RLock()
+            self.add_moderator_command = AddModeratorCommand()
+            self.block_user_command = BlockUserCommand()
             self.change_mode_command = ChangeModeCommand()
-            self.delete_source_command = DeleteSourceChatCommand()
-            self.delete_target_command = DeleteCurrentChatCommand()
-            self.delete_target_by_id_command = DeleteChatByIdCommand()
+            self.delete_chat_by_id_command = DeleteChatByIdCommand()
+            self.delete_chat_by_vk_id_command = DeleteChatByIdCommand()
+            self.delete_current_chat_command = DeleteCurrentChatCommand()
+            self.delete_sender_command = DeleteSenderCommand()
             self.exit_command = ExitCommand()
-            self.info_command = InfoCommand()
+            self.get_chat_id_command = GetChatIdCommand()
+            self.get_vk_chat_id_command = GetVkChatIdCommand()
+            
             self.register_godlike_command = RegisterGodlikeCommand()
             self.register_source_command = RegisterSourceChatCommand()
-            self.register_target_command = RegisterChatCommand()
+            self.register_target_command = RegisterCurrentChatCommand()
             self.reload_settings_command = ReloadSettingsCommand()
             self.help_command = HelpCommand()
             self.send_command = SendCommand()
             self.undo_command = UndoCommand()
+            self.info_command = InfoCommand()
             self.send_with_all_command = SendWithAllCommand()
 
             self.commands_dispatchering = {
@@ -74,11 +80,11 @@ class MessageDispatcher:
                 "delete_source": self.delete_source_command,
                 "ds": self.delete_source_command,
 
-                "delete_target": self.delete_target_by_id_command,
-                "dt": self.delete_target_command,
+                "delete_target": self.delete_chat_by_id_command,
+                "dt": self.delete_current_chat_command,
 
-                "delete_target_by_id": self.delete_target_by_id_command,
-                "dtbi": self.delete_target_by_id_command,
+                "delete_target_by_id": self.delete_chat_by_id_command,
+                "dtbi": self.delete_chat_by_id_command,
 
                 "exit": self.exit_command,
                 "info": self.info_command,

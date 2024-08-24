@@ -4,10 +4,6 @@ import enum
 
 SETTINGS_FILE_NAME = "config.json"
 
-class Mode(enum.Enum):
-    WORK = "work"
-    CONFIGURATION = "configuration"
-
 class ConfigKeys(pydantic.BaseModel):
     token: Literal["token"] = "token"
     api_version: Literal["api_version"] = "api_version"

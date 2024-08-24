@@ -25,8 +25,6 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
 
 
 class SendWithAllCommand(ICommand):
-    USAGE_STRING = 'Использование: _всем_важно_ ["title"]'
-
     def handle(self, event: VkBotMessageEvent) -> None:
         result = check_if_user_allowed(event)
         if result.is_err():
@@ -46,7 +44,7 @@ class SendWithAllCommand(ICommand):
             if not title_result.is_ok():
                 send_reply_message(
                     event.message.peer_id,
-                    title_result.err() + "\n" + __class__.USAGE_STRING,
+                    title_result.err() + "\n" + self.usage,
                     event.message.conversation_message_id,
                 )
                 return

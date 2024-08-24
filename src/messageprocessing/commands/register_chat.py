@@ -24,8 +24,7 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
 
     return Err("Вы должны быть main_godlike")
 
-class RegisterChatCommand(ICommand):
-    USAGE_STRING = 'Использование: /register_target_chat {id} ["title"]'
+class RegisterCurrentChatCommand(ICommand):
     def handle(self, event: VkBotMessageEvent) -> None:
         result = check_if_user_allowed(event)
         if result.is_err():
@@ -34,7 +33,7 @@ class RegisterChatCommand(ICommand):
 
         args = event.message.text.strip().splitline()[0].split()
         if len(args) < 2:
-            send_reply_message(event.message.peer_id, __class__.USAGE_STRING, event.message.conversation_message_id)
+            send_reply_message(event.message.peer_id, self.usage, event.message.conversation_message_id)
             return
         
         try:
@@ -51,7 +50,7 @@ class RegisterChatCommand(ICommand):
         if len(args) > 2:
             extracted_title = extract_string_argument(" ".join(args[2:]))
             if not extracted_title.is_ok():
-                send_reply_message(event.message.peer_id, extracted_title.err() + '\n' + __class__.USAGE_STRING, event.message.conversation_message_id)
+                send_reply_message(event.message.peer_id, extracted_title.err() + '\n' + self.usage, event.message.conversation_message_id)
                 return
             title = extracted_title.ok_value
         

@@ -21,8 +21,6 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
     )
 
 class RegisterSenderCommand(ICommand):
-    USAGE_STRING = 'Использование: /register_sender {id}'
-
     def handle(self, event: VkBotMessageEvent) -> None:
         result = check_if_user_allowed(event)
         if result.is_err():
@@ -38,7 +36,7 @@ class RegisterSenderCommand(ICommand):
         if len(args) < 2:
             send_reply_message(
                 event.message.peer_id,
-                "Неправильное использование команды. " + __class__.USAGE_STRING,
+                "Неправильное использование команды. " + self.usage,
                 event.message.conversation_message_id,
             )
             return
@@ -48,7 +46,7 @@ class RegisterSenderCommand(ICommand):
         except Exception:
             send_reply_message(
                 event.message.peer_id,
-                "Неправильное использование команды. " + __class__.USAGE_STRING,
+                "Неправильное использование команды. " + self.usage,
                 event.message.conversation_message_id,
             )
             return
