@@ -1,12 +1,26 @@
 {
-    "godlike_ids" : 
-    [
-            175640282
-    ],
-    "group_id" : 220604034,
-    "mode" : "work",
-    "source_chat" : null,
-    "target_chats" : [],
-    "token" : "",
-    "api_version" : "5.151"
+  "token": "",
+  "api_version": "5.151",
+  "group_id": 227094861,
+  "chats": [
+    {
+      "vk_chat_peer_id": 2000000001,
+      "id": 200,
+      "title": "some chat"
+    },
+    {
+      "vk_chat_peer_id": 2000000002,
+      "id": 200,
+      "title": "some chat"
+    }
+  ],
+  "moderator_ids": [],
+  "blocked_user_ids": [],
+  "godlike_ids": [
+    175640282
+  ],
+  "sender_ids": [
+    175640282
+  ],
+  "main_godlike_id": 175640282
 }
