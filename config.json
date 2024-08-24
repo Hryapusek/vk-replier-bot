@@ -1,26 +1,179 @@
 {
   "token": "",
   "api_version": "5.151",
-  "group_id": 227094861,
+  "group_id": 220604034,
   "chats": [
-    {
-      "vk_chat_peer_id": 2000000001,
-      "id": 200,
-      "title": "some chat"
-    },
-    {
-      "vk_chat_peer_id": 2000000002,
-      "id": 200,
-      "title": "some chat"
-    }
+      {
+          "vk_chat_peer_id": 2000000009,
+          "id": null,
+          "title": null
+      },
+      {
+          "vk_chat_peer_id": 2000000005,
+          "id": -2147483648
+      },
+      {
+          "vk_chat_peer_id": 2000000040,
+          "id": -2147483647
+      },
+      {
+          "vk_chat_peer_id": 2000000041,
+          "id": -2147483646
+      },
+      {
+          "vk_chat_peer_id": 2000000042,
+          "id": -2147483645,
+          "title": "23 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000012,
+          "id": 1,
+          "title": "1 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000028,
+          "id": 2,
+          "title": "2 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000031,
+          "id": 3,
+          "title": "3 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000017,
+          "id": 4,
+          "title": "4 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000048,
+          "id": 5,
+          "title": "5 блок"
+      },
+      {
+          "vk_chat_peer_id": 2000000043,
+          "id": 6,
+          "title": "6 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000036,
+          "id": 7,
+          "title": "7 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000039,
+          "id": 9,
+          "title": "9 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000025,
+          "id": 10,
+          "title": "10 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000030,
+          "id": 11,
+          "title": "11 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000011,
+          "id": 12,
+          "title": "12 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000044,
+          "id": 14,
+          "title": "14 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000026,
+          "id": 15,
+          "title": "15 блок"
+      },
+      {
+          "vk_chat_peer_id": 2000000033,
+          "id": 16,
+          "title": "16 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000032,
+          "id": 18,
+          "title": "18 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000037,
+          "id": 19,
+          "title": "19 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000015,
+          "id": 20,
+          "title": "20 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000022,
+          "id": 21,
+          "title": "21 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000013,
+          "id": 22,
+          "title": "22 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000007,
+          "id": 23,
+          "title": "23 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000010,
+          "id": 24,
+          "title": "24 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000046,
+          "id": 25,
+          "title": "25 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000038,
+          "id": 26,
+          "title": "26 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000047,
+          "id": 27,
+          "title": "27 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000027,
+          "id": 28,
+          "title": "28 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000019,
+          "id": 29,
+          "title": "29 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000045,
+          "id": 30,
+          "title": "30 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000008,
+          "id": 31,
+          "title": "31 квартира"
+      },
+      {
+          "vk_chat_peer_id": 2000000021,
+          "id": 32,
+          "title": "32 квартира"
+      }
   ],
-  "moderator_ids": [],
-  "blocked_user_ids": [],
-  "godlike_ids": [
-    175640282
-  ],
-  "sender_ids": [
-    175640282
-  ],
-  "main_godlike_id": 175640282
+  "godlike_ids": [175640282],
+  "moderator_ids": [],  
+  "blocked_user_ids": [],  
+  "main_godlike_id": 175640282,
+  "sender_ids": []  
 }

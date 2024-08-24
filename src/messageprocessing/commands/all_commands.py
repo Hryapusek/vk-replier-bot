@@ -9,6 +9,7 @@ from .delete_moderator import DeleteModeratorCommand
 from .delete_sender import DeleteSenderCommand
 from .exit import ExitCommand
 from .get_chat_id import GetChatIdCommand
+from .get_config import GetConfigCommand
 from .get_vk_chat_id import GetVkChatIdCommand
 from .help import HelpCommand
 from .info import InfoCommand
@@ -111,6 +112,14 @@ ALL_COMMANDS = [
         "Получить ID чата",
         "Доступно для всех",
         "Использование: /get_chat_id",
+        []
+    ),
+
+    GetConfigCommand(
+        "get_config",
+        "Получить конфигурацию",
+        "Доступно только для создателя и только в лс",
+        "Использование: /get_config",
         []
     ),
 

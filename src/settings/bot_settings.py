@@ -137,3 +137,7 @@ class BotSettings:
         with self._lock:
             self._config.sender_ids = sender_ids
             self._save_config()
+
+    def get_whole_config(self) -> _ConfigValues:
+        with self._lock:
+            return self._config
