@@ -39,7 +39,7 @@ class DeleteGodlikeCommand(ICommand):
         
         result = check_if_user_allowed(event, godlike_to_delete_id)
         if not result.is_ok():
-            logger.warning(result.failure)
+            logger.warning(result.err())
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
 

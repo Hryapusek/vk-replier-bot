@@ -14,7 +14,7 @@ from .help import HelpCommand
 from .info import InfoCommand
 from .list_chats import ListChatsCommand
 from .list_users import ListUsersCommand
-from .register_chat import RegisterCurrentChatCommand
+from .register_current_chat import RegisterCurrentChatCommand
 from .register_godlike import RegisterGodlikeCommand
 from .register_sender import RegisterSenderCommand
 from .reload_settings import ReloadSettingsCommand

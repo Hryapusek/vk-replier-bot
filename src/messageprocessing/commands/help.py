@@ -17,7 +17,8 @@ class HelpCommand(ICommand):
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
         
-        send_reply_message(event.message.peer_id, self.help_text, event.message.conversation_message_id)
+        result = send_reply_message(event.message.peer_id, self.help_text, event.message.conversation_message_id)
+        return HelpCommandUndoable(event.message.peer_id, result[0].get('conversation_message_id'))
     
 class HelpCommandUndoable(IUndoable):
     def __init__(self, peer_id: int, conversation_message_id: int) -> None:

@@ -17,10 +17,10 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
     if event.message.from_id in BotSettings().get_godlike_ids():
         return Ok(None)
 
-    if is_user_admin_in_any_chat(event.message.from_id, BotSettings().get_chats()):
+    if event.message.from_id in BotSettings().get_moderator_ids():
         return Ok(None)
 
-    return Err("Вы должны быть либо godlike, либо админом в какой-либо беседе")
+    return Err("Вы должны быть либо godlike, либо модератором")
 
 class AddModeratorCommand(ICommand):
     def handle(self, event: VkBotMessageEvent) -> None:

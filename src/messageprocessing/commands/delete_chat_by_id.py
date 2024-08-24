@@ -13,6 +13,9 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
     
     if event.message.from_id in BotSettings().get_godlike_ids():
         return Ok(None)
+    
+    if event.message.from_id in BotSettings().get_moderator_ids():
+        return Ok(None)
 
     return Err("Вы должны быть godlike")
 
@@ -35,11 +38,11 @@ class DeleteChatByIdCommand(ICommand):
         
         chats = BotSettings().get_chats()
         if new_chat_id not in [chat.id for chat in chats]:
-            send_reply_message(event.message.peer_id, "Целевой чат не найден", event.message.conversation_message_id)
+            send_reply_message(event.message.peer_id, "Чат не найден", event.message.conversation_message_id)
             return
 
         chat_to_remove = [chat for chat in chats if chat.id == new_chat_id][0]
         chats.remove(chat_to_remove)
         BotSettings().set_chats(chats)
-        send_reply_message(event.message.peer_id, "Целевой чат удален", event.message.conversation_message_id)
+        send_reply_message(event.message.peer_id, "Чат удален", event.message.conversation_message_id)
 

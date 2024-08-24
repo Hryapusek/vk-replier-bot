@@ -10,6 +10,9 @@ from loguru import logger
 def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
     if event.message.from_id in BotSettings().get_godlike_ids():
         return Ok(None)
+    
+    if event.message.from_id in BotSettings().get_moderator_ids():
+        return Ok(None)
 
     return Err("Вы должны быть godlike")
 
@@ -21,6 +24,14 @@ class BlockUserCommand(ICommand):
             return
 
         blocked = BotSettings().get_blocked_user_ids()
+
+        if event.message.from_id in BotSettings().get_godlike_ids():
+            send_reply_message(event.message.peer_id, "Вы не можете заблокировать godlike", event.message.conversation_message_id)
+            return
+        
+        if event.message.from_id in BotSettings().get_moderator_ids():
+            send_reply_message(event.message.peer_id, "Вы не можете заблокировать модераторов", event.message.conversation_message_id)
+            return
 
         if event.message.from_id in blocked:
             blocked.remove(event.message.from_id)

@@ -13,7 +13,7 @@ class GetChatIdCommand(ICommand):
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
         
-        result = list(filter(BotSettings().get_chats(), lambda chat: chat.vk_chat_peer_id == event.message.peer_id))
+        result = list(filter(lambda chat: chat.vk_chat_peer_id == event.message.peer_id, BotSettings().get_chats()))
         if result:
             send_reply_message(event.message.peer_id, str(result[0].id), event.message.conversation_message_id)
             return

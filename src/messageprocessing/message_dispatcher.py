@@ -1,5 +1,4 @@
 import threading
-from types import NoneType
 from messageprocessing.commands.i_command import ICommand
 from messageprocessing.commands.i_undoable import IUndoable
 from .commands.all_commands import ALL_COMMANDS
@@ -10,7 +9,7 @@ from loguru import logger
 
 from result import Ok, Err, Result
 
-def _extract_command(event: VkBotEvent) -> Result[str, NoneType]:
+def _extract_command(event: VkBotEvent) -> Result[str, None]:
     """event.message.text should not be None"""
     command = str(event.message.text).strip().splitlines()[0].split()[0].lower()
     if not command.startswith("/"):

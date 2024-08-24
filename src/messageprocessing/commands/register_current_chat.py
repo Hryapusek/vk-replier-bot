@@ -42,8 +42,12 @@ class RegisterCurrentChatCommand(ICommand):
             send_reply_message(event.message.peer_id, "Неправильный ID", event.message.conversation_message_id)
             return
         
-        if new_chat_id in [x.vk_chat_peer_id for x in BotSettings().get_chats()]:
-            send_reply_message(event.message.peer_id, "Такой целевой чат уже есть", event.message.conversation_message_id)
+        if event.message.peer_id in [x.vk_chat_peer_id for x in BotSettings().get_chats()]:
+            send_reply_message(event.message.peer_id, "Такой чат уже есть", event.message.conversation_message_id)
+            return
+        
+        if new_chat_id in [x.id for x in BotSettings().get_chats()]:
+            send_reply_message(event.message.peer_id, "Чат с таким ID уже есть", event.message.conversation_message_id)
             return
 
         title = ""
@@ -59,6 +63,6 @@ class RegisterCurrentChatCommand(ICommand):
         chats.append(Chat(id=new_chat_id, title=title, vk_chat_peer_id=event.message.peer_id))
         BotSettings().set_chats(chats)
         if not title:
-            send_reply_message(event.message.peer_id, "Целевой чат добавлен", event.message.conversation_message_id)
+            send_reply_message(event.message.peer_id, "Чат добавлен", event.message.conversation_message_id)
         else:
-            send_reply_message(event.message.peer_id, "Целевой чат добавлен: " + title, event.message.conversation_message_id)
+            send_reply_message(event.message.peer_id, "Чат добавлен: " + title, event.message.conversation_message_id)

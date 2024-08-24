@@ -25,7 +25,7 @@ def get_chat_members_ids(peer_id: int) -> list:
 def send_reply_message(peer_id: int, message: str, reply_to_conversation_message_id: Optional[int] = None) -> list[dict]:
     vk_session = get_session()
     if reply_to_conversation_message_id is not None:
-        result = vk_session.get_api().messages.send(peer_id=peer_id, 
+        result = vk_session.get_api().messages.send(peer_ids=[peer_id], 
                                                     message=message, 
                                                     random_id=0,
                                                     forward=json.dumps({
