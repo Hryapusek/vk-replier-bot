@@ -4,7 +4,8 @@ import json
 import threading
 
 from settings.constants import ConfigKeys, Mode
-from bot_types.types import Chat
+from bottypes.types import Chat
+from settings.json_encoder import ExtendedJSONEncoder
 
 
 class _ConfigValues(pydantic.BaseModel):
@@ -54,7 +55,7 @@ class BotSettings:
 
     def _save_config(self):
         with open(self.file_path, 'w') as f:
-            f.write(json.dumps(self._config.model_dump(), indent=2))
+            f.write(json.dumps(self._config.model_dump(), indent=2, cls=ExtendedJSONEncoder))
     
     def get_mode(self) -> Mode:
         with self._lock:

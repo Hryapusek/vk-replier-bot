@@ -1,6 +1,7 @@
 from __future__ import annotations
 from messageprocessing.commands.i_undoable import IUndoable
 from vk_session import get_session
+from vkservice.vk_service import is_user_admin
 from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 

@@ -1,4 +1,5 @@
 import threading
+from types import NoneType
 from messageprocessing.commands.i_command import ICommand
 from messageprocessing.commands.i_undoable import IUndoable
 from .commands import *
@@ -7,12 +8,15 @@ from vk_api.bot_longpoll import VkBotEventType, VkBotEvent, VkBotMessageEvent
 
 from loguru import logger
 
-def _extract_command(event: VkBotEvent) -> str:
+from result import Ok, Err, Result
+
+def _extract_command(event: VkBotEvent) -> Result[str, NoneType]:
     """event.message.text should not be None"""
     command = str(event.message.text).strip().splitlines()[0].split()[0].lower()
-    if command.startswith("/"):
-        command = command[1:]
-    return command
+    if not command.startswith("/"):
+        return Err(None)
+        
+    return Ok(command[1:])
 
 class UndoCommand(ICommand):
     def handle(self, event: VkBotMessageEvent) -> None:
@@ -63,7 +67,7 @@ class MessageDispatcher:
             self.send_with_all_command = SendWithAllCommand()
 
             self.commands_dispatchering = {
-                "change_mode": self.change_mode_command,
+                "sus": self.change_mode_command,
                 "delete_source": self.delete_source_command,
                 "delete_target": self.delete_target_by_id_command,
                 "delete_target_by_id": self.delete_target_by_id_command,
@@ -106,6 +110,12 @@ class MessageDispatcher:
 
         logger.debug("Event message: {}".format(event.message.text))
         command = _extract_command(event)
+
+        if not command.is_ok():
+            logger.debug("Ignoring event without command: {}".format(event))
+            return
+        
+        command = command.unwrap()
 
         logger.debug("Extracted command: {}".format(command))
 
