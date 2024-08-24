@@ -7,7 +7,7 @@ from .commands.all_commands import ALL_COMMANDS
 
 from vk_api.bot_longpoll import VkBotEventType, VkBotEvent, VkBotMessageEvent
 
-from loguru import logger
+from bot_logger import logger
 
 from result import Ok, Err, Result
 

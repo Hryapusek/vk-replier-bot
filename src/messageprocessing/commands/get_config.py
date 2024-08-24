@@ -1,5 +1,5 @@
 
-from loguru import logger
+from bot_logger import logger
 from result import *
 
 from messageprocessing.commands.utils import is_user_blocked

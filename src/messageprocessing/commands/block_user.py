@@ -5,7 +5,7 @@ from vkservice.vk_service import is_user_admin, is_user_admin_in_any_chat, send_
 from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 from result import *
-from loguru import logger
+from bot_logger import logger
 
 def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
     if event.message.from_id in BotSettings().get_godlike_ids():

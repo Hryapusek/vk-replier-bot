@@ -2,7 +2,7 @@
 import json
 from typing import Optional
 
-from loguru import logger
+from bot_logger import logger
 import pydantic
 from bottypes.types import Chat
 from vk_session import get_session

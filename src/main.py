@@ -5,7 +5,8 @@ import traceback
 
 from vk_api.bot_longpoll import VkBotEventType, VkBotLongPoll
 from messageprocessing.message_dispatcher import MessageDispatcher
-from loguru import logger
+from bot_logger import logger
+
 from settings.bot_settings import BotSettings
 from vk_session import get_session
 
