@@ -1,7 +1,8 @@
 
+from exceptions import ReloadException
 from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 
-class RegisterSourceCommand(ICommand):
+class ReloadSettingsCommand(ICommand):
     def handle(self, event: VkBotMessageEvent) -> None:
-        return None
+        raise ReloadException

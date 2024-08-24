@@ -1,6 +1,7 @@
+from typing import Optional
 import pydantic
 
-class Chat:
-    id: int # will be set manually
-    vk_chat_id: int
-    title: str
+class Chat(pydantic.BaseModel):
+    vk_chat_peer_id: int
+    id: Optional[int] = None # will be set manually
+    title: Optional[str] = None

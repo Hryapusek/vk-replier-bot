@@ -59,8 +59,9 @@ class MessageDispatcher:
             self.exit_command = ExitCommand()
             self.info_command = InfoCommand()
             self.register_godlike_command = RegisterGodlikeCommand()
-            self.register_source_command = RegisterSourceCommand()
-            self.register_target_command = RegisterTargetCommand()
+            self.register_source_command = RegisterSourceChatCommand()
+            self.register_target_command = RegisterTargetChatCommand()
+            self.reload_settings_command = ReloadSettingsCommand()
             self.help_command = HelpCommand()
             self.send_command = SendCommand()
             self.undo_command = UndoCommand()
@@ -77,6 +78,7 @@ class MessageDispatcher:
                 "register_godlike": self.register_godlike_command,
                 "register_source": self.register_source_command,
                 "register_target": self.register_target_command,
+                "reload_settings": self.reload_settings_command,
                 "help": self.help_command,
                 "cm": self.change_mode_command,
                 "ds": self.delete_source_command,

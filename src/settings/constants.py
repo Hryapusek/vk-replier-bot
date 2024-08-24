@@ -9,10 +9,12 @@ class Mode(enum.Enum):
     CONFIGURATION = "configuration"
 
 class ConfigKeys(pydantic.BaseModel):
-    mode: Literal["mode"] = "mode"
     token: Literal["token"] = "token"
     api_version: Literal["api_version"] = "api_version"
     group_id: Literal["group_id"] = "group_id"
     target_chats: Literal["target_chats"] = "target_chats"
-    source_caht: Literal["source_chat"] = "source_chat"
+    source_chat: Literal["source_chat"] = "source_chat"
     godlike_ids: Literal["godlike_ids"] = "godlike_ids"
+    moderator_ids: Literal["moderator_ids"] = "moderator_ids"
+    blocked_user_ids: Literal["blocked_user_ids"] = "blocked_user_ids"
+    main_godlike_id: Literal["main_godlike_id"] = "main_godlike_id"

@@ -1,13 +1,12 @@
 from __future__ import annotations
 from messageprocessing.commands.i_undoable import IUndoable
 from vk_session import get_session
-from vkservice.vk_service import is_user_admin
+from vkservice.vk_service import is_user_admin, send_reply_message
 from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 
 class HelpCommand(ICommand):
-    def handle(self, event: VkBotMessageEvent) -> HelpCommandUndoable:
-        help_text ="""
+    HELP_TEXT ="""
 /help - показывает этот текст
 /change_mode - меняет режим работы бота (godlike only)
 /delete_source - удалить текущую беседу из списка источников (godlike or admin only)
@@ -21,8 +20,8 @@ class HelpCommand(ICommand):
 _всем_ - рассылка сообщений (anybody)
 _всем_важно_ - рассылка сообщений с all (anybody)
 """
-        vk_session = get_session()
-        result = vk_session.get_api().messages.send(peer_ids=[event.message.peer_id], message=help_text, random_id=0)
+    def handle(self, event: VkBotMessageEvent) -> HelpCommandUndoable:
+        result = send_reply_message(event.message.peer_id, self.HELP_TEXT, event.message.conversation_message_id)
         return HelpCommandUndoable(event.message.peer_id, result[0].get('conversation_message_id'))
     
 class HelpCommandUndoable(IUndoable):

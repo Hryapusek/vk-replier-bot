@@ -14,7 +14,7 @@ def check_if_user_allowed(event: VkBotMessageEvent) -> Result[None, str]:
 
     source_chat = BotSettings().get_source_chat()
 
-    if source_chat and is_user_admin(event.message.from_id, source_chat):
+    if source_chat and is_user_admin(event.message.from_id, source_chat.vk_chat_peer_id):
         return Ok(None)
 
     if is_user_admin_in_any_chat(event.message.from_id, BotSettings().get_target_chats()):
