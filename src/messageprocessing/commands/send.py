@@ -1,9 +1,10 @@
 
 from result import *
 
+from messageprocessing.commands.i_undoable import IUndoable
 from messageprocessing.commands.utils import extract_string_argument, is_user_blocked
 from settings.bot_settings import BotSettings
-from vkservice.vk_service import send_reply_message
+from vkservice.vk_service import SendMessageResponse, delete_message, send_reply_message
 from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 from vkservice.vk_service import forward_message_to_chats
@@ -49,7 +50,7 @@ class SendCommand(ICommand):
                 return
             title = title_result.ok_value
 
-        forward_message_to_chats(
+        responses: list[SendMessageResponse] = forward_message_to_chats(
             [
                 chat
                 for chat in BotSettings().get_chats()
@@ -59,3 +60,30 @@ class SendCommand(ICommand):
             event.message.conversation_message_id,
             event.message.peer_id,
         )
+
+        send_reply_message(
+            event.message.peer_id,
+            "Сообщение отправлено",
+            event.message.conversation_message_id,
+        )
+        return SendCommandUndoable(responses)
+
+class SendCommandUndoable(IUndoable):
+    def __init__(self, responses: list[SendMessageResponse]) -> None:
+        self.responses = responses
+    def undo(self, event: VkBotMessageEvent):
+        result = check_if_user_allowed(event)
+        if result.is_err():
+            send_reply_message(
+                event.message.peer_id,
+                result.err(),
+                event.message.conversation_message_id,
+            )
+            return
+
+        count = 0
+        for response in self.responses:
+            if delete_message(response.peer_id, response.conversation_message_id):
+                count += 1
+
+        send_reply_message(event.message.peer_id, "Было удалено {} сообщений".format(count), event.message.conversation_message_id)

@@ -1,6 +1,8 @@
 import threading
 from messageprocessing.commands.i_command import ICommand
 from messageprocessing.commands.i_undoable import IUndoable
+from settings.bot_settings import BotSettings
+from vkservice.vk_service import send_reply_message
 from .commands.all_commands import ALL_COMMANDS
 
 from vk_api.bot_longpoll import VkBotEventType, VkBotEvent, VkBotMessageEvent
@@ -20,6 +22,10 @@ def _extract_command(event: VkBotEvent) -> Result[str, None]:
 class UndoCommand(ICommand):
     def handle(self, event: VkBotMessageEvent) -> None:
         logger.debug("Undoing last command")
+        if (not event.message.from_id in BotSettings().get_godlike_ids()
+                and not event.message.from_id in BotSettings().get_moderator_ids()):
+            send_reply_message(event.message.peer_id, "You're not allowed to do that")
+            return
         dispatcher = MessageDispatcher()
         with dispatcher.lock:
             if len(dispatcher.commands_history) > 0:
@@ -32,12 +38,33 @@ class UndoCommand(ICommand):
 class SkipOneCommand(ICommand):
     def handle(self, event: VkBotMessageEvent) -> None:
         logger.debug("Popping command from history")
+        if (not event.message.from_id in BotSettings().get_godlike_ids()
+                and not event.message.from_id in BotSettings().get_moderator_ids()):
+            send_reply_message(event.message.peer_id, "You're not allowed to do that")
+            return
         dispatcher = MessageDispatcher()
         with dispatcher.lock:
             if len(dispatcher.commands_history) > 0:
                 dispatcher.commands_history.pop()
             else:
                 logger.debug("Nothing to pop")
+
+ALL_COMMANDS.extend([
+    UndoCommand(
+        "undo",
+        "Undo last command",
+        "",
+        "/undo",
+        []
+    ),
+    SkipOneCommand(
+        "skip",
+        "Pop last command from commands history",
+        "",
+        "/skip",
+        []
+    )
+])
 
 class MessageDispatcher:
     _instance = None

@@ -1,5 +1,6 @@
 from result import *
 
+from messageprocessing.commands.send import SendCommandUndoable
 from messageprocessing.commands.utils import extract_string_argument, is_user_blocked
 from settings.bot_settings import BotSettings
 from vkservice.vk_service import send_reply_message
@@ -50,7 +51,7 @@ class SendWithAllCommand(ICommand):
                 return
             title += ", " + title_result.ok_value
 
-        forward_message_to_chats(
+        responses = forward_message_to_chats(
             [
                 chat
                 for chat in BotSettings().get_chats()
@@ -60,3 +61,11 @@ class SendWithAllCommand(ICommand):
             event.message.conversation_message_id,
             event.message.peer_id,
         )
+
+        send_reply_message(
+            event.message.peer_id,
+            "Сообщение отправлено",
+            event.message.conversation_message_id,
+        )
+
+        return SendCommandUndoable(responses)
