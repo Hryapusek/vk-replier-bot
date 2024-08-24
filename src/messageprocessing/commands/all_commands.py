@@ -1,3 +1,4 @@
+from messageprocessing.commands.i_command import ICommand
 from .add_moderator import AddModeratorCommand
 from .block_user import BlockUserCommand
 from .delete_chat_by_id import DeleteChatByIdCommand
@@ -20,7 +21,7 @@ from .reload_settings import ReloadSettingsCommand
 from .send_with_all import SendWithAllCommand
 from .send import SendCommand
 
-ALL_COMMANDS = [
+ALL_COMMANDS: list[ICommand] = [
     AddModeratorCommand(
         "add_moderator",
 """Добавить модератора. Примеры: 
@@ -121,14 +122,6 @@ ALL_COMMANDS = [
         []
     ),
 
-    HelpCommand(
-        "help",
-        "Справка по командам",
-        "Доступно для всех",
-        "Использование: /help",
-        []
-    ),
-
     InfoCommand(
         "info",
         "Информация о боте",
@@ -199,9 +192,9 @@ ALL_COMMANDS = [
 
 /всем "Отключение горячей воды"
 Отключение горячей воды с 5 числа по 50 число""",
-        "Доступно для godlike, модераторов и админу беседы",
+        "Доступно для godlike и sender",
         'Использование: /send ["заголовок"]\n'
-        '"текст"\n'
+        '"текст"\n',
         ["всем"]
     ),
 
@@ -213,7 +206,32 @@ ALL_COMMANDS = [
 
 /всемважно "Отключение горячей воды"
 Отключение горячей воды с 5 числа по 50 число""",
-        "Использование: /send_with_all",
+        "Доступно для godlike и sender",
+        'Использование: /send_with_all ["заголовок"]\n'
+        '"текст"\n',
         ["всемважно"]
     ),
 ]
+
+def get_help_text() -> str:
+    help_text = ""
+    for command in ALL_COMMANDS:
+        help_text += f"{command.command_name}\n"
+        help_text += f"{command.description}\n"
+        help_text += f"{command.roles}\n"
+        help_text += f"{command.usage}\n"
+        help_text += "---------\n"
+
+    return help_text
+
+ALL_COMMANDS.append
+(
+    HelpCommand(
+        "help",
+        "Справка по командам",
+        "Доступно для всех",
+        "Использование: /help",
+        [],
+        get_help_text()
+    )
+)

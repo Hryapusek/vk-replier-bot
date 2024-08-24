@@ -7,27 +7,17 @@ from .i_command import ICommand
 from vk_api.bot_longpoll import VkBotMessageEvent
 
 class HelpCommand(ICommand):
-    HELP_TEXT ="""
-/help - показывает этот текст
-/change_mode - меняет режим работы бота (godlike only)
-/delete_source - удалить текущую беседу из списка источников (godlike or admin only)
-/delete_target_by_id {id} - удалить беседу по id (godlike only)
-/delete_target - удалить текущую беседу из списка получателей (godlike or admin only)
-/exit - завершение работы бота (godlike only)
-/info - информация о боте (anybody)
-/register_source "title" - регистрация текущей беседы как источника (godlike or admin only)
-/register_target "title" [id] - регистрация текущей беседы как получателя (godlike or admin only)
-/undo - отмена последней команды (godlike or admin only)
-_всем_ - рассылка сообщений (anybody)
-_всем_важно_ - рассылка сообщений с all (anybody)
-"""
+    def __init__(self, command_name: str, description: str, usage: str, shortcuts: list[str], roles: str, help_text: str) -> None:
+        super().__init__(command_name, description, usage, shortcuts, roles)
+        self.help_text: str = help_text
+
     def handle(self, event: VkBotMessageEvent) -> HelpCommandUndoable:
         result = is_user_blocked(event.message.from_id)
         if result.is_err():
             send_reply_message(event.message.peer_id, result.err(), event.message.conversation_message_id)
             return
         
-        result = send_reply_message(event.message.peer_id, self.HELP_TEXT, event.message.conversation_message_id)
+        result = send_reply_message(event.message.peer_id, self.help_text, event.message.conversation_message_id)
         return HelpCommandUndoable(event.message.peer_id, result[0].get('conversation_message_id'))
     
 class HelpCommandUndoable(IUndoable):

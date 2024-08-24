@@ -5,7 +5,7 @@ from vk_api.bot_longpoll import VkBotMessageEvent
 from .i_undoable import IUndoable
 
 class ICommand(abc.ABC):
-    def __init__(self, command_name: str, description: str, usage: str, shortcuts: list[str], roles: str) -> None:
+    def __init__(self, command_name: str, description: str, roles: str, usage: str, shortcuts: list[str]) -> None:
         self.command_name = command_name
         self.description = description
         self.usage = usage

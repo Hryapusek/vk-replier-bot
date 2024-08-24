@@ -2,7 +2,7 @@ import threading
 from types import NoneType
 from messageprocessing.commands.i_command import ICommand
 from messageprocessing.commands.i_undoable import IUndoable
-from .commands import *
+from .commands.all_commands import ALL_COMMANDS
 
 from vk_api.bot_longpoll import VkBotEventType, VkBotEvent, VkBotMessageEvent
 
@@ -52,62 +52,15 @@ class MessageDispatcher:
         if not hasattr(self, "_initialized"):
             self._initialized = True
             self.lock = threading.RLock()
-            self.add_moderator_command = AddModeratorCommand()
-            self.block_user_command = BlockUserCommand()
-            self.change_mode_command = ChangeModeCommand()
-            self.delete_chat_by_id_command = DeleteChatByIdCommand()
-            self.delete_chat_by_vk_id_command = DeleteChatByIdCommand()
-            self.delete_current_chat_command = DeleteCurrentChatCommand()
-            self.delete_sender_command = DeleteSenderCommand()
-            self.exit_command = ExitCommand()
-            self.get_chat_id_command = GetChatIdCommand()
-            self.get_vk_chat_id_command = GetVkChatIdCommand()
-            
-            self.register_godlike_command = RegisterGodlikeCommand()
-            self.register_source_command = RegisterSourceChatCommand()
-            self.register_target_command = RegisterCurrentChatCommand()
-            self.reload_settings_command = ReloadSettingsCommand()
-            self.help_command = HelpCommand()
-            self.send_command = SendCommand()
-            self.undo_command = UndoCommand()
-            self.info_command = InfoCommand()
-            self.send_with_all_command = SendWithAllCommand()
+            self.commands_dispatchering = {}
 
-            self.commands_dispatchering = {
-                "change_mode": self.change_mode_command,
-                "cm": self.change_mode_command,
-
-                "delete_source": self.delete_source_command,
-                "ds": self.delete_source_command,
-
-                "delete_target": self.delete_chat_by_id_command,
-                "dt": self.delete_current_chat_command,
-
-                "delete_target_by_id": self.delete_chat_by_id_command,
-                "dtbi": self.delete_chat_by_id_command,
-
-                "exit": self.exit_command,
-                "info": self.info_command,
-                "undo": self.undo_command,
-
-                "register_godlike": self.register_godlike_command,
-                "rgg": self.register_godlike_command,
-
-                "register_source": self.register_source_command,
-                "rs": self.register_source_command,
-
-                "register_target": self.register_target_command,
-                "rt": self.register_target_command,
-
-                "reload_settings": self.reload_settings_command,
-
-                "help": self.help_command,
-
-                "i": self.info_command,
-                "h": self.help_command,
-                "всем": self.send_command,
-                "всем_важно": self.send_with_all_command
-            }
+            for command in ALL_COMMANDS:
+                logger.debug("Registering command: {}".format(command))
+                self.commands_dispatchering[command.command_name] = command
+                for shortcut in command.shortcuts:
+                    logger.debug("Registering shortcut: {}".format(shortcut))
+                    self.commands_dispatchering[shortcut] = command
+                    
             self.commands_history: list[IUndoable] = []
 
     async def handle(self, event: VkBotEvent) -> None:
