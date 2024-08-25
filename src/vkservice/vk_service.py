@@ -9,6 +9,7 @@ from vk_session import get_session
 from .constants import CHAT_ID_START
 from vk_api.exceptions import ApiError
 
+BASE_USER_URL = "https://vk.com/id"
 
 def is_user_admin(user_id: int, peer_id: int) -> bool:
     vk_session = get_session()
@@ -91,3 +92,8 @@ def delete_message(peer_id: int, conversation_message_id: int) -> bool:
     except ApiError as e:
         logger.exception(e)
         return False
+
+def get_user_fullname(user_id: int) -> str:
+    vk_session = get_session()
+    result = vk_session.get_api().users.get(user_ids=[user_id])
+    return result[0].get('first_name') + ' ' + result[0].get('last_name')

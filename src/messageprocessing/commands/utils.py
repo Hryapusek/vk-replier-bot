@@ -1,4 +1,5 @@
 
+import os
 from result import *
 
 from settings.bot_settings import BotSettings
@@ -17,3 +18,9 @@ def is_user_blocked(user_id: int) -> Result[None, str]:
     if user_id in BotSettings().get_blocked_user_ids():
         return Err("Пользователь заблокирован")
     return Ok(None)
+
+def read_from_file(filename: str) -> str:
+    if not os.path.exists(filename):
+        return ""
+    with open(filename, "r") as f:
+        return f.read()
