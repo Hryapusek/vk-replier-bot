@@ -47,6 +47,9 @@ from .set_pledge import SetPledgeCommand
 from .lyrics import LyricsCommand
 from .set_lyrics import SetLyricsCommand
 
+from .guests import GuestsCommand
+from .set_guests import SetGuestsCommand
+
 ALL_COMMANDS = [
     AddModeratorCommand(
         "add_moderator",
@@ -410,6 +413,23 @@ ALL_COMMANDS = [
         "Использование: /set_lyrics\n"
         '"текст"\n',
         ["sl"]
+    ),
+
+    GuestsCommand(
+        "гости",
+        "Получить список гостей",
+        "Доступно для всех",
+        "Использование: /гости\n",
+        []
+    ),
+
+    SetGuestsCommand(
+        "set_гости",
+        "Сохранить список гостей",
+        "Доступно только для создателя и godlike",
+        "Использование: /set_гости\n"
+        '"текст"\n',
+        ["sg"]
     )
 ]
 
