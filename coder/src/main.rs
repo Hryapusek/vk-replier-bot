@@ -2,6 +2,7 @@
 #![allow(rustdoc::missing_crate_level_docs)] // it's an example
 
 use eframe::egui;
+use rfd::FileDialog;
 
 fn main() -> eframe::Result {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
@@ -48,11 +49,13 @@ impl eframe::App for MyApp {
             if ui.button("Increment").clicked() {
                 self.age += 1;
             }
+            if ui.button("Open File Dialog").clicked() {
+                let file = FileDialog::new()
+                    .add_filter("Text", &["txt"])
+                    .pick_file();
+                println!("{:?}", file);
+            }
             ui.label(format!("Hello '{}', age {}", self.name, self.age));
-
-            ui.image(egui::include_image!(
-                "/home/hryapusek/damn.jpg"
-            ));
         });
     }
 }
