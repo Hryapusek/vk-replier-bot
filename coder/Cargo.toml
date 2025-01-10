@@ -1,0 +1,16 @@
+[package]
+name = "coder"
+version = "0.1.0"
+edition = "2021"
+authors = ["Abraamyan Alexander Manvelovich <hryapusek@gmail.com>"]
+rust-version = "1.80"
+
+[dependencies]
+eframe = "0.30.0"
+
+egui_extras = "0.30.0"
+
+env_logger = { version = "0.11.6", default-features = false, features = [
+    "auto-color",
+    "humantime",
+] }
