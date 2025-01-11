@@ -2,6 +2,7 @@
 
 mod debts_reader;
 mod default_types;
+mod pair_coder;
 
 use eframe::egui;
 use rfd::FileDialog;
