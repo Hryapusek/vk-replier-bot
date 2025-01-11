@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Abraamyan Alexander Manvelovich <hryapusek@gmail.com>"]
 rust-version = "1.80"
+build = "build.rs"
 
 [dependencies]
 csv = "1.3.1"
