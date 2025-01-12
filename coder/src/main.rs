@@ -3,11 +3,16 @@
 mod debts_reader;
 mod default_types;
 mod pair_coder;
+mod encoder;
 
 use eframe::egui;
+use log::info;
 use rfd::FileDialog;
+use dotenv::dotenv;
 
 fn main() -> eframe::Result {
+    info!("Starting application");
+    dotenv().ok();
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([320.0, 240.0]),

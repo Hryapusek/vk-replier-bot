@@ -44,3 +44,4 @@ env
 # Rust
 target
 Cargo.lock
+.env

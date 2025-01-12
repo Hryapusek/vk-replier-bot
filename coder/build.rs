@@ -9,7 +9,7 @@ fn main() {
     // Get the target directory (default is `target`)
     let target_dir = env::var("CARGO_TARGET_DIR")
         .unwrap_or_else(|_| "target".to_string());
-    let debug_dir = Path::new(&target_dir).join("debug");
+    let debug_dir = Path::new(&target_dir).join(env::var("PROFILE").unwrap());
 
     // Destination path for test files
     let dest_path = debug_dir.join("test_files");
@@ -19,6 +19,8 @@ fn main() {
         println!("cargo:note=Failed to create test_files directory: {}", e);
         return;
     }
+
+    fs::copy(".env", debug_dir.clone().join(".env")).unwrap();
 
     // Copy files from a "test_files" directory in the project root
     match fs::read_dir("test_files") {

@@ -8,7 +8,6 @@ mod json_constants {
 trait PairCoderBase {
     fn decode(&self, key: &u64) -> Option<String>;
     fn encode(&mut self, value: &str) -> u64;
-    fn get(&self, key: &u64) -> Option<&str>;
     fn get_key_by_value(&self, value: &str) -> Option<u64>;
     fn load_from_file(&mut self, path: &str) -> Result<(), String>;
     fn save_to_file(&self, path: &str) -> Result<(), String>;
@@ -35,10 +34,6 @@ impl PairCoderBase for PairCoder {
         }
         self.map.insert(key, value.to_owned());
         key
-    }
-
-    fn get(&self, key: &u64) -> Option<&str> {
-        self.map.get(key).map(|v| v.as_str())
     }
 
     fn get_key_by_value(&self, value: &str) -> Option<u64> {
