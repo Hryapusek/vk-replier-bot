@@ -18,6 +18,12 @@ impl Default for Encoder {
   }
 }
 
+impl Encoder {
+  pub fn new(key: age::secrecy::SecretString) -> Self {
+    Self { key }
+  }
+}
+
 impl EncoderBase for Encoder {
   fn encode(&mut self, value: &std::vec::Vec<u8>) -> Result<std::vec::Vec<u8>, age::EncryptError> {
     age::encrypt(&age::scrypt::Recipient::new(self.key.clone()), value)

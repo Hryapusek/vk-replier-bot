@@ -4,6 +4,7 @@ mod debts_reader;
 mod default_types;
 mod pair_coder;
 mod encoder;
+mod settings;
 
 use eframe::egui;
 use log::info;
