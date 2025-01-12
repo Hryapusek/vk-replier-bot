@@ -29,7 +29,7 @@ fn main() -> eframe::Result {
             egui_extras::install_image_loaders(&cc.egui_ctx);
 
             cc.egui_ctx.style_mut(|style| style.visuals = egui::Visuals::light());
-            cc.egui_ctx.set_pixels_per_point(1.3_f32);
+            cc.egui_ctx.set_pixels_per_point(1.4_f32);
 
             Ok(Box::<MyApp>::default())
         }),

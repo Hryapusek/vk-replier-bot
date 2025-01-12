@@ -1,5 +1,7 @@
 use std::{cell::RefCell, io::Write, path::PathBuf, rc::Rc};
 
+use num_format::{Buffer, CustomFormat, Grouping};
+
 use crate::{
     debts_reader::{CSVDebtsFileParser, DebtsFileParser},
     default_types::DebtorBase,
@@ -20,6 +22,7 @@ pub struct MyApp {
     debts_reader: CSVDebtsFileParser,
     error_text: String,
     search_text: String,
+    number_format: CustomFormat,
     debug: bool,
 }
 
@@ -44,6 +47,9 @@ impl MyApp {
 
 impl Default for MyApp {
     fn default() -> Self {
+        let number_format = CustomFormat::builder()
+            .grouping(Grouping::Standard)
+            .separator("'");
         Self {
             settings: Self::get_or_create_settings(),
             pair_coder: Self::create_pair_coder(),
@@ -51,6 +57,7 @@ impl Default for MyApp {
             debts_reader: CSVDebtsFileParser::default(),
             error_text: String::new(),
             search_text: String::new(),
+            number_format: number_format.build().unwrap(),
             debug: false,
         }
     }
@@ -123,16 +130,21 @@ impl eframe::App for MyApp {
             }
 
             ui.label("");
-            ui.label("Введите ФИО человека в поле ниже чтобы узнать информацию о нем");
+            ui.label("Введите ФИО человека в поле ниже чтобы узнать его код");
             ui.text_edit_singleline(&mut self.search_text).highlight();
 
             if self.search_text.len() > 0 {
                 match self.pair_coder.get_key_by_value(&self.search_text) {
                     Some(key) => {
-                        ui.label(format!("Код: {}", key));
+                        let mut buf = Buffer::new();
+                        buf.write_formatted(&key, &self.number_format);
+                        ui.label(format!("Код: {}", buf.as_str()));
+                        if ui.button("Скопировать код").clicked() {
+                            ui.output_mut(|o| o.copied_text = key.to_string());
+                        }
                     }
                     None => {
-                        ui.label(format!("Долг не наиден"));
+                        ui.label(format!("Должник не наиден"));
                     }
                 }
             }

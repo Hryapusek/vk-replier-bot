@@ -19,6 +19,7 @@ env_logger = { version = "0.11.6", default-features = false, features = [
     "humantime",
 ] }
 log = "0.4.21"
+num-format = "0.4.4"
 rand = "0.8.5"
 rfd = "0.15.2"
 serde = "1.0.217"
