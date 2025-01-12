@@ -25,18 +25,19 @@ impl PairCoderBase for PairCoder {
     }
 
     fn encode(&mut self, value: &str) -> u64 {
-        if let Some(key) = self.get_key_by_value(value) {
+        let lowercase_value = value.trim().to_lowercase();
+        if let Some(key) = self.get_key_by_value(lowercase_value.as_str()) {
             info!("Found key for value: {} - {}", value, key);
             return key;
         }
 
-        info!("No key found for value: {}", value);
+        info!("No key found for value: {}", lowercase_value);
 
         let mut key = rand::random::<u64>();
         while let Some(_) = self.map.get(&key) {
             key = rand::random::<u64>();
         }
-        self.map.insert(key, value.to_owned());
+        self.map.insert(key, lowercase_value.to_owned());
         if let Err(e) = self.save_to_file(json_constants::CONFIG_NAME) {
             error!("Failed to save to JSON: {}", e);
         }
@@ -45,7 +46,7 @@ impl PairCoderBase for PairCoder {
 
     fn get_key_by_value(&self, value: &str) -> Option<u64> {
         for (key, val) in &self.map {
-            if val == value {
+            if val == &value.trim().to_lowercase() {
                 return Some(*key);
             }
         }

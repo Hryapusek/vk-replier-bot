@@ -7,6 +7,7 @@ use crate::{
     encoder::*,
     pair_coder::{PairCoder, PairCoderBase},
 };
+use eframe::egui::Visuals;
 use log::{error, info};
 use rfd::FileDialog;
 
@@ -17,6 +18,8 @@ pub struct MyApp {
     pair_coder: Box<dyn PairCoderBase>,
     encoder: Encoder,
     debts_reader: CSVDebtsFileParser,
+    error_text: String,
+    search_text: String,
     debug: bool,
 }
 
@@ -46,7 +49,9 @@ impl Default for MyApp {
             pair_coder: Self::create_pair_coder(),
             encoder: Encoder::default(),
             debts_reader: CSVDebtsFileParser::default(),
-            debug: true,
+            error_text: String::new(),
+            search_text: String::new(),
+            debug: false,
         }
     }
 }
@@ -73,15 +78,16 @@ impl MyApp {
         }
     }
 
-    fn process_file(&mut self, file_path: &PathBuf) {
+    fn process_file(&mut self, file_path: &PathBuf) -> Result<(), String> {
         info!("Processing file {:?}", file_path);
         let debtors = self.debts_reader.parse_file(file_path);
         if let Ok(debtors) = debtors {
             info!("Parsed {} debtors", debtors.len());
             self.encode_and_save_debtors(debtors);
+            Ok(())
         } else {
-            error!("Failed to parse file: {:?}", debtors.unwrap_err());
-            return;
+            error!("Failed to parse file: {:?}", debtors.as_ref().unwrap_err());
+            Err(format!("Не удалось обработать файл. Данные загружены в неправильном формате. Ошибка для разработчика: {:?}", debtors.as_ref().unwrap_err()))
         }
     }
 }
@@ -90,34 +96,65 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Приложение для кодирования долгов");
-            if ui.button("Закодировать файл").clicked() {
+            ui.label(format!("Людей загружено: {}", self.pair_coder.keys_count()));
+            if self.pair_coder.keys_count() == 0 {
+                ui.label(format!(
+                    "Чтобы начать использовать приложение - выберите файл с долгами"
+                ));
+            }
+            if ui.button("Выбрать файл с долгами").clicked() {
                 let file = FileDialog::new()
                     .add_filter("csv", &["csv"])
                     .set_directory(std::env::current_dir().unwrap())
                     .pick_file();
                 if let Some(file) = file.as_ref() {
-                    self.process_file(&file);
+                    match self.process_file(&file) {
+                        Ok(()) => {
+                            info!("File processed successfully");
+                            self.error_text = String::new();
+                        }
+                        Err(e) => {
+                            self.error_text = e;
+                        }
+                    }
                 } else {
                     info!("No file selected. Canceling process");
                 }
             }
 
-            ctx.show_viewport_immediate(
-                egui::ViewportId::from_hash_of("debug_viewport"),
-                egui::ViewportBuilder::default()
-                    .with_title("Debug Viewport")
-                    .with_inner_size([200.0, 100.0]),
-                |ctx, class| {
-                    assert!(
-                        class == egui::ViewportClass::Immediate,
-                        "This egui backend doesn't support multiple viewports"
-                    );
+            ui.label("");
+            ui.label("Введите ФИО человека в поле ниже чтобы узнать информацию о нем");
+            ui.text_edit_singleline(&mut self.search_text).highlight();
 
-                    egui::CentralPanel::default().show(ctx, |ui| {
-                        ui.label(format!("Pairs count: {}", self.pair_coder.keys_count()));
-                    });
-                },
-            );
+            if self.search_text.len() > 0 {
+                match self.pair_coder.get_key_by_value(&self.search_text) {
+                    Some(key) => {
+                        ui.label(format!("Код: {}", key));
+                    }
+                    None => {
+                        ui.label(format!("Долг не наиден"));
+                    }
+                }
+            }
+
+            if self.error_text.len() > 0 {
+                ui.label("При обработке файла произошла ошибка: ".to_string() + &self.error_text);
+            }
+
+            if self.debug {
+                ctx.show_viewport_immediate(
+                    egui::ViewportId::from_hash_of("debug_viewport"),
+                    egui::ViewportBuilder::default()
+                        .with_title("Debug Viewport")
+                        .with_inner_size([200.0, 100.0]),
+                    |ctx, class| {
+                        assert!(
+                            class == egui::ViewportClass::Immediate,
+                            "This egui backend doesn't support multiple viewports"
+                        );
+                    },
+                );
+            }
         });
     }
 }
