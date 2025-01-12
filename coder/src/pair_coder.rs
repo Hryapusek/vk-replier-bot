@@ -3,18 +3,19 @@ use std::collections::HashMap;
 
 mod json_constants {
     pub const PAIRS_KEY: &str = "pairs";
+    pub const CONFIG_NAME: &str = "pair_coder_keys.json";
 }
 
-trait PairCoderBase {
+pub trait PairCoderBase {
     fn decode(&self, key: &u64) -> Option<String>;
     fn encode(&mut self, value: &str) -> u64;
     fn get_key_by_value(&self, value: &str) -> Option<u64>;
     fn load_from_file(&mut self, path: &str) -> Result<(), String>;
     fn save_to_file(&self, path: &str) -> Result<(), String>;
+    fn keys_count(&self) -> usize;
 }
 
-#[derive(Default)]
-struct PairCoder {
+pub struct PairCoder {
     map: HashMap<u64, String>,
 }
 
@@ -25,14 +26,20 @@ impl PairCoderBase for PairCoder {
 
     fn encode(&mut self, value: &str) -> u64 {
         if let Some(key) = self.get_key_by_value(value) {
+            info!("Found key for value: {} - {}", value, key);
             return key;
         }
+
+        info!("No key found for value: {}", value);
 
         let mut key = rand::random::<u64>();
         while let Some(_) = self.map.get(&key) {
             key = rand::random::<u64>();
         }
         self.map.insert(key, value.to_owned());
+        if let Err(e) = self.save_to_file(json_constants::CONFIG_NAME) {
+            error!("Failed to save to JSON: {}", e);
+        }
         key
     }
 
@@ -73,16 +80,30 @@ impl PairCoderBase for PairCoder {
         std::fs::write(path, json_data).map_err(|e| e.to_string())?;
         Ok(())
     }
+
+    fn keys_count(&self) -> usize {
+        self.map.len()
+    }
 }
 
-impl PairCoder {
-    fn from_json_path(json_path: &str) -> PairCoder {
-        let mut result = PairCoder::default();
-        if let Err(e) = result.load_from_file(json_path) {
+impl Default for PairCoder {
+    fn default() -> PairCoder {
+        let mut result = PairCoder::new();
+        if let Err(e) = result.load_from_file("pair_coder_keys.json") {
             error!("Failed to load from JSON: {}. Continuing with empty map", e);
+        } else {
+            info!("Loaded {} pairs from JSON", result.keys_count());
         }
 
         result
+    }
+}
+
+impl PairCoder {
+    pub fn new() -> PairCoder {
+        PairCoder {
+            map: HashMap::new(),
+        }
     }
 }
 
@@ -109,7 +130,8 @@ mod tests {
         let new_code: u64;
 
         {
-            let mut pair_coder = super::PairCoder::from_json_path("non_existing.json");
+            let mut pair_coder = super::PairCoder::new();
+            pair_coder.load_from_file("non_existing.json");
             assert!(pair_coder.map.is_empty());
 
             pair_coder.load_from_file("test_files/key.json").unwrap();
@@ -121,7 +143,8 @@ mod tests {
         }
 
         {
-            let pair_coder = super::PairCoder::from_json_path("test_files/output_key.json");
+            let mut pair_coder = super::PairCoder::new();
+            pair_coder.load_from_file("test_files/output_key.json");
             assert_eq!(pair_coder.decode(&new_code).unwrap(), another_name);
         }
     }

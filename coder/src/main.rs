@@ -5,11 +5,13 @@ mod default_types;
 mod pair_coder;
 mod encoder;
 mod settings;
+mod gui;
 
 use eframe::egui;
 use log::info;
-use rfd::FileDialog;
 use dotenv::dotenv;
+use gui::MyApp;
+use encoder::{EncoderBase, Encoder};
 
 fn main() -> eframe::Result {
     info!("Starting application");
@@ -29,42 +31,4 @@ fn main() -> eframe::Result {
             Ok(Box::<MyApp>::default())
         }),
     )
-}
-
-struct MyApp {
-    name: String,
-    age: u32,
-}
-
-impl Default for MyApp {
-    fn default() -> Self {
-        Self {
-            name: "Arthur".to_owned(),
-            age: 42,
-        }
-    }
-}
-
-impl eframe::App for MyApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("My egui Application");
-            ui.horizontal(|ui| {
-                let name_label = ui.label("Your name: ");
-                ui.text_edit_singleline(&mut self.name)
-                    .labelled_by(name_label.id);
-            });
-            ui.add(egui::Slider::new(&mut self.age, 0..=120).text("age"));
-            if ui.button("Increment").clicked() {
-                self.age += 1;
-            }
-            if ui.button("Open File Dialog").clicked() {
-                let file = FileDialog::new()
-                    .add_filter("Text", &["txt"])
-                    .pick_file();
-                println!("{:?}", file);
-            }
-            ui.label(format!("Hello '{}', age {}", self.name, self.age));
-        });
-    }
 }

@@ -1,12 +1,13 @@
 use crate::default_types::{Debtor, DebtorBase};
 use std::{cell::RefCell, num::ParseFloatError, path::Path, rc::Rc};
 
-trait DebtsFileParser<E> {
+pub trait DebtsFileParser<E> {
     fn parse_file(&self, path: &Path) -> Result<Vec<Rc<RefCell<dyn DebtorBase>>>, E>;
+    fn delimiter(&self) -> u8;
 }
 
 #[derive(Debug)]
-enum CSVDebtsFileParserError {
+pub enum CSVDebtsFileParserError {
     FileNotFound(String),
     PathIsNotFile(String),
     IncorrectFileExtension(String),
@@ -14,7 +15,7 @@ enum CSVDebtsFileParserError {
     BadRecordData(String, String),
 }
 
-struct CSVDebtsFileParser
+pub struct CSVDebtsFileParser
 {
     delimiter: u8
 }
@@ -32,6 +33,10 @@ impl Default for CSVDebtsFileParser {
 }
 
 impl DebtsFileParser<CSVDebtsFileParserError> for CSVDebtsFileParser {
+    fn delimiter(&self) -> u8 {
+        self.delimiter
+    }
+    
     fn parse_file(
         &self,
         path: &Path,

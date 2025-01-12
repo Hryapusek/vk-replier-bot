@@ -1,12 +1,12 @@
 use std::str::Bytes;
 use age::secrecy::SecretSlice;
 
-trait EncoderBase {
+pub trait EncoderBase {
   fn encode(&mut self, value: &std::vec::Vec<u8>) -> Result<std::vec::Vec<u8>, age::EncryptError>;
   fn decode(&self, encoded_value: &std::vec::Vec<u8>) -> Result<std::vec::Vec<u8>, age::DecryptError>;
 }
 
-struct Encoder {
+pub struct Encoder {
   key: age::secrecy::SecretString
 }
 

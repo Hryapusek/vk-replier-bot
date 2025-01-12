@@ -1,4 +1,4 @@
-trait SettingsBase {
+pub trait SettingsBase {
     fn save_to_file(&mut self);
 
     fn input_file(&mut self) -> Option<&str>;
@@ -14,7 +14,7 @@ struct PureSettings {
     decode_file: Option<String>,
 }
 
-struct Settings {
+pub struct Settings {
     path_to_json: String,
     pure_settings: PureSettings,
 }
