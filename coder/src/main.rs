@@ -18,7 +18,7 @@ fn main() -> eframe::Result {
     dotenv().ok();
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([600.0, 300.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([600.0, 500.0]),
         ..Default::default()
     };
     eframe::run_native(

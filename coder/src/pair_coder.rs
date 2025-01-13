@@ -37,6 +37,15 @@ impl PairCoderBase for PairCoder {
         let lowercase_value = value.trim().to_lowercase();
         if let Some(key) = self.get_key_by_value(lowercase_value.as_str()) {
             info!("Found key for value: {} - {}", value, key);
+            if let Some(amount) = amount {
+                self.map.get_mut(&key).unwrap().amount = Some(amount);
+                self.map.get_mut(&key).unwrap().last_updated = std::time::SystemTime::now()
+                    .duration_since(std::time::SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs()
+                    as u128;
+            }
+            self.save_to_file(json_constants::CONFIG_NAME).unwrap();
             return key;
         }
 
@@ -164,7 +173,10 @@ mod tests {
             }
             assert_eq!(pair_coder.decode(&(1 as u64)).unwrap().name, example_name);
             assert_eq!(pair_coder.decode(&(2 as u64)).unwrap().name, example_name);
-            assert_eq!(pair_coder.decode(&(2 as u64)).unwrap().amount, Some(EXAMPLE_AMOUNT));
+            assert_eq!(
+                pair_coder.decode(&(2 as u64)).unwrap().amount,
+                Some(EXAMPLE_AMOUNT)
+            );
 
             new_code = pair_coder.encode(&another_name, None);
             println!("This pair should be in test_files/output_key.json with all other pairs -> \"{}\": \"{}\"", new_code, another_name);

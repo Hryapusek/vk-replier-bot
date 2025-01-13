@@ -99,6 +99,62 @@ impl MyApp {
             Err(format!("Не удалось обработать файл. Данные загружены в неправильном формате. Ошибка для разработчика: {:?}", debtors.as_ref().unwrap_err()))
         }
     }
+
+    fn show_search(&mut self, ui: &mut egui::Ui, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        ui.label("");
+        ui.label("Введите ФИО человека в поле ниже чтобы узнать его код");
+        ui.text_edit_singleline(&mut self.search_text).highlight();
+
+        if self.search_text.len() > 0 {
+            ui.label("Данные");
+        }
+
+        if self.search_text.len() > 0 {
+            egui::Frame::none()
+                .fill(egui::Color32::LIGHT_GRAY)
+                .inner_margin(egui::Margin::symmetric(10.0, 10.0))
+                .show(ui, |ui| {
+                    ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+                        match self.pair_coder.get_key_by_value(&self.search_text) {
+                            Some(key) => {
+                                let mut buf = Buffer::new();
+                                buf.write_formatted(&key, &self.number_format);
+                                ui.with_layout(
+                                    egui::Layout::left_to_right(egui::Align::Min),
+                                    |ui| {
+                                        ui.label(format!("Код: {}", buf.as_str()));
+
+                                        if ui.button("Copy").highlight().clicked() {
+                                            ui.output_mut(|o| o.copied_text = key.to_string());
+                                        }
+                                    },
+                                );
+
+                                let user_data = self.pair_coder.decode(&key).unwrap();
+                                if let Some(amount) = user_data.amount {
+                                    ui.label("Долг: ".to_string() + &amount.to_string());
+                                }
+
+                                ui.label(
+                                    "Последнее обновление: ".to_string()
+                                        + &chrono::DateTime::from_timestamp(
+                                            user_data.last_updated as i64,
+                                            0,
+                                        )
+                                        .unwrap()
+                                        .with_timezone(&chrono::Local)
+                                        .format("%H:%M:%S %d.%m.%Y")
+                                        .to_string(),
+                                );
+                            }
+                            None => {
+                                ui.label(format!("Должник не наиден"));
+                            }
+                        }
+                    });
+                });
+        }
+    }
 }
 
 impl eframe::App for MyApp {
@@ -131,37 +187,8 @@ impl eframe::App for MyApp {
                 }
             }
 
-            ui.label("");
-            ui.label("Введите ФИО человека в поле ниже чтобы узнать его код");
-            ui.text_edit_singleline(&mut self.search_text).highlight();
-
-            if self.search_text.len() > 0 {
-                match self.pair_coder.get_key_by_value(&self.search_text) {
-                    Some(key) => {
-                        let mut buf = Buffer::new();
-                        buf.write_formatted(&key, &self.number_format);
-                        ui.label(format!("Код: {}", buf.as_str()));
-                        let user_data = self.pair_coder.decode(&key).unwrap();
-                        if let Some(amount) = user_data.amount {
-                            ui.label("Долг: ".to_string() + &amount.to_string());
-                        }
-
-                        ui.label(
-                            "Последнее обновление: ".to_string()
-                                + &chrono::DateTime::from_timestamp(user_data.last_updated as i64, 0)
-                                    .unwrap()
-                                    .format("%H:%M:%S %d.%m.%Y")
-                                    .to_string(),
-                        );
-
-                        if ui.button("Скопировать код").clicked() {
-                            ui.output_mut(|o| o.copied_text = key.to_string());
-                        }
-                    }
-                    None => {
-                        ui.label(format!("Должник не наиден"));
-                    }
-                }
+            if self.pair_coder.keys_count() > 0 {
+                self.show_search(ui, ctx, _frame);
             }
 
             if self.error_text.len() > 0 {
