@@ -1,5 +1,13 @@
 {
   "pairs": {
-    "1": "s0m4b0dY"
+    "1": {
+      "name": "s0m4b0dy",
+      "last_updated": 1736794641
+    },
+    "2": {
+      "name": "s0m4b0dy",
+      "amount": 1000,
+      "last_updated": 1736794641
+    }
   }
 }

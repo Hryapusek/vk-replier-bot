@@ -49,7 +49,7 @@ impl Default for MyApp {
     fn default() -> Self {
         let number_format = CustomFormat::builder()
             .grouping(Grouping::Standard)
-            .separator("'");
+            .separator(" ");
         Self {
             settings: Self::get_or_create_settings(),
             pair_coder: Self::create_pair_coder(),
@@ -78,7 +78,9 @@ impl MyApp {
             .delimiter(self.debts_reader.delimiter())
             .from_writer(output_file);
         for debtor in debtors {
-            let encoded = self.pair_coder.encode(&debtor.borrow().name());
+            let encoded = self
+                .pair_coder
+                .encode(&debtor.borrow().name(), Some(debtor.borrow().amount()));
             writer
                 .write_record(&[encoded.to_string(), debtor.borrow().amount().to_string()])
                 .unwrap();
@@ -139,6 +141,19 @@ impl eframe::App for MyApp {
                         let mut buf = Buffer::new();
                         buf.write_formatted(&key, &self.number_format);
                         ui.label(format!("Код: {}", buf.as_str()));
+                        let user_data = self.pair_coder.decode(&key).unwrap();
+                        if let Some(amount) = user_data.amount {
+                            ui.label("Долг: ".to_string() + &amount.to_string());
+                        }
+
+                        ui.label(
+                            "Последнее обновление: ".to_string()
+                                + &chrono::DateTime::from_timestamp(user_data.last_updated as i64, 0)
+                                    .unwrap()
+                                    .format("%H:%M:%S %d.%m.%Y")
+                                    .to_string(),
+                        );
+
                         if ui.button("Скопировать код").clicked() {
                             ui.output_mut(|o| o.copied_text = key.to_string());
                         }

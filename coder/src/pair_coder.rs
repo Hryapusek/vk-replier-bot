@@ -1,4 +1,5 @@
 use log::{debug, error, info, log_enabled, Level};
+use serde::{ser::SerializeMap, Deserialize};
 use std::collections::HashMap;
 
 mod json_constants {
@@ -6,9 +7,17 @@ mod json_constants {
     pub const CONFIG_NAME: &str = "pair_coder_keys.json";
 }
 
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct UserData {
+    pub name: String,
+    pub amount: Option<f64>,
+    /// epoch
+    pub last_updated: u128,
+}
+
 pub trait PairCoderBase {
-    fn decode(&self, key: &u64) -> Option<String>;
-    fn encode(&mut self, value: &str) -> u64;
+    fn decode(&self, key: &u64) -> Option<&UserData>;
+    fn encode(&mut self, value: &str, amount: Option<f64>) -> u64;
     fn get_key_by_value(&self, value: &str) -> Option<u64>;
     fn load_from_file(&mut self, path: &str) -> Result<(), String>;
     fn save_to_file(&self, path: &str) -> Result<(), String>;
@@ -16,15 +25,15 @@ pub trait PairCoderBase {
 }
 
 pub struct PairCoder {
-    map: HashMap<u64, String>,
+    map: HashMap<u64, UserData>,
 }
 
 impl PairCoderBase for PairCoder {
-    fn decode(&self, key: &u64) -> Option<String> {
-        self.map.get(key).cloned()
+    fn decode(&self, key: &u64) -> Option<&UserData> {
+        self.map.get(key)
     }
 
-    fn encode(&mut self, value: &str) -> u64 {
+    fn encode(&mut self, value: &str, amount: Option<f64>) -> u64 {
         let lowercase_value = value.trim().to_lowercase();
         if let Some(key) = self.get_key_by_value(lowercase_value.as_str()) {
             info!("Found key for value: {} - {}", value, key);
@@ -37,7 +46,17 @@ impl PairCoderBase for PairCoder {
         while let Some(_) = self.map.get(&key) {
             key = rand::random::<u64>();
         }
-        self.map.insert(key, lowercase_value.to_owned());
+        self.map.insert(
+            key,
+            UserData {
+                name: lowercase_value.to_owned(),
+                amount,
+                last_updated: std::time::SystemTime::now()
+                    .duration_since(std::time::SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs() as u128,
+            },
+        );
         if let Err(e) = self.save_to_file(json_constants::CONFIG_NAME) {
             error!("Failed to save to JSON: {}", e);
         }
@@ -46,7 +65,7 @@ impl PairCoderBase for PairCoder {
 
     fn get_key_by_value(&self, value: &str) -> Option<u64> {
         for (key, val) in &self.map {
-            if val == &value.trim().to_lowercase() {
+            if &val.name == &value.trim().to_lowercase() {
                 return Some(*key);
             }
         }
@@ -65,8 +84,10 @@ impl PairCoderBase for PairCoder {
 
         for (key, value) in json_pairs.unwrap() {
             let key = key.parse::<u64>().map_err(|e| e.to_string())?;
-            let value = value.as_str().ok_or("Value is not a string")?.to_string();
-            self.map.insert(key, value);
+            let user_data: UserData =
+                UserData::deserialize(value.as_object().ok_or("Value is not an object")?)
+                    .map_err(|e| e.to_string())?;
+            self.map.insert(key, user_data);
         }
 
         Ok(())
@@ -113,19 +134,19 @@ mod tests {
 
     #[test]
     fn default_test() {
-        let example_name = "s0m4b0dY";
-        let another_name = "hryapusek";
+        let example_name = "s0m4b0dY".to_lowercase();
+        let another_name = "hryapusek".to_lowercase();
 
         {
-            let mut pair_coder = super::PairCoder::default();
+            let mut pair_coder = super::PairCoder::new();
             assert!(pair_coder.map.is_empty());
 
-            let code = pair_coder.encode(&example_name);
+            let code = pair_coder.encode(&example_name, None);
 
             println!("Randomly generated code(just to check): {}", code);
 
             let decoded = pair_coder.decode(&code);
-            assert_eq!(decoded, Some(example_name.to_string()));
+            assert_eq!(decoded.unwrap().name, example_name.to_string());
         }
 
         let new_code: u64;
@@ -135,18 +156,27 @@ mod tests {
             pair_coder.load_from_file("non_existing.json");
             assert!(pair_coder.map.is_empty());
 
-            pair_coder.load_from_file("test_files/key.json").unwrap();
-            assert_eq!(pair_coder.decode(&(1 as u64)).unwrap(), example_name);
+            const EXAMPLE_AMOUNT: f64 = 1000.0;
 
-            new_code = pair_coder.encode(&another_name);
+            if let Err(e) = pair_coder.load_from_file("test_files/key.json") {
+                println!("Failed to load from JSON: {}", e);
+                assert!(false);
+            }
+            assert_eq!(pair_coder.decode(&(1 as u64)).unwrap().name, example_name);
+            assert_eq!(pair_coder.decode(&(2 as u64)).unwrap().name, example_name);
+            assert_eq!(pair_coder.decode(&(2 as u64)).unwrap().amount, Some(EXAMPLE_AMOUNT));
+
+            new_code = pair_coder.encode(&another_name, None);
             println!("This pair should be in test_files/output_key.json with all other pairs -> \"{}\": \"{}\"", new_code, another_name);
-            pair_coder.save_to_file("test_files/output_key.json").unwrap();
+            pair_coder
+                .save_to_file("test_files/output_key.json")
+                .unwrap();
         }
 
         {
             let mut pair_coder = super::PairCoder::new();
             pair_coder.load_from_file("test_files/output_key.json");
-            assert_eq!(pair_coder.decode(&new_code).unwrap(), another_name);
+            assert_eq!(pair_coder.decode(&new_code).unwrap().name, another_name);
         }
     }
 }
