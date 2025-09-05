@@ -40,3 +40,8 @@ __pycache__
 old_src
 env
 .venv
+
+# Rust
+target
+Cargo.lock
+.env
