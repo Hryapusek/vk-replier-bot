@@ -9,7 +9,7 @@ from vk_session import get_session
 from .constants import CHAT_ID_START
 from vk_api.exceptions import ApiError
 
-BASE_USER_URL = "https://vk.com/id"
+BASE_USER_URL = "https://vk.ru/id"
 
 def is_user_admin(user_id: int, peer_id: int) -> bool:
     vk_session = get_session()
